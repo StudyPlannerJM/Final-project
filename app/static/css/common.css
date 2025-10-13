@@ -1,0 +1,36 @@
+/* General Body Styles */
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color-primary);
+    color: var(--text-color-primary);
+    display: flex;
+    min-height: 100vh;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Variables for theming */
+:root {
+    --bg-color-primary: #f4f7f6;
+    --bg-color-secondary: #ffffff;
+    --text-color-primary: #333333;
+    --text-color-secondary: #555555;
+    --border-color: #e0e0e0;
+    --accent-color: #4a90e2;
+    --sidebar-bg: #2c3e50;
+    --sidebar-text: #ecf0f1;
+    --sidebar-hover: #34495e;
+}
+
+/* Dark Theme Variables */
+body.dark-theme {
+    --bg-color-primary: #2c3e50;
+    --bg-color-secondary: #34495e;
+    --text-color-primary: #ecf0f1;
+    --text-color-secondary: #bdc3c7;
+    --border-color: #4a627a;
+    --accent-color: #6cb6ff;
+    --sidebar-bg: #212b36;
+    --sidebar-hover: #2c3e50;
+}
