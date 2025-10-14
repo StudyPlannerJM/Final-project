@@ -1,7 +1,8 @@
 import os
-from flask import Flask
+from flask import Flask, app
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
+from app.routes import main as main_blueprint
 
 # Load environment variables from .env file
 load_dotenv()
@@ -22,6 +23,7 @@ def create_app():
 
     # Initialize extensions with the app
     db.init_app(app)
-    # Blueprints will be registered here later
+    # Register blueprints
 
+    app.register_blueprint(main_blueprint)
     return app
