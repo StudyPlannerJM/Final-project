@@ -9,7 +9,9 @@ main = Blueprint('main', __name__)
 @main.route('/dashboard')
 def dashboard():
     user_id = 1  # Placeholder for the logged-in user ID
-    tasks = Task.query.filter_by(user_id=user_id).order_by(Task.due_date.asc).all()
+    tasks = Task.query.filter_by(user_id=user_id).order_by(
+        Task.due_date.asc()
+    ).all()
     return render_template('dashboard.html', title='Dashboard', tasks=tasks)
 
 @main.route('/add_task', methods=['GET', 'POST'])

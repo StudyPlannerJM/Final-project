@@ -1,8 +1,7 @@
 import os
-from flask import Flask, app
+from flask import Flask
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
-from app.routes import main as main_blueprint
 
 # Load environment variables from .env file
 load_dotenv()
@@ -15,7 +14,8 @@ def create_app():
     app = Flask(__name__)
 
     # Configuration
-    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'a_very_secret_key_for_dev')
+    secret_key = os.environ.get('SECRET_KEY', 'a_very_secret_key_for_dev')
+    app.config['SECRET_KEY'] = secret_key
     app.config['SQLALCHEMY_DATABASE_URI'] = (
         "sqlite:///complete_study_planner.db"
     )
@@ -23,7 +23,10 @@ def create_app():
 
     # Initialize extensions with the app
     db.init_app(app)
-    # Register blueprints
 
+    # Import blueprints here to avoid circular imports
+    from app.routes import main as main_blueprint
+
+    # Register blueprints
     app.register_blueprint(main_blueprint)
     return app
