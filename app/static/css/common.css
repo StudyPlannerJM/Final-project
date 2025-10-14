@@ -79,3 +79,73 @@ body.dark-theme {
 .sidebar-toggle { background: none; border: none; color: var(--text-color-primary); font-size: 1.5em; cursor: pointer; padding: 5px; }
 
 .theme-toggle .theme-btn { background: none; border: none; color: var(--text-color-primary); font-size: 1.5em; cursor: pointer; padding: 5px; }
+
+/* Task List */
+.task-list-section { margin-top: 30px; background-color: var(--bg-color-secondary); padding: 20px; border-radius: 8px; }
+.task-list { list-style: none; padding: 0; margin: 0; }
+.task-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border: 1px solid var(--border-color); border-radius: 5px; margin-bottom: 10px; }
+.task-item.completed { background-color: #e0ffe0; opacity: 0.7; }
+.dark-theme .task-item.completed { background-color: #3a504a; }
+.task-title { font-weight: bold; }
+.task-item.completed .task-title { text-decoration: line-through; }
+.task-due-date { font-size: 0.9em; color: var(--text-color-secondary); }
+.task-actions { display: flex; gap: 10px; }
+.btn-sm { padding: 5px 10px; font-size: 0.8em; }
+.btn-success { background-color: #2ecc71; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+
+/* Flash Messages */
+.flash-messages { margin: 20px 0; }
+.flash-message {
+    padding: 12px 20px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border-left: 4px solid;
+    animation: slideIn 0.3s ease;
+}
+.flash-message.success {
+    background-color: #d4edda;
+    border-color: #28a745;
+    color: #155724;
+}
+.flash-message.danger {
+    background-color: #f8d7da;
+    border-color: #dc3545;
+    color: #721c24;
+}
+.flash-message.warning {
+    background-color: #fff3cd;
+    border-color: #ffc107;
+    color: #856404;
+}
+.flash-message.info {
+    background-color: #d1ecf1;
+    border-color: #17a2b8;
+    color: #0c5460;
+}
+.dark-theme .flash-message.success {
+    background-color: #1e4620;
+    color: #a8d5a8;
+}
+.dark-theme .flash-message.danger {
+    background-color: #4a1e1e;
+    color: #d5a8a8;
+}
+.dark-theme .flash-message.warning {
+    background-color: #4a3e1e;
+    color: #d5cba8;
+}
+.dark-theme .flash-message.info {
+    background-color: #1e3e4a;
+    color: #a8cbd5;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
