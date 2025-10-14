@@ -5,6 +5,7 @@ from datetime import datetime
 
 main = Blueprint('main', __name__)
 
+
 @main.route('/')
 @main.route('/dashboard')
 def dashboard():
@@ -13,6 +14,7 @@ def dashboard():
         Task.due_date.asc()
     ).all()
     return render_template('dashboard.html', title='Dashboard', tasks=tasks)
+
 
 @main.route('/add_task', methods=['GET', 'POST'])
 def add_task():
@@ -28,10 +30,11 @@ def add_task():
         return redirect(url_for('main.dashboard'))
     return render_template('add_task.html', title='Add New Task')
 
+
 @main.route('/complete_task/<int:task_id>', methods=['POST'])
 def complete_task(task_id):
     task = Task.query.get_or_404(task_id)
-    if task.user_id != 1: # Simple authorization check
+    if task.user_id != 1:  # Simple authorization check
         flash('You are not authorized to complete this task.', 'danger')
         return redirect(url_for('main.dashboard'))
     task.is_complete = not task.is_complete
