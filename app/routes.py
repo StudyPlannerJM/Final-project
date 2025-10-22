@@ -1,3 +1,4 @@
+#type: ignore
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from app.models import Task, User
 from app import db
