@@ -92,6 +92,8 @@ body.dark-theme {
 .task-actions { display: flex; gap: 10px; }
 .btn-sm { padding: 5px 10px; font-size: 0.8em; }
 .btn-success { background-color: #2ecc71; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+.btn-secondary { background-color: #f39c12; color: #fff; }
+.btn-danger { background-color: #e74c3c; color: #fff; }
 
 /* Flash Messages */
 .flash-messages { margin: 20px 0; }
