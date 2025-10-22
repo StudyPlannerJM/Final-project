@@ -1,3 +1,4 @@
+#type: ignore
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from app.models import Task, User
 from app import db
@@ -40,4 +41,32 @@ def complete_task(task_id):
     task.is_complete = not task.is_complete
     db.session.commit()
     flash('Task status updated!', 'success')
+    return redirect(url_for('main.dashboard'))
+
+@main.route('/edit_task/<int:task_id>', methods=['GET', 'POST'])
+def edit_task(task_id):
+    task = Task.query.get_or_404(task_id)
+    if task.user_id != 1: # Simple authorization check
+        flash('You are not authorized to edit this task.', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    if request.method == 'POST':
+        task.title = request.form['title']
+        task.description = request.form['description']
+        db.session.commit()
+        flash('Your task has been updated!', 'success')
+        return redirect(url_for('main.dashboard'))
+
+    return render_template('edit_task.html', title='Edit Task', task=task)
+
+@main.route('/delete_task/<int:task_id>', methods=['POST'])
+def delete_task(task_id):
+    task = Task.query.get_or_404(task_id)
+    if task.user_id != 1: # Simple authorization check
+        flash('You are not authorized to delete this task.', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    db.session.delete(task)
+    db.session.commit()
+    flash('Your task has been deleted!', 'success')
     return redirect(url_for('main.dashboard'))
