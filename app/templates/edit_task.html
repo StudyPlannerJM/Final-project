@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Study Planner{% endblock %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <div class="form-container">
+        <form method="POST" action="{{ url_for('main.edit_task', task_id=task.id) }}">
+            <div class="form-group">
+                <label for="title">Task Title</label>
+                <input type="text" id="title" name="title" value="{{ task.title }}" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description (Optional)</label>
+                <textarea id="description" name="description" rows="5">{{ task.description }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Task</button>
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+{% endblock %}
