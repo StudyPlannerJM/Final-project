@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Study Planner{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
+{% endblock %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <div class="settings-wrapper">
+        <div class="settings-nav">
+            <ul>
+                <li><a href="#appearance" class="active"><i class="fas fa-paint-brush"></i> Appearance</a></li>
+                <li><a href="#about"><i class="fas fa-info-circle"></i> About</a></li>
+            </ul>
+        </div>
+        <div class="settings-content">
+            <div id="appearance" class="settings-section active">
+                <h2>Appearance</h2>
+                <p>Customize the look and feel of your study planner.</p>
+                <div class="setting-item">
+                    <label for="theme-select">Theme</label>
+                    <select id="theme-select">
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                    </select>
+                </div>
+            </div>
+            <div id="about" class="settings-section">
+                <h2>About</h2>
+                <p><strong>Study Planner</strong></p>
+                <p>Version: 1.0.0</p>
+                <p>A comprehensive tool to help you organize your studies, manage tasks, and stay productive.</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block body_extra %}
+    <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+{% endblock %}
