@@ -6,6 +6,9 @@ from datetime import datetime
 
 main = Blueprint('main', __name__)
 
+@main.route('/settings')
+def settings():
+    return render_template('settings.html', title='Settings')
 
 @main.route('/')
 @main.route('/dashboard')
