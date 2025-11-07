@@ -2,6 +2,7 @@ import os
 from flask import Flask
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
 
 
 # Load environment variables from .env file
@@ -9,6 +10,9 @@ load_dotenv()
 
 # Initialize SQLAlchemy without binding to an app yet
 db = SQLAlchemy()
+
+login_manager = LoginManager()
+login_manager.login_view = 'auth.login' # type: ignore[attr-defined]
 
 
 def create_app():
@@ -24,10 +28,15 @@ def create_app():
 
     # Initialize extensions with the app
     db.init_app(app)
-
+    login_manager.init_app(app)
+    
+    
     # Import blueprints here to avoid circular imports
     from app.routes import main as main_blueprint
+    from app.auth import auth as auth_blueprint
 
     # Register blueprints
     app.register_blueprint(main_blueprint)
+    app.register_blueprint(auth_blueprint, url_prefix='/auth')
+    
     return app
