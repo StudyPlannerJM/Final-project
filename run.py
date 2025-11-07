@@ -1,6 +1,4 @@
 from app import create_app, db
-from flask import render_template
-from app.models import User, Task  # noqa: F401 - Importing the User model to ensure it's registeredg
 
 app = create_app()
 

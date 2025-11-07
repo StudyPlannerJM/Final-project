@@ -12,6 +12,21 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard'))
     form = LoginForm()
+    
+     # Create default admin if it doesn't exist
+    admin_email = "admin"
+    admin_username = "admin"
+    admin_password = "admin"
+
+    admin_user = User.query.filter_by(email=admin_email).first()
+    if admin_user is None:
+        admin_user = User()
+        admin_user.username = admin_username
+        admin_user.email = admin_email
+        admin_user.set_password(admin_password)
+        db.session.add(admin_user)
+        db.session.commit()
+        
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user is None or not user.check_password(form.password.data):
@@ -27,7 +42,7 @@ def register():
         return redirect(url_for('main.dashboard'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, email=form.email.data)
+        user = User(username=form.username.data, email=form.email.data) #type: ignore
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
