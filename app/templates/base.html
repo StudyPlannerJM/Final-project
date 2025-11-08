@@ -30,7 +30,16 @@
                 </div>
                 <div class="header-right">
                     <div class="theme-toggle">
-                        <button id="theme-toggle" class="theme-btn"><i class="fas fa-moon"></i></button>
+                     <button id="theme-toggle" class="theme-btn"><i class="fas fa-moon"></i></button>
+                    </div>
+                    <div class="user-auth">
+                     {% if current_user.is_anonymous %}
+                     <a href="{{ url_for('auth.login') }}">Login</a>
+                     <a href="{{ url_for('auth.register') }}">Register</a>
+                     {% else %}
+                     <span>Hello, {{ current_user.username }}!</span>
+                     <a href="{{ url_for('auth.logout') }}">Logout</a>
+                     {% endif %}
                     </div>
                 </div>
             </header>
