@@ -151,3 +151,101 @@ body.dark-theme {
         transform: translateY(0);
     }
 }
+
+/* Task Form Styles */
+.form-container {
+    background-color: var(--bg-color-secondary);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    max-width: 600px;
+    margin: 0 auto;
+    transition: background-color 0.3s ease;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 8px;
+    color: var(--text-color-primary);
+}
+
+.form-group input[type="text"],
+.form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 0.95rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: #fff;
+    color: var(--text-color-primary);
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+body.dark-theme .form-group input[type="text"],
+body.dark-theme .form-group textarea {
+    background-color: var(--bg-color-primary);
+    color: var(--text-color-primary);
+}
+
+.form-group input[type="text"]:focus,
+.form-group textarea:focus {
+    border-color: var(--accent-color);
+    outline: none;
+}
+
+.btn {
+    padding: 12px 20px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.btn-primary {
+    background-color: var(--accent-color);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #357abd;
+}
+
+.btn-secondary {
+    background-color: #bdc3c7;
+    color: #333;
+}
+
+.btn-secondary:hover {
+    background-color: #a0a7ad;
+}
+
+body.dark-theme .btn-secondary {
+    background-color: #4a627a;
+    color: #ecf0f1;
+}
+
+body.dark-theme .btn-secondary:hover {
+    background-color: #3b5166;
+}
+
+@media (max-width: 600px) {
+    .form-container {
+        padding: 20px;
+    }
+
+    .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
