@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 
 
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -30,6 +31,10 @@ def create_app():
     db.init_app(app)
     login_manager.init_app(app)
     
+    from app.models import User
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
     
     # Import blueprints here to avoid circular imports
     from app.routes import main as main_blueprint
