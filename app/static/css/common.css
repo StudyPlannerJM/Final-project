@@ -73,6 +73,7 @@ body.dark-theme {
 .top-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: var(--bg-color-secondary); border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
 
 .header-left { display: flex; align-items: center; }
+.header-right { display:flex; align-items: center;}
 
 .header-left h1 { margin: 0; font-size: 1.8em; color: var(--text-color-primary); margin-left: 20px; }
 

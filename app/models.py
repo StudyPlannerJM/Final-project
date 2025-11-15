@@ -25,9 +25,11 @@ class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
-    due_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    data_created = db.Column(db.DateTime, default=datetime.utcnow)
+    due_date = db.Column(db.DateTime, nullable=True)
+    category = db.Column(db.String(50), nullable=True) 
     is_complete = db.Column(db.Boolean, default=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
     def __repr__(self):
-        return f'<Task {self.title}>'
+         return f"Task(\'{self.title}\', \'{self.due_date}\', \'{self.is_complete}\')"
