@@ -31,9 +31,9 @@
                     </li>
                 {% endfor %}
             </ul>
-             <p><a href="{{ url_for('main.add_task') }}">Add another task</a>.</p>
+             <p><a class="btn btn-primary btn-sm" href="{{ url_for('main.add_task') }}">Add another task</a>.</p>
         {% else %}
-            <p>No tasks yet! <a href="{{ url_for('main.add_task') }}">Add your first task</a>.</p>
+            <p>No tasks yet! <a class="btn btn-primary btn-sm" href="{{ url_for('main.add_task') }}">Add your first task</a>.</p>
         {% endif %}
     </div>
 {% endblock %}
