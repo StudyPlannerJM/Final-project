@@ -18,7 +18,9 @@ def login():
         if user is None or not user.check_password(form.password.data):
             flash('Invalid email or password', 'danger')
             return redirect(url_for('auth.login'))
-        login_user(user, remember=form.remember_me.data)       
+        print(f"Attempting to log in user: {user.username}")
+        login_success = login_user(user, remember=form.remember_me.data)
+        print(f"Login success: {login_success}")       
 
         return redirect(url_for('main.dashboard'))
     return render_template('auth/login.html', title='Sign In', form=form)
