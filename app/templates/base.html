@@ -23,16 +23,20 @@
         </nav>
 
         <main class="main-content">
-            <header class="top-header">
+            <header class="top-header">                
                 <div class="header-left">
                     <button class="sidebar-toggle" id="sidebar-toggle"><i class="fas fa-bars"></i></button>
                     <h1>{% block page_title %}{% endblock %}</h1>
-                </div>
-                <div class="header-right">
-                    <div class="theme-toggle">
-                        <button id="theme-toggle" class="theme-btn"><i class="fas fa-moon"></i></button>
-                    </div>
-                </div>
+                </div>                
+                <div class="header-right">                    
+                    <div>
+                        <span>Hello, {{ current_user.username }}!</span>
+                        <a class="btn btn-danger btn-sm" href="{{ url_for('auth.logout') }}">Logout</a>  
+                    </div>  
+                    <div class="theme-toggle moon">
+                     <button id="theme-toggle" class="theme-btn"><i class="fas fa-moon"></i></button> 
+                    </div>                                                    
+                </div>                
             </header>
             
             <div class="flash-messages">

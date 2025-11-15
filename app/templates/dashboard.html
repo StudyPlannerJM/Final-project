@@ -17,7 +17,7 @@
                     <li class="task-item {% if task.is_complete %}completed{% endif %}">
                         <div class="task-details">
                             <span class="task-title">{{ task.title }}</span>
-                            <span class="task-due-date">Due: {{ task.due_date.strftime('%d-%m-%Y %H:%M') }}</span>
+                            <span class="data-created">Created at: {{ task.data_created.strftime('%d-%m-%Y %H:%M') }}</span>
                         </div>
                         <div class="task-actions">
                            <a href="{{ url_for('main.edit_task', task_id=task.id) }}" class="btn btn-secondary btn-sm"><i class="fas fa-edit"></i></a>
@@ -31,9 +31,9 @@
                     </li>
                 {% endfor %}
             </ul>
-             <p><a href="{{ url_for('main.add_task') }}">Add another task</a>.</p>
+             <p><a class="btn btn-primary btn-sm" href="{{ url_for('main.add_task') }}">Add another task</a>.</p>
         {% else %}
-            <p>No tasks yet! <a href="{{ url_for('main.add_task') }}">Add your first task</a>.</p>
+            <p>No tasks yet! <a class="btn btn-primary btn-sm" href="{{ url_for('main.add_task') }}">Add your first task</a>.</p>
         {% endif %}
     </div>
 {% endblock %}

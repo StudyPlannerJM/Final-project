@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - Study Planner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login_register.css') }}">
+</head>
+<body>
+    <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+    <h2>{{ title }}</h2>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.username.label }}<br>
+            {{ form.username(size=32) }}
+            {% for error in form.username.errors %}<span style="color: red;">[{{ error }}]</span>{% endfor %}
+        </p>
+        <p>
+            {{ form.email.label }}<br>
+            {{ form.email(size=32) }}
+            {% for error in form.email.errors %}<span style="color: red;">[{{ error }}]</span>{% endfor %}
+        </p>
+        <p>
+            {{ form.password.label }}<br>
+            {{ form.password(size=32) }}
+            {% for error in form.password.errors %}<span style="color: red;">[{{ error }}]</span>{% endfor %}
+        </p>
+        <p>
+            {{ form.password2.label }}<br>
+            {{ form.password2(size=32) }}
+            {% for error in form.password2.errors %}<span style="color: red;">[{{ error }}]</span>{% endfor %}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+    <p>Already have an account? <a href="{{ url_for('auth.login') }}">Click to Login!</a></p>
+    </div>
+</body>
+</html>
