@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 
+from flask_migrate import Migrate
 
 
 # Load environment variables from .env file
@@ -15,6 +16,7 @@ db = SQLAlchemy()
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login' # type: ignore[attr-defined]
 
+migrate = Migrate()
 
 def create_app():
     app = Flask(__name__)
@@ -30,6 +32,7 @@ def create_app():
     # Initialize extensions with the app
     db.init_app(app)
     login_manager.init_app(app)
+    migrate.init_app(app, db)
     
     from app.models import User
     @login_manager.user_loader

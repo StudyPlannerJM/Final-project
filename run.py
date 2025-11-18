@@ -1,8 +1,10 @@
+from flask_migrate import Migrate
 from app import create_app, db
 from app.models import User
 from werkzeug.security import generate_password_hash
 
 app = create_app()
+migrate = Migrate(app, db) 
 
 # This block ensures that the database is created when run.py is executed directly.
 with app.app_context():

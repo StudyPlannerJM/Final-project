@@ -1,0 +1,28 @@
+# Byte-compiled / cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Flask instance folder (runtime files, configs, uploads)
+instance/
+
+# SQLite databases
+*.db
+*.sqlite3
+
+# Logs
+*.log
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE/editor settings
+.vscode/
+.idea/
+
+# OS-specific junk
+.DS_Store
+Thumbs.db
