@@ -4,6 +4,7 @@ from app.models import Task, User
 from app import db
 from datetime import datetime
 from flask_login import current_user, login_required
+from app.forms import TaskForm
 
 main = Blueprint('main', __name__)
 
@@ -17,17 +18,24 @@ def dashboard():
 @main.route('/add_task', methods=['GET', 'POST'])
 @login_required
 def add_task():
-    if request.method == 'POST':
-        title = request.form.get('title')
-        if not title:
-            flash('Task title is required!', 'danger')
-            return redirect(url_for('main.add_task'))
-        new_task = Task(title=title, description=request.form.get('description'), user_id=current_user.id)
+    form = TaskForm() # Initialize form
+    if form.validate_on_submit():
+        category = form.category.data
+        if category == "Other" and form.other_category.data.strip():
+            category = form.other_category.data.strip()
+            
+        new_task = Task(
+            title=form.title.data,
+            description=form.description.data,
+            due_date=form.due_date.data, 
+            category=category, 
+            author=current_user
+        )
         db.session.add(new_task)
         db.session.commit()
         flash('Task added successfully!', 'success')
         return redirect(url_for('main.dashboard'))
-    return render_template('add_task.html', title='Add New Task')
+    return render_template('add_task.html', title='Add New Task', form=form)
 
 @main.route('/edit_task/<int:task_id>', methods=['GET', 'POST'])
 @login_required
@@ -37,14 +45,28 @@ def edit_task(task_id):
         flash('You are not authorized to edit this task.', 'danger')
         return redirect(url_for('main.dashboard'))
 
-    if request.method == 'POST':
-        task.title = request.form['title']
-        task.description = request.form['description']
+    form = TaskForm(obj=task)
+    
+    if request.method == "GET":
+        default_choices = [c[0] for c in form.category.choices]
+        if task.category not in default_choices:
+            form.category.data = "Other"
+            form.other_category.data = task.category
+        
+    if form.validate_on_submit():
+        task.title = form.title.data
+        task.description = form.description.data
+        task.due_date = form.due_date.data
+        
+        category = form.category.data
+        if category == "Other" and form.other_category.data.strip():
+            category = form.other_category.data.strip()
+        task.category = category
+        
         db.session.commit()
-        flash('Your task has been updated!', 'success')
-        return redirect(url_for('main.dashboard'))
-
-    return render_template('edit_task.html', title='Edit Task', task=task)
+        flash("Your task has been updated!", "success")
+        return redirect(url_for("main.dashboard"))
+    return render_template("edit_task.html", title="Edit Task", form=form, task=task)
 
 @main.route('/delete_task/<int:task_id>', methods=['POST'])
 @login_required
