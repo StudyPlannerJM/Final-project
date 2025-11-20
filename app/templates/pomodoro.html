@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Study Planner{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="{{ url_for(\'static\', filename=\'css/pomodoro.css\') }}">
+{% endblock %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <div class="pomodoro-container">
+        <div class="timer-display" id="timer-display">25:00</div>
+        <div class="timer-controls">
+            <button id="start-timer" class="btn btn-primary">Start</button>
+            <button id="pause-timer" class="btn btn-secondary">Pause</button>
+            <button id="reset-timer" class="btn btn-danger">Reset</button>
+        </div>
+        <div class="session-info">
+            <p>Session: <span id="session-count">0</span></p>
+            <p>Status: <span id="timer-status">Ready</span></p>
+        </div>
+    </div>
+{% endblock %}
+
+{% block body_extra %}
+    <script src="{{ url_for(\'static\', filename=\'js/pomodoro.js\') }}"></script>
+{% endblock %}
