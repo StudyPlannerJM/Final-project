@@ -11,6 +11,34 @@
     margin: 50px auto;
 }
 
+.timer-settings {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.btn-time {
+    padding: 8px 16px;
+    font-size: 1em;
+    cursor: pointer;
+    border: 2px solid var(--accent-color);
+    background-color: transparent;
+    color: var(--text-color-primary);
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.btn-time:hover {
+    background-color: var(--accent-color);
+    color: #fff;
+}
+
+.btn-time.active {
+    background-color: var(--accent-color);
+    color: #fff;
+    font-weight: bold;
+}
+
 .timer-display {
     font-size: 4em;
     font-weight: bold;
