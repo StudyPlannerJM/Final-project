@@ -5,10 +5,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetBtn = document.getElementById('reset-timer');
     const sessionCountSpan = document.getElementById('session-count');
     const timerStatusSpan = document.getElementById('timer-status');
+    const time25Btn = document.getElementById('time-25');
+    const time45Btn = document.getElementById('time-45');
+    const time60Btn = document.getElementById('time-60');
 
     let timer;
     let isRunning = false;
-    let timeLeft = 25 * 60; // 25 minutes in seconds
+    let workDuration = 25 * 60; // Default 25 minutes in seconds
+    let timeLeft = workDuration;
     let sessionCount = 0;
     let isBreak = false;
 
@@ -36,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     isBreak = true;
                 } else {
                     alert('Break over! Time to work again.');
-                    timeLeft = 25 * 60; // 25-minute work session
+                    timeLeft = workDuration; // Return to selected work duration
                     isBreak = false;
                 }
                 timerStatusSpan.textContent = 'Ready';
@@ -54,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function resetTimer() {
         clearInterval(timer);
         isRunning = false;
-        timeLeft = 25 * 60;
+        timeLeft = workDuration;
         sessionCount = 0;
         isBreak = false;
         timerStatusSpan.textContent = 'Ready';
@@ -62,9 +66,28 @@ document.addEventListener('DOMContentLoaded', () => {
         updateDisplay();
     }
 
+    function setWorkDuration(minutes) {
+        if (isRunning) {
+            alert('Please pause the timer before changing duration.');
+            return;
+        }
+        workDuration = minutes * 60;
+        timeLeft = workDuration;
+        isBreak = false;
+        timerStatusSpan.textContent = 'Ready';
+        updateDisplay();
+        
+        // Update active button state
+        document.querySelectorAll('.btn-time').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
     startBtn.addEventListener('click', startTimer);
     pauseBtn.addEventListener('click', pauseTimer);
     resetBtn.addEventListener('click', resetTimer);
+    time25Btn.addEventListener('click', () => setWorkDuration(25));
+    time45Btn.addEventListener('click', () => setWorkDuration(45));
+    time60Btn.addEventListener('click', () => setWorkDuration(60));
 
     updateDisplay(); // Initial display
 });
