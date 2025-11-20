@@ -1,0 +1,41 @@
+.pomodoro-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-color-secondary);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: var(--box-shadow);
+    max-width: 400px;
+    margin: 50px auto;
+}
+
+.timer-display {
+    font-size: 4em;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: var(--text-color-primary);
+}
+
+.timer-controls button {
+    margin: 0 10px;
+    padding: 10px 20px;
+    font-size: 1.1em;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.session-info {
+    margin-top: 20px;
+    font-size: 1.1em;
+    color: var(--text-color-secondary);
+    text-align: center;
+}
+
+.session-info span {
+    font-weight: bold;
+    color: var(--accent-color);
+}
