@@ -97,3 +97,8 @@ def complete_task(task_id):
 @login_required
 def settings():
     return render_template('settings.html', title='Settings')
+
+@main.route("/pomodoro")
+@login_required
+def pomodoro():
+    return render_template("pomodoro.html", title="Pomodoro Timer")
