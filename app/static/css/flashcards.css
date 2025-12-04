@@ -1,0 +1,39 @@
+.flashcards-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.flashcards-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.flashcard-item {
+    background-color: var(--bg-color-secondary);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: var(--box-shadow);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 150px;
+}
+
+.flashcard-item h3 {
+    margin-top: 0;
+    color: var(--text-color-primary);
+}
+
+.flashcard-item p {
+    color: var(--text-color-secondary);
+}
+
+.flashcard-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
