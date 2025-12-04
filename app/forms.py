@@ -39,3 +39,7 @@ class TaskForm(FlaskForm):
     )
     other_category = StringField("Other Category", validators=[Optional()])
     submit = SubmitField("Save Task")
+class FlashcardForm(FlaskForm):
+    question = TextAreaField("Question", validators=[DataRequired()])
+    answer = TextAreaField("Answer", validators=[DataRequired()])
+    submit = SubmitField("Save Flashcard")
