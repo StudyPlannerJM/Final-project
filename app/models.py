@@ -33,3 +33,14 @@ class Task(db.Model):
     
     def __repr__(self):
          return f"Task(\'{self.title}\', \'{self.due_date}\', \'{self.is_complete}\')"
+    
+class Flashcard(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    question = db.Column(db.Text, nullable=False)
+    answer = db.Column(db.Text, nullable=False)
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    author = db.relationship("User", backref=db.backref("flashcards", lazy=True))
+
+    def __repr__(self):
+        return f"Flashcard(\\'{self.question}\\'{self.answer}\\'{self.date_created}\\'{self.user_id}\\'{self.author}\")"
