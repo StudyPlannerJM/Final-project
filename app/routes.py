@@ -124,3 +124,33 @@ def add_flashcard():
         flash("Your flashcard has been added!", "success")
         return redirect(url_for("main.flashcards"))
     return render_template("add_flashcard.html", title="Add Flashcard", form=form)
+
+@main.route("/edit_flashcard/<int:flashcard_id>", methods=["GET", "POST"])
+@login_required
+def edit_flashcard(flashcard_id):
+    flashcard = Flashcard.query.get_or_404(flashcard_id)
+    if flashcard.author != current_user:
+        flash("You are not authorized to edit this flashcard.", "danger")
+        return redirect(url_for("main.flashcards"))
+
+    form = FlashcardForm(obj=flashcard) # Pre-populate form with flashcard data
+    if form.validate_on_submit():
+        flashcard.question = form.question.data
+        flashcard.answer = form.answer.data
+        db.session.commit()
+        flash("Your flashcard has been updated!", "success")
+        return redirect(url_for("main.flashcards"))
+    return render_template("edit_flashcard.html", title="Edit Flashcard", form=form, flashcard=flashcard)
+
+@main.route("/delete_flashcard/<int:flashcard_id>", methods=["POST"])
+@login_required
+def delete_flashcard(flashcard_id):
+    flashcard = Flashcard.query.get_or_404(flashcard_id)
+    if flashcard.author != current_user:
+        flash("You are not authorized to delete this flashcard.", "danger")
+        return redirect(url_for("main.flashcards"))
+
+    db.session.delete(flashcard)
+    db.session.commit()
+    flash("Your flashcard has been deleted!", "success")
+    return redirect(url_for("main.flashcards"))
