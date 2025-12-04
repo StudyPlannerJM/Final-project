@@ -1,10 +1,10 @@
 #type: ignore
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from app.models import Task, User
+from app.models import Task, User, Flashcard
 from app import db
 from datetime import datetime
 from flask_login import current_user, login_required
-from app.forms import TaskForm
+from app.forms import TaskForm, FlashcardForm
 
 main = Blueprint('main', __name__)
 
@@ -102,3 +102,25 @@ def settings():
 @login_required
 def pomodoro():
     return render_template("pomodoro.html", title="Pomodoro Timer")
+
+@main.route("/flashcards")
+@login_required
+def flashcards():
+    user_flashcards = Flashcard.query.filter_by(author=current_user).order_by(Flashcard.date_created.desc()).all()
+    return render_template("flashcards.html", title="Flashcards", flashcards=user_flashcards)
+
+@main.route("/add_flashcard", methods=["GET", "POST"])
+@login_required
+def add_flashcard():
+    form = FlashcardForm()
+    if form.validate_on_submit():
+        new_flashcard = Flashcard(
+            question=form.question.data,
+            answer=form.answer.data,
+            author=current_user
+        )
+        db.session.add(new_flashcard)
+        db.session.commit()
+        flash("Your flashcard has been added!", "success")
+        return redirect(url_for("main.flashcards"))
+    return render_template("add_flashcard.html", title="Add Flashcard", form=form)
