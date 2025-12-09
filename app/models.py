@@ -29,6 +29,7 @@ class Task(db.Model):
     due_date = db.Column(db.DateTime, nullable=True)
     category = db.Column(db.String(50), nullable=True)
     is_complete = db.Column(db.Boolean, default=False)
+    status = db.Column(db.String(20), default='todo', nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __repr__(self):
