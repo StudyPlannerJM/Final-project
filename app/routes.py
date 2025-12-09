@@ -22,13 +22,41 @@ def dashboard():
 @main.route('/tasks')
 @login_required
 def tasks():
-    user_tasks = Task.query.filter_by(user_id=current_user.id).order_by(
+    todo_tasks = Task.query.filter_by(user_id=current_user.id, status="todo").order_by(
+        Task.data_created.asc()
+    ).all
+    doing_tasks = Task.query.filter_by(user_id=current_user.id, status="doing").order_by(
+        Task.data_created.asc()
+    ).all
+    done_tasks = Task.query.filter_by(user_id=current_user.id, status='done').order_by(
         Task.data_created.asc()
     ).all()
     return render_template(
-        'tasks.html', title='Tasks', tasks=user_tasks
+        'tasks.html', 
+        title='Tasks', 
+        todo_tasks=todo_tasks,
+        doing_tasks=doing_tasks,
+        done_tasks=done_tasks
     )
+@main.route('/update_task_status/<int:task_id>/<status>', methods=['POST'])
+@login_required
+def update_task_status(task_id, status):
+    task = Task.query.get_or_404(task_id)
 
+    # Security check: verify user owns this task
+    if task.user_id != current_user.id:
+        return {'success': False, 'error': 'Unauthorized'}, 403
+
+    # Validate the status is one of our allowed values
+    if status not in ['todo', 'doing', 'done']:
+        return {'success': False, 'error': 'Invalid status'}, 400
+
+    # Update the task status in the database
+    task.status = status
+    db.session.commit()
+
+    # Return success response
+    return {'success': True, 'task_id': task_id, 'new_status': status}
 
 @main.route('/add_task', methods=['GET', 'POST'])
 @login_required
