@@ -9,7 +9,6 @@ migrate = Migrate(app, db)
 # This block ensures that the database is created when
 # run.py is executed directly.
 with app.app_context():
-    db.drop_all()  # Drops all tables (for development purposes)
     db.create_all()  # Creates tables based on models.py
     # SIMPLE default admin creator
     admin = User.query.filter_by(email="admin@admin.com").first()
