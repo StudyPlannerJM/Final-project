@@ -141,21 +141,26 @@
 }
 
 .task-actions .btn {
-    flex: 1;
-    padding: 6px 10px;
+    flex: 0 0 auto;
+    padding: 6px 8px;
     font-size: 0.85em;
+    min-width: fit-content;
 }
 
 /* Add Task Button */
 .add-task-button {
     padding: 15px;
     border-top: 1px solid #f0f0f0;
+    box-sizing: border-box;
 }
 
 .add-task-button .btn {
     width: 100%;
     display: block;
     text-align: center;
+    padding: 8px 12px;
+    font-size: 0.9em;
+    box-sizing: border-box;
 }
 
 /* Responsive Design - Stack columns on smaller screens */

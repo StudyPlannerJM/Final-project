@@ -24,10 +24,10 @@ def dashboard():
 def tasks():
     todo_tasks = Task.query.filter_by(user_id=current_user.id, status="todo").order_by(
         Task.data_created.asc()
-    ).all
+    ).all()
     doing_tasks = Task.query.filter_by(user_id=current_user.id, status="doing").order_by(
         Task.data_created.asc()
-    ).all
+    ).all()
     done_tasks = Task.query.filter_by(user_id=current_user.id, status='done').order_by(
         Task.data_created.asc()
     ).all()
