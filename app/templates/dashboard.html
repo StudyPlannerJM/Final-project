@@ -10,32 +10,13 @@
         <h2>Study Hub</h2>
         <p>Welcome to your personalized study dashboard.</p>
         
-        <h3>Upcoming Tasks</h3>
-        {% if tasks %}
-            <ul class="task-list">
-                {% for task in tasks %}
-                    <li class="task-item {% if task.is_complete %}completed{% endif %}">
-                        <div class="task-details">
-                            <h3>{{ task.title }}</h3>
-                            {% if task.description %}<p>{{ task.description }}</p>{% endif %}
-                            {% if task.due_date %}<p class="task-due-date">Due: {{ task.due_date.strftime('%d-%m-%Y %H:%M') }}</p>{% endif %}
-                            {% if task.category %}<span class="task-category">{{ task.category }}</span>{% endif %}
-                        </div>
-                        <div class="task-actions">
-                           <a href="{{ url_for('main.edit_task', task_id=task.id) }}" class="btn btn-secondary btn-sm"><i class="fas fa-edit"></i></a>
-                            <form action="{{ url_for('main.delete_task', task_id=task.id) }}" method="POST" style="display:inline;">
-                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this task?');"><i class="fas fa-trash"></i></button>
-                            </form>
-                            <form action="{{ url_for('main.complete_task', task_id=task.id) }}" method="POST" style="display:inline;">
-                                <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-check"></i></button>
-                            </form>
-                        </div>
-                    </li>
-                {% endfor %}
-            </ul>
-             <p><a class="btn btn-primary btn-sm" href="{{ url_for('main.add_task') }}">Add another task</a>.</p>
-        {% else %}
-            <p>No tasks yet! <a class="btn btn-primary btn-sm" href="{{ url_for('main.add_task') }}">Add your first task</a>.</p>
-        {% endif %}
+        <div class="dashboard-overview">
+            <div class="dashboard-section">
+                <h3>Quick Access</h3>
+                <p><a class="btn btn-primary" href="{{ url_for('main.tasks') }}">View All Tasks</a></p>
+                <p><a class="btn btn-primary" href="{{ url_for('main.flashcards') }}">Flashcards</a></p>
+                <p><a class="btn btn-primary" href="{{ url_for('main.pomodoro') }}">Pomodoro Timer</a></p>
+            </div>
+        </div>
     </div>
 {% endblock %}

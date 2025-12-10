@@ -14,13 +14,49 @@ main = Blueprint('main', __name__)
 @main.route('/dashboard')
 @login_required
 def dashboard():
-    tasks = Task.query.filter_by(user_id=current_user.id).order_by(
+    return render_template(
+        'dashboard.html', title='Dashboard'
+    )
+
+
+@main.route('/tasks')
+@login_required
+def tasks():
+    todo_tasks = Task.query.filter_by(user_id=current_user.id, status="todo").order_by(
+        Task.data_created.asc()
+    ).all()
+    doing_tasks = Task.query.filter_by(user_id=current_user.id, status="doing").order_by(
+        Task.data_created.asc()
+    ).all()
+    done_tasks = Task.query.filter_by(user_id=current_user.id, status='done').order_by(
         Task.data_created.asc()
     ).all()
     return render_template(
-        'dashboard.html', title='Dashboard', tasks=tasks
+        'tasks.html', 
+        title='Tasks', 
+        todo_tasks=todo_tasks,
+        doing_tasks=doing_tasks,
+        done_tasks=done_tasks
     )
+@main.route('/update_task_status/<int:task_id>/<status>', methods=['POST'])
+@login_required
+def update_task_status(task_id, status):
+    task = Task.query.get_or_404(task_id)
 
+    # Security check: verify user owns this task
+    if task.user_id != current_user.id:
+        return {'success': False, 'error': 'Unauthorized'}, 403
+
+    # Validate the status is one of our allowed values
+    if status not in ['todo', 'doing', 'done']:
+        return {'success': False, 'error': 'Invalid status'}, 400
+
+    # Update the task status in the database
+    task.status = status
+    db.session.commit()
+
+    # Return success response
+    return {'success': True, 'task_id': task_id, 'new_status': status}
 
 @main.route('/add_task', methods=['GET', 'POST'])
 @login_required
@@ -41,7 +77,7 @@ def add_task():
         db.session.add(new_task)
         db.session.commit()
         flash('Task added successfully!', 'success')
-        return redirect(url_for('main.dashboard'))
+        return redirect(url_for('main.tasks'))
     return render_template('add_task.html', title='Add New Task', form=form)
 
 
@@ -51,7 +87,7 @@ def edit_task(task_id):
     task = Task.query.get_or_404(task_id)
     if task.user_id != current_user.id:  # Simple authorization check
         flash('You are not authorized to edit this task.', 'danger')
-        return redirect(url_for('main.dashboard'))
+        return redirect(url_for('main.tasks'))
 
     form = TaskForm(obj=task)
 
@@ -73,7 +109,7 @@ def edit_task(task_id):
 
         db.session.commit()
         flash("Your task has been updated!", "success")
-        return redirect(url_for("main.dashboard"))
+        return redirect(url_for("main.tasks"))
     return render_template(
         "edit_task.html", title="Edit Task", form=form, task=task
     )
@@ -85,12 +121,12 @@ def delete_task(task_id):
     task = Task.query.get_or_404(task_id)
     if task.user_id != current_user.id:  # Simple authorization check
         flash('You are not authorized to delete this task.', 'danger')
-        return redirect(url_for('main.dashboard'))
+        return redirect(url_for('main.tasks'))
 
     db.session.delete(task)
     db.session.commit()
     flash('Your task has been deleted!', 'success')
-    return redirect(url_for('main.dashboard'))
+    return redirect(url_for('main.tasks'))
 
 
 @main.route('/complete_task/<int:task_id>', methods=['POST'])
@@ -99,11 +135,11 @@ def complete_task(task_id):
     task = Task.query.get_or_404(task_id)
     if task.user_id != current_user.id:  # Simple authorization check
         flash('You are not authorized to complete this task.', 'danger')
-        return redirect(url_for('main.dashboard'))
+        return redirect(url_for('main.tasks'))
     task.is_complete = not task.is_complete
     db.session.commit()
     flash('Task status updated!', 'success')
-    return redirect(url_for('main.dashboard'))
+    return redirect(url_for('main.tasks'))
 
 
 @main.route('/settings')
