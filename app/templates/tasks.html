@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Study Hub{% endblock %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <div class="kanban-container">
+        <h2>Task Board</h2>
+        <p>Drag tasks between columns to change their status</p>
+
+        <div class="kanban-board">
+            <!-- TO-DO COLUMN -->
+            <div class="kanban-column">
+                <div class="column-header">
+                    <h3>To-Do</h3>
+                    <span class="task-count">{{ todo_tasks|length }}</span>
+                </div>
+                <div class="column-content" data-status="todo" id="todo-column">
+                    {% for task in todo_tasks %}
+                        <div class="task-card" draggable="true" data-task-id="{{ task.id }}">
+                            <div class="task-card-header">
+                                <h4>{{ task.title }}</h4>
+                            </div>
+                            {% if task.description %}
+                                <p class="task-description">{{ task.description }}</p>
+                            {% endif %}
+                            {% if task.due_date %}
+                                <p class="task-due-date">
+                                    <i class="far fa-calendar"></i> {{ task.due_date.strftime('%d-%m-%Y %H:%M') }}
+                                </p>
+                            {% endif %}
+                            {% if task.category %}
+                                <span class="task-category">{{ task.category }}</span>
+                            {% endif %}
+                            <div class="task-actions">
+                                <a href="{{ url_for('main.edit_task', task_id=task.id) }}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
+                                <form action="{{ url_for('main.delete_task', task_id=task.id) }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this task?');"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="add-task-button">
+                    <a href="{{ url_for('main.add_task') }}" class="btn btn-primary btn-sm">+ Add Task</a>
+                </div>
+            </div>
+
+            <!-- DOING COLUMN -->
+            <div class="kanban-column">
+                <div class="column-header">
+                    <h3>Doing</h3>
+                    <span class="task-count">{{ doing_tasks|length }}</span>
+                </div>
+                <div class="column-content" data-status="doing" id="doing-column">
+                    {% for task in doing_tasks %}
+                        <div class="task-card" draggable="true" data-task-id="{{ task.id }}">
+                            <div class="task-card-header">
+                                <h4>{{ task.title }}</h4>
+                            </div>
+                            {% if task.description %}
+                                <p class="task-description">{{ task.description }}</p>
+                            {% endif %}
+                            {% if task.due_date %}
+                                <p class="task-due-date">
+                                    <i class="far fa-calendar"></i> {{ task.due_date.strftime('%d-%m-%Y %H:%M') }}
+                                </p>
+                            {% endif %}
+                            {% if task.category %}
+                                <span class="task-category">{{ task.category }}</span>
+                            {% endif %}
+                            <div class="task-actions">
+                                <a href="{{ url_for('main.edit_task', task_id=task.id) }}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
+                                <form action="{{ url_for('main.delete_task', task_id=task.id) }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this task?');"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="add-task-button">
+                    <a href="{{ url_for('main.add_task') }}" class="btn btn-primary btn-sm">+ Add Task</a>
+                </div>
+            </div>
+
+            <!-- DONE COLUMN -->
+            <div class="kanban-column">
+                <div class="column-header">
+                    <h3>Done</h3>
+                    <span class="task-count">{{ done_tasks|length }}</span>
+                </div>
+                <div class="column-content" data-status="done" id="done-column">
+                    {% for task in done_tasks %}
+                        <div class="task-card" draggable="true" data-task-id="{{ task.id }}">
+                            <div class="task-card-header">
+                                <h4>{{ task.title }}</h4>
+                            </div>
+                            {% if task.description %}
+                                <p class="task-description">{{ task.description }}</p>
+                            {% endif %}
+                            {% if task.due_date %}
+                                <p class="task-due-date">
+                                    <i class="far fa-calendar"></i> {{ task.due_date.strftime('%d-%m-%Y %H:%M') }}
+                                </p>
+                            {% endif %}
+                            {% if task.category %}
+                                <span class="task-category">{{ task.category }}</span>
+                            {% endif %}
+                            <div class="task-actions">
+                                <a href="{{ url_for('main.edit_task', task_id=task.id) }}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
+                                <form action="{{ url_for('main.delete_task', task_id=task.id) }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this task?');"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="add-task-button">
+                    <a href="{{ url_for('main.add_task') }}" class="btn btn-primary btn-sm">+ Add Task</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/kanban.js') }}"></script>
+{% endblock %}
