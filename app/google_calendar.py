@@ -13,6 +13,10 @@ from googleapiclient.errors import HttpError  # Catches errors from Google API
 from datetime import datetime, timedelta  # For handling dates and times
 from flask import url_for  # Generates URLs for my Flask app
 
+# IMPORTANT: Allow OAuth2 to work over HTTP for local development
+# In production with HTTPS, you can remove this line
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
 
 # ==============================================================================
 # CONFIGURATION
