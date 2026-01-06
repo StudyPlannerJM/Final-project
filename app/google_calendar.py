@@ -170,3 +170,72 @@ def create_calendar_event(service, task):
         # If Google returns an error (network issue, auth problem, etc.)
         print(f"An error occurred: {error}")
         return None  # Return None to indicate failure
+
+def update_calendar_event(service, event_id, task):
+    """
+    Updates an existing event in Google Calendar when I edit a task.
+    
+    How it works:
+    1. Finds the existing event in Google Calendar using its ID
+    2. Updates it with the new information from my task
+    3. Sends the updates back to Google Calendar
+    
+    Use case: When I edit a task's title, description, or due date,
+    this function makes sure the calendar event matches.
+    
+    Args:
+        service: The Google Calendar connection
+        event_id: The unique ID of the event in Google Calendar
+        task: My updated Task object with new information
+    
+    Returns:
+        True: If update was successful
+        False: If something went wrong
+    """
+    try:
+        # STEP 1: Get the current event from Google Calendar
+        # I need this to see what's already there
+        event = service.events().get(
+            calendarId='primary',  # User's main calendar
+            eventId=event_id  # The specific event we want to update
+        ).execute()
+        
+        # STEP 2: Figure out the new start time
+        if task.due_date:
+            # Use the task's new due date
+            start_time = task.due_date
+        else:
+            # If task doesn't have a due date, keep the original event time
+            # Try to get dateTime first, fall back to date if it's an all-day event
+            start_time = datetime.fromisoformat(
+                event['start'].get('dateTime', event['start'].get('date'))
+            )
+        
+        # STEP 3: Calculate end time (1 hour after start)
+        end_time = start_time + timedelta(hours=1)
+        
+        # STEP 4: Update the event with new information
+        event['summary'] = task.title  # New title
+        event['description'] = task.description or 'No description provided'  # New description
+        event['start'] = {
+            'dateTime': start_time.isoformat(),
+            'timeZone': 'UTC',
+        }
+        event['end'] = {
+            'dateTime': end_time.isoformat(),
+            'timeZone': 'UTC',
+        }
+        
+        # STEP 5: Send the updated event back to Google Calendar
+        updated_event = service.events().update(
+            calendarId='primary',  # Which calendar
+            eventId=event_id,  # Which event to update
+            body=event  # The updated event data
+        ).execute()
+        
+        return True  # Success!
+    
+    except HttpError as error:
+        # If something goes wrong (network issue, event not found, etc.)
+        print(f"An error occurred: {error}")
+        return False  # Indicate failure
