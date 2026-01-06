@@ -98,3 +98,75 @@ def get_calendar_service(user):
         # If anything goes wrong (bad token, network error, etc.), print error and return None
         print(f"Error creating calendar service: {e}")
         return None
+    
+# ==============================================================================
+# CALENDAR EVENT MANAGEMENT FUNCTIONS
+# ==============================================================================
+
+def create_calendar_event(service, task):
+    """
+    Takes one of my tasks and creates it as an event in Google Calendar.
+    
+    How it works:
+    1. Gets the task's due date (or uses tomorrow if none exists)
+    2. Creates an event that lasts 1 hour
+    3. Sends it to Google Calendar
+    4. Returns the event ID so I can track it
+    
+    Args:
+        service: The Google Calendar connection (from get_calendar_service)
+        task: My Task object from the database (has title, description, due_date, etc.)
+    
+    Returns:
+        event_id: A unique ID from Google for this event (I save this to sync later)
+        None: If something went wrong
+    """
+    try:
+        # STEP 1: Figure out when the event should start
+        if task.due_date:
+            # Use the task's due date if it has one
+            start_time = task.due_date
+        else:
+            # No due date? I'll schedule it for tomorrow
+            start_time = datetime.now() + timedelta(days=1)
+        
+        # STEP 2: Set event duration to 1 hour
+        # (I can change this to any duration later if needed)
+        end_time = start_time + timedelta(hours=1)
+        
+        # STEP 3: Create the event data structure
+        # This is the format Google Calendar expects
+        event = {
+            'summary': task.title,  # Event title (what shows on calendar)
+            'description': task.description or 'No description provided',  # Event details
+            'start': {
+                'dateTime': start_time.isoformat(),  # Start time in ISO format (e.g., 2024-01-15T14:00:00)
+                'timeZone': 'UTC',  # Time zone
+            },
+            'end': {
+                'dateTime': end_time.isoformat(),  # End time
+                'timeZone': 'UTC',
+            },
+            'reminders': {
+                'useDefault': False,  # Don't use calendar's default reminders
+                'overrides': [
+                    {'method': 'popup', 'minutes': 30},  # Popup reminder 30 minutes before
+                ],
+            },
+        }
+        
+        # STEP 4: Send the event to Google Calendar
+        # 'primary' means the user's main calendar
+        created_event = service.events().insert(
+            calendarId='primary',  # Which calendar to add to (primary = main calendar)
+            body=event  # The event data we created above
+        ).execute()  # Actually send the request to Google
+        
+        # STEP 5: Get the event ID from Google's response
+        # I need this to update or delete the event later
+        return created_event.get('id')
+    
+    except HttpError as error:
+        # If Google returns an error (network issue, auth problem, etc.)
+        print(f"An error occurred: {error}")
+        return None  # Return None to indicate failure
