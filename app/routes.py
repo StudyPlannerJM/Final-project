@@ -395,3 +395,89 @@ def schedule():
         calendar_events=calendar_events,
         calendar_connected=calendar_connected
     )
+    
+@main.route('/sync_task_to_calendar/<int:task_id>', methods=['POST'])
+@login_required
+def sync_task_to_calendar(task_id):
+    # Sync or update a task in Google Calendar
+    # Creates new calendar event if task not synced yet, otherwise updates existing event
+    
+    # STEP 1: Get the task from database
+    task = Task.query.get_or_404(task_id)
+
+    # STEP 2: Security check - make sure user owns this task
+    if task.user_id != current_user.id:
+        return {'success': False, 'error': 'Unauthorized'}, 403
+
+    # STEP 3: Check if Google Calendar is connected
+    if not current_user.calendar_sync_enabled:
+        return {
+            'success': False,
+            'error': 'Google Calendar not connected'
+        }, 400
+
+    # STEP 4: Get calendar service connection
+    service = get_calendar_service(current_user)
+    if not service:
+        return {
+            'success': False,
+            'error': 'Failed to connect to Google Calendar'
+        }, 500
+
+    # STEP 5: Decide whether to update existing event or create new one
+    if task.google_event_id:
+        # Task already has a calendar event - update it
+        success = update_calendar_event(service, task.google_event_id, task)
+        message = 'Task updated in calendar'
+    else:
+        # Task not synced yet - create new calendar event
+        event_id = create_calendar_event(service, task)
+        if event_id:
+            # Successfully created - save event ID to task
+            task.google_event_id = event_id
+            task.synced_to_calendar = True
+            success = True
+            message = 'Task synced to calendar'
+        else:
+            success = False
+            message = 'Failed to sync task'
+
+    # STEP 6: Save changes and return response
+    if success:
+        db.session.commit()
+        return {'success': True, 'message': message}
+    else:
+        return {'success': False, 'error': message}, 500
+    
+@main.route('/remove_task_from_calendar/<int:task_id>', methods=['POST'])
+@login_required
+def remove_task_from_calendar(task_id):
+    # Remove a task's event from Google Calendar
+    # Keeps the task in my database, just removes from calendar
+    
+    # STEP 1: Get the task from database
+    task = Task.query.get_or_404(task_id)
+
+    # STEP 2: Security check - verify user owns this task
+    if task.user_id != current_user.id:
+        return {'success': False, 'error': 'Unauthorized'}, 403
+
+    # STEP 3: Check if task is actually synced to calendar
+    if not task.google_event_id:
+        return {'success': False, 'error': 'Task not synced'}, 400
+
+    # STEP 4: Get calendar service connection
+    service = get_calendar_service(current_user)
+    if not service:
+        return {'success': False, 'error': 'Failed to connect'}, 500
+
+    # STEP 5: Delete the event from Google Calendar
+    if delete_calendar_event(service, task.google_event_id):
+        # Successfully deleted - clear the sync fields in database
+        task.google_event_id = None
+        task.synced_to_calendar = False
+        db.session.commit()
+        return {'success': True, 'message': 'Removed from calendar'}
+    else:
+        # Failed to delete from calendar
+        return {'success': False, 'error': 'Failed to remove'}, 500
