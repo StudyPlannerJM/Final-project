@@ -187,6 +187,12 @@ def delete_task(task_id):
         flash('You are not authorized to delete this task.', 'danger')
         return redirect(url_for('main.tasks'))
 
+    # Delete from Google Calendar if synced
+    if task.google_event_id and current_user.calendar_sync_enabled:
+        service = get_calendar_service(current_user)
+        if service:
+            delete_calendar_event(service, task.google_event_id)
+            
     db.session.delete(task)
     db.session.commit()
     flash('Your task has been deleted!', 'success')
