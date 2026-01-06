@@ -350,3 +350,48 @@ def oauth2callback():
 
     flash('Google Calendar connected successfully!', 'success')
     return redirect(url_for('main.schedule'))
+
+@main.route('/disconnect_google')
+@login_required
+def disconnect_google():
+    # Remove Google Calendar connection - clear stored token
+    # User will need to re-authorize to use calendar features again
+    current_user.google_token = None
+    current_user.calendar_sync_enabled = False
+    db.session.commit()
+
+    flash('Google Calendar disconnected.', 'info')
+    return redirect(url_for('main.schedule'))
+
+@main.route('/schedule')
+@login_required
+def schedule():
+    # Show schedule page with tasks and Google Calendar events combined
+    # If calendar is connected, fetch upcoming events from Google
+    
+    # STEP 1: Get all my tasks sorted by due date (earliest first)
+    tasks = Task.query.filter_by(user_id=current_user.id).order_by(
+        Task.due_date.asc()
+    ).all()
+
+    # STEP 2: Initialize calendar variables
+    calendar_events = []
+    calendar_connected = False
+
+    # STEP 3: Check if I've connected Google Calendar
+    if current_user.calendar_sync_enabled:
+        # Try to get calendar service
+        service = get_calendar_service(current_user)
+        if service:
+            # Successfully connected - mark as connected and fetch events
+            calendar_connected = True
+            calendar_events = get_upcoming_events(service, max_results=20)
+
+    # STEP 4: Render the schedule page with all data
+    return render_template(
+        'schedule.html',
+        title='Schedule',
+        tasks=tasks,
+        calendar_events=calendar_events,
+        calendar_connected=calendar_connected
+    )
