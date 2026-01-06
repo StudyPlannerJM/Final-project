@@ -1,4 +1,4 @@
-from flask_migrate import Migrate  # type: ignore
+from flask_migrate import Migrate 
 from app import create_app, db
 from app.models import User
 from werkzeug.security import generate_password_hash
@@ -26,4 +26,7 @@ with app.app_context():
         db.session.commit()
         print("Admin created: admin@admin.com / admin")
 if __name__ == '__main__':
-    app.run(debug=True)
+    try:
+        app.run(debug=True)
+    except KeyboardInterrupt:
+        print("\nServer stopped gracefully.")

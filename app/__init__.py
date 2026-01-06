@@ -28,6 +28,11 @@ def create_app():
         "sqlite:///complete_study_planner.db"
     )
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    
+    # Session configuration for OAuth
+    app.config['SESSION_COOKIE_NAME'] = 'study_planner_session'
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
     # Initialize extensions with the app
     db.init_app(app)

@@ -9,6 +9,12 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), unique=True)
     email = db.Column(db.String(120), unique=True)
     password_hash = db.Column(db.String(128))
+    
+    # Google Calendar Integration Fields
+    google_token = db.Column(db.Text, nullable=True)  # Store OAuth token as JSON
+    google_calendar_id = db.Column(db.String(255), nullable=True)  # Primary calendar ID
+    calendar_sync_enabled = db.Column(db.Boolean, default=False)
+    
     tasks = db.relationship('Task', backref='author', lazy='dynamic')
 
     def set_password(self, password):
@@ -31,6 +37,11 @@ class Task(db.Model):
     is_complete = db.Column(db.Boolean, default=False)
     status = db.Column(db.String(20), default='todo', nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    # Google Calendar Integration
+    google_event_id = db.Column(db.String(255), nullable=True)  # Link to calendar event
+    synced_to_calendar = db.Column(db.Boolean, default=False)
+    
 
     def __repr__(self):
         return (

@@ -19,6 +19,11 @@ venv/
 env/
 .venv/
 
+# Secret Keys
+client_secret.json
+token.json
+.env
+
 # IDE/editor settings
 .vscode/
 .idea/
