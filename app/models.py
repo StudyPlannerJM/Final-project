@@ -10,7 +10,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True)
     password_hash = db.Column(db.String(128))
     
-     # Google Calendar Integration Fields
+    # Google Calendar Integration Fields
     google_token = db.Column(db.Text, nullable=True)  # Store OAuth token as JSON
     google_calendar_id = db.Column(db.String(255), nullable=True)  # Primary calendar ID
     calendar_sync_enabled = db.Column(db.Boolean, default=False)
@@ -38,7 +38,7 @@ class Task(db.Model):
     status = db.Column(db.String(20), default='todo', nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
-     # Google Calendar Integration
+    # Google Calendar Integration
     google_event_id = db.Column(db.String(255), nullable=True)  # Link to calendar event
     synced_to_calendar = db.Column(db.Boolean, default=False)
     
