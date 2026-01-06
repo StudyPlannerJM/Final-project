@@ -239,3 +239,92 @@ def update_calendar_event(service, event_id, task):
         # If something goes wrong (network issue, event not found, etc.)
         print(f"An error occurred: {error}")
         return False  # Indicate failure
+    
+def delete_calendar_event(service, event_id):
+    """
+    Removes an event from Google Calendar.
+    
+    Simple and straightforward: This tells Google to delete a specific event.
+    
+    Use case: When I delete a task from my app, this removes
+    the corresponding event from Google Calendar too.
+    
+    Args:
+        service: The Google Calendar connection
+        event_id: The unique ID of the event to delete
+    
+    Returns:
+        True: If deletion was successful
+        False: If something went wrong
+    """
+    try:
+        # Tell Google Calendar to delete this event
+        service.events().delete(
+            calendarId='primary',  # From the user's main calendar
+            eventId=event_id  # Which event to delete
+        ).execute()  # Execute the deletion
+        
+        return True  # Success!
+    
+    except HttpError as error:
+        # Error could mean: event already deleted, network issue, or permission problem
+        print(f"An error occurred: {error}")
+        return False
+    
+def get_upcoming_events(service, max_results=10):
+    """
+    Fetches upcoming events from Google Calendar to display in my app.
+    
+    How it works:
+    1. Gets the current time
+    2. Asks Google Calendar for events happening from now into the future
+    3. Returns them sorted by start time (earliest first)
+    
+    Use case: Show what events are coming up in the user's Google Calendar,
+    so they can see everything in one place (my app + their calendar).
+    
+    Args:
+        service: The Google Calendar connection
+        max_results: How many events to fetch (default is 10)
+    
+    Returns:
+        list: A list of event dictionaries (each has title, time, description, etc.)
+        Empty list: If no events found or error occurred
+    """
+    try:
+        # STEP 1: Get current time in ISO format with 'Z' at the end
+        # 'Z' means UTC time (Universal Coordinated Time)
+        # Example: "2024-01-15T10:30:00Z"
+        now = datetime.utcnow().isoformat() + 'Z'
+        
+        # STEP 2: Request events from Google Calendar
+        events_result = service.events().list(
+            calendarId='primary',  # User's main calendar
+            timeMin=now,  # Only get events from now onwards (no past events)
+            maxResults=max_results,  # Limit how many events to get
+            singleEvents=True,  # Break recurring events into separate instances
+            orderBy='startTime'  # Sort by start time (earliest first)
+        ).execute()
+        
+        # STEP 3: Extract the events from the response
+        # If no events found, this returns an empty list
+        events = events_result.get('items', [])
+        return events
+    
+    except HttpError as error:
+        # If something goes wrong (network issue, auth problem, etc.)
+        print(f"An error occurred: {error}")
+        return []  # Return empty list instead of crashing
+
+
+# ==============================================================================
+# END OF FILE
+# ==============================================================================
+# Summary of what this file does:
+# 1. get_google_auth_flow() - Starts the Google login process
+# 2. get_calendar_service(user) - Gets access to a user's calendar
+# 3. create_calendar_event(service, task) - Adds a task to Google Calendar
+# 4. update_calendar_event(service, event_id, task) - Updates an existing event
+# 5. delete_calendar_event(service, event_id) - Removes an event
+# 6. get_upcoming_events(service, max_results) - Fetches upcoming events
+# ==============================================================================
