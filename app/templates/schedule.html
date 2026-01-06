@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Schedule & Calendar</h1>
+
+    <!-- Google Calendar Connection Status -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Google Calendar Integration</h5>
+            {% if calendar_connected %}
+                <p class="text-success">
+                    <i class="fas fa-check-circle"></i> Connected to Google Calendar
+                </p>
+                <a href="{{ url_for('main.disconnect_google') }}" class="btn btn-warning">
+                    Disconnect Google Calendar
+                </a>
+            {% else %}
+                <p class="text-muted">
+                    <i class="fas fa-times-circle"></i> Not connected
+                </p>
+                <a href="{{ url_for('main.authorize_google') }}" class="btn btn-primary">
+                    Connect Google Calendar
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- User Tasks Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Your Tasks</h5>
+        </div>
+        <div class="card-body">
+            {% if tasks %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Calendar</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for task in tasks %}
+                            <tr>
+                                <td>{{ task.title }}</td>
+                                <td>
+                                    {% if task.due_date %}
+                                        {{ task.due_date.strftime('%Y-%m-%d %H:%M') }}
+                                    {% else %}
+                                        <span class="text-muted">No due date</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if task.status == 'done' else 'warning' if task.status == 'doing' else 'secondary' }}">
+                                        {{ task.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if task.synced_to_calendar %}
+                                        <span class="text-success">
+                                            <i class="fas fa-calendar-check"></i> Synced
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">
+                                            <i class="far fa-calendar"></i> Not synced
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if calendar_connected %}
+                                        {% if not task.synced_to_calendar %}
+                                            <button class="btn btn-sm btn-primary sync-task" 
+                                                    data-task-id="{{ task.id }}">
+                                                Sync to Calendar
+                                            </button>
+                                        {% else %}
+                                            <button class="btn btn-sm btn-secondary sync-task" 
+                                                    data-task-id="{{ task.id }}">
+                                                Update in Calendar
+                                            </button>
+                                            <button class="btn btn-sm btn-danger remove-task" 
+                                                    data-task-id="{{ task.id }}">
+                                                Remove from Calendar
+                                            </button>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted small">Connect calendar first</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">No tasks yet. <a href="{{ url_for('main.add_task') }}">Create one!</a></p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Google Calendar Events Section -->
+    {% if calendar_connected %}
+    <div class="card">
+        <div class="card-header">
+            <h5>Upcoming Events from Google Calendar</h5>
+        </div>
+        <div class="card-body">
+            {% if calendar_events %}
+                <div class="list-group">
+                    {% for event in calendar_events %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ event.get('summary', 'No title') }}</h6>
+                            <small>
+                                {% if event.get('start', {}).get('dateTime') %}
+                                    {{ event['start']['dateTime'][:16].replace('T', ' ') }}
+                                {% elif event.get('start', {}).get('date') %}
+                                    {{ event['start']['date'] }} (All day)
+                                {% endif %}
+                            </small>
+                        </div>
+                        {% if event.get('description') %}
+                        <p class="mb-1 small text-muted">{{ event['description'] }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No upcoming events in your Google Calendar.</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% block body_extra %}
+<script src="{{ url_for('static', filename='js/schedule.js') }}"></script>
+{% endblock %}
