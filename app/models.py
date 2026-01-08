@@ -65,3 +65,20 @@ class Flashcard(db.Model):
             f"Flashcard('{self.question}', '{self.answer}', "
             f"'{self.date_created}')"
         )
+
+
+class Summary(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    original_filename = db.Column(db.String(255), nullable=False)
+    extracted_text = db.Column(db.Text, nullable=True)
+    summary_text = db.Column(db.Text, nullable=True)
+    file_type = db.Column(db.String(20), nullable=False)  # 'word', 'pdf', 'ocr'
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    author = db.relationship(
+        "User", backref=db.backref("summaries", lazy=True)
+    )
+
+    def __repr__(self):
+        return f"Summary('{self.title}', '{self.date_created}')"
