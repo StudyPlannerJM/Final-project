@@ -5,6 +5,50 @@
 import requests
 import os
 
+
+def extract_text_from_response(data):
+    """
+    Helper function to extract text from API response data.
+    Handles different response formats (string, dict, list).
+    
+    Args:
+        data: The data from API response (can be str, dict, or list)
+        
+    Returns:
+        str: Extracted text as a string
+    """
+    if data is None:
+        return ''
+    
+    if isinstance(data, str):
+        return data
+    
+    if isinstance(data, dict):
+        # Try common keys where text might be stored
+        for key in ['text', 'content', 'extracted_text', 'result', 'value', 'output']:
+            if key in data:
+                return extract_text_from_response(data[key])
+        # If no known key, join all string values
+        text_parts = []
+        for value in data.values():
+            extracted = extract_text_from_response(value)
+            if extracted:
+                text_parts.append(extracted)
+        return '\n'.join(text_parts)
+    
+    if isinstance(data, list):
+        # Join list items
+        text_parts = []
+        for item in data:
+            extracted = extract_text_from_response(item)
+            if extracted:
+                text_parts.append(extracted)
+        return '\n'.join(text_parts)
+    
+    # For other types, convert to string
+    return str(data)
+
+
 # ApyHub API Configuration
 APYHUB_API_KEY = "APY0xmuNMuMOM6C4fpyELD2neLTEJZHWBZ9X80HYRJTenbR6kpg3iXnbS7d15xYPPlviZ0d"
 APYHUB_WORD_URL = "https://api.apyhub.com/extract/text/word-file"
@@ -36,9 +80,10 @@ def extract_text_from_word(file_path):
         if response.status_code == 200:
             result = response.json()
             # ApyHub returns the text in the 'data' field
-            text = result.get('data', '')
-            if text:
-                return True, text
+            raw_data = result.get('data', '')
+            text = extract_text_from_response(raw_data)
+            if text and text.strip():
+                return True, text.strip()
             else:
                 return False, "No text could be extracted from the document."
         else:
@@ -72,9 +117,10 @@ def extract_text_from_pdf(file_path):
         
         if response.status_code == 200:
             result = response.json()
-            text = result.get('data', '')
-            if text:
-                return True, text
+            raw_data = result.get('data', '')
+            text = extract_text_from_response(raw_data)
+            if text and text.strip():
+                return True, text.strip()
             else:
                 return False, "No text could be extracted from the PDF."
         else:
@@ -122,9 +168,10 @@ def extract_text_from_image_ocr(file_path):
         
         if response.status_code == 200:
             result = response.json()
-            text = result.get('data', '')
-            if text:
-                return True, text
+            raw_data = result.get('data', '')
+            text = extract_text_from_response(raw_data)
+            if text and text.strip():
+                return True, text.strip()
             else:
                 return False, "No text could be extracted using OCR."
         else:
@@ -168,39 +215,62 @@ def generate_summary(text, max_sentences=10):
     Returns:
         str: The summarized text as bullet points
     """
+    import re
+    
+    # Ensure text is a string (handle dict/list cases)
+    if not isinstance(text, str):
+        text = extract_text_from_response(text)
+    
     if not text or len(text.strip()) == 0:
         return "No content to summarize."
     
-    # Clean the text
+    # Clean the text - remove extra whitespace and normalize
     text = text.strip()
+    text = re.sub(r'\s+', ' ', text)  # Normalize whitespace
+    text = re.sub(r'\n+', '\n', text)  # Normalize newlines
     
-    # Split into sentences (simple approach)
-    import re
-    sentences = re.split(r'(?<=[.!?])\s+', text)
+    # Split into sentences using multiple delimiters
+    sentences = re.split(r'(?<=[.!?])\s+|\n+', text)
     
     # Filter out very short sentences and clean them
-    sentences = [s.strip() for s in sentences if len(s.strip()) > 20]
+    cleaned_sentences = []
+    for s in sentences:
+        s = s.strip()
+        # Skip very short sentences or ones that look like headers/fragments
+        if len(s) > 30 and not s.isupper() and s.count(' ') >= 3:
+            cleaned_sentences.append(s)
     
-    if not sentences:
-        return text  # Return original if no valid sentences found
+    if not cleaned_sentences:
+        # If no valid sentences found, return a cleaned version of original
+        if len(text) > 500:
+            return f"Document Content Preview:\n\n{text[:500]}..."
+        return f"Document Content:\n\n{text}"
     
-    # Simple extractive summarization: score sentences by length and position
-    # and select the most important ones
+    # Simple extractive summarization: score sentences by various factors
     scored_sentences = []
-    for i, sentence in enumerate(sentences):
+    for i, sentence in enumerate(cleaned_sentences):
         # Score based on position (earlier sentences often more important)
         position_score = 1.0 / (i + 1)
         # Score based on length (medium-length sentences are often better)
-        length_score = min(len(sentence) / 100, 1.0)
+        optimal_length = 100
+        length_diff = abs(len(sentence) - optimal_length)
+        length_score = max(0, 1.0 - (length_diff / 200))
+        # Bonus for sentences with important keywords
+        keyword_score = 0
+        important_words = ['important', 'key', 'main', 'significant', 'essential', 
+                          'conclusion', 'result', 'therefore', 'however', 'summary']
+        for word in important_words:
+            if word.lower() in sentence.lower():
+                keyword_score += 0.1
         # Combined score
-        score = position_score * 0.6 + length_score * 0.4
+        score = position_score * 0.4 + length_score * 0.3 + min(keyword_score, 0.3)
         scored_sentences.append((score, i, sentence))
     
     # Sort by score and get top sentences
     scored_sentences.sort(reverse=True)
     top_sentences = scored_sentences[:max_sentences]
     
-    # Sort back by original position to maintain flow
+    # Sort back by original position to maintain logical flow
     top_sentences.sort(key=lambda x: x[1])
     
     # Format as bullet points for study notes
@@ -208,11 +278,19 @@ def generate_summary(text, max_sentences=10):
     for _, _, sentence in top_sentences:
         # Clean up the sentence
         sentence = sentence.strip()
-        if not sentence.endswith('.'):
+        # Capitalize first letter if needed
+        if sentence and sentence[0].islower():
+            sentence = sentence[0].upper() + sentence[1:]
+        # Add period if missing
+        if sentence and not sentence[-1] in '.!?':
             sentence += '.'
         summary_bullets.append(f"• {sentence}")
     
-    return "\n\n".join(summary_bullets)
+    # Create formatted summary
+    summary_header = "📝 Key Points Summary\n" + "=" * 40 + "\n\n"
+    summary_content = "\n\n".join(summary_bullets)
+    
+    return summary_header + summary_content
 
 
 def get_allowed_extensions():
