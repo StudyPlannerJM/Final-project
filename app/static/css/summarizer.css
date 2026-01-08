@@ -527,8 +527,33 @@
 }
 
 .summary-bullets {
-    line-height: 1.8;
+    line-height: 2;
     color: var(--text-color-primary);
+    font-size: 1.05em;
+    white-space: pre-wrap;
+    padding: 10px 0;
+}
+
+.summary-bullets br {
+    display: block;
+    content: "";
+    margin-top: 8px;
+}
+
+/* Style for bullet points */
+.summary-bullets p,
+.summary-bullets span {
+    margin-bottom: 12px;
+    display: block;
+}
+
+/* Header styling for summary */
+.summary-header-text {
+    font-weight: bold;
+    color: var(--accent-color);
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
 }
 
 .original-text {
