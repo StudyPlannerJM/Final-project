@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Study Planner{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/summarizer.css') }}">
+{% endblock %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <div class="upload-container">
+        <div class="upload-header">
+            <a href="{{ url_for('main.summarizer') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Summaries
+            </a>
+            <h2><i class="fas fa-upload"></i> Upload Document</h2>
+        </div>
+        
+        <div class="upload-card">
+            <form method="POST" enctype="multipart/form-data" class="upload-form" id="uploadForm">
+                <div class="form-group">
+                    <label for="title">Summary Title (optional)</label>
+                    <input type="text" id="title" name="title" class="form-control" 
+                           placeholder="Enter a title for your summary">
+                    <small class="form-hint">If left empty, the filename will be used as the title.</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="file">Select Document</label>
+                    <div class="file-upload-area" id="dropZone">
+                        <input type="file" id="file" name="file" class="file-input" 
+                               accept=".pdf,.docx,.doc,.jpg,.jpeg,.png,.gif,.bmp,.tiff,.tif" required>
+                        <div class="file-upload-content">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <p class="upload-text">Drag & drop a file here or <span class="browse-link">browse</span></p>
+                            <p class="upload-hint">Supported formats: PDF, DOCX, JPG, PNG, GIF, BMP, TIFF</p>
+                        </div>
+                        <div class="file-selected" id="fileSelected" style="display: none;">
+                            <i class="fas fa-file file-icon"></i>
+                            <span class="file-name" id="fileName"></span>
+                            <button type="button" class="btn-remove-file" id="removeFile">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group ocr-option" id="ocrOption" style="display: none;">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="use_ocr" id="useOcr">
+                        <span class="checkbox-custom"></span>
+                        <span class="checkbox-text">Use OCR for scanned PDF</span>
+                    </label>
+                    <small class="form-hint">Enable this if your PDF contains scanned images instead of text.</small>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-block" id="submitBtn">
+                        <i class="fas fa-magic"></i> Extract & Summarize
+                    </button>
+                </div>
+            </form>
+            
+            <div class="supported-formats">
+                <h4>Supported File Types:</h4>
+                <div class="format-list">
+                    <div class="format-item">
+                        <i class="fas fa-file-word"></i>
+                        <span>Word Documents (.docx)</span>
+                    </div>
+                    <div class="format-item">
+                        <i class="fas fa-file-pdf"></i>
+                        <span>PDF Files (.pdf)</span>
+                    </div>
+                    <div class="format-item">
+                        <i class="fas fa-image"></i>
+                        <span>Images for OCR (.jpg, .png, etc.)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block body_extra %}
+<script>
+    const fileInput = document.getElementById('file');
+    const dropZone = document.getElementById('dropZone');
+    const fileSelected = document.getElementById('fileSelected');
+    const fileName = document.getElementById('fileName');
+    const removeFile = document.getElementById('removeFile');
+    const ocrOption = document.getElementById('ocrOption');
+    const uploadForm = document.getElementById('uploadForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Handle file selection
+    fileInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            showSelectedFile(this.files[0]);
+        }
+    });
+    
+    // Handle drag and drop
+    dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.classList.add('drag-over');
+    });
+    
+    dropZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.classList.remove('drag-over');
+    });
+    
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('drag-over');
+        
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            fileInput.files = e.dataTransfer.files;
+            showSelectedFile(e.dataTransfer.files[0]);
+        }
+    });
+    
+    // Show selected file
+    function showSelectedFile(file) {
+        fileName.textContent = file.name;
+        dropZone.querySelector('.file-upload-content').style.display = 'none';
+        fileSelected.style.display = 'flex';
+        
+        // Show OCR option for PDF files
+        if (file.name.toLowerCase().endsWith('.pdf')) {
+            ocrOption.style.display = 'block';
+        } else {
+            ocrOption.style.display = 'none';
+        }
+    }
+    
+    // Remove selected file
+    removeFile.addEventListener('click', function() {
+        fileInput.value = '';
+        dropZone.querySelector('.file-upload-content').style.display = 'flex';
+        fileSelected.style.display = 'none';
+        ocrOption.style.display = 'none';
+    });
+    
+    // Handle form submission
+    uploadForm.addEventListener('submit', function() {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    });
+</script>
+{% endblock %}
