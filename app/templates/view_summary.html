@@ -56,18 +56,14 @@
                 <div class="tab-panel active" id="summary-panel">
                     <div class="summary-text-box">
                         <h3><i class="fas fa-star"></i> Key Points</h3>
-                        <div class="summary-bullets">
-                            {{ summary.summary_text | safe | replace('\n', '<br>') }}
-                        </div>
+                        <div class="summary-bullets">{{ summary.summary_text }}</div>
                     </div>
                 </div>
                 
                 <div class="tab-panel" id="original-panel">
                     <div class="original-text-box">
                         <h3><i class="fas fa-file-alt"></i> Extracted Text</h3>
-                        <div class="original-text">
-                            {{ summary.extracted_text | safe | replace('\n', '<br>') }}
-                        </div>
+                        <div class="original-text">{{ summary.extracted_text }}</div>
                     </div>
                 </div>
             </div>

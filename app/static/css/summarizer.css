@@ -504,7 +504,8 @@
 .original-text-box {
     background: var(--bg-color-primary);
     border-radius: 10px;
-    padding: 25px;
+    padding: 30px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .summary-text-box h3,
@@ -527,16 +528,38 @@
 }
 
 .summary-bullets {
-    line-height: 1.8;
+    line-height: 1.9;
     color: var(--text-color-primary);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 1.05em;
+    letter-spacing: 0.2px;
+}
+
+.summary-bullets p,
+.original-text p {
+    margin-bottom: 1em;
+    text-indent: 0;
+}
+
+.summary-bullets br,
+.original-text br {
+    display: block;
+    content: "";
+    margin-top: 0.5em;
 }
 
 .original-text {
-    line-height: 1.8;
+    line-height: 1.9;
     color: var(--text-color-secondary);
-    max-height: 500px;
+    max-height: 600px;
     overflow-y: auto;
-    padding-right: 10px;
+    padding-right: 15px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 1em;
+    letter-spacing: 0.2px;
+    text-align: justify;
 }
 
 .original-text::-webkit-scrollbar {
