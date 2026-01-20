@@ -378,34 +378,76 @@ def disconnect_google():
 @main.route('/schedule')
 @login_required
 def schedule():
-    # Show schedule page with tasks and Google Calendar events combined
-    # If calendar is connected, fetch upcoming events from Google
-    
-    # STEP 1: Get all my tasks sorted by due date (earliest first)
+    """
+    Enhanced schedule page with week view calendar.
+    Shows mini calendar, week view, and upcoming events.
+    """
+    from datetime import datetime, timedelta
+
+    # Get date parameter (if navigating to specific date)
+    date_param = request.args.get('date')
+    if date_param:
+        try:
+            target_date = datetime.strptime(date_param, '%Y-%m-%d')
+        except:
+            target_date = datetime.now()
+    else:
+        target_date = datetime.now()
+
+    # Get all tasks sorted by due date
     tasks = Task.query.filter_by(user_id=current_user.id).order_by(
         Task.due_date.asc()
     ).all()
 
-    # STEP 2: Initialize calendar variables
+    # Initialize calendar variables
     calendar_events = []
+    week_events = []
+    month_events = {}
     calendar_connected = False
+    upcoming_events = []
 
-    # STEP 3: Check if I've connected Google Calendar
+    # Check if Google Calendar is connected
     if current_user.calendar_sync_enabled:
-        # Try to get calendar service
         service = get_calendar_service(current_user)
         if service:
-            # Successfully connected - mark as connected and fetch events
             calendar_connected = True
-            calendar_events = get_upcoming_events(service, max_results=20)
 
-    # STEP 4: Render the schedule page with all data
+            # Get events for the week view
+            week_events = get_week_events(service, target_date)
+
+            # Get events for the mini calendar (current month)
+            month_events = get_events_for_month(
+                service, 
+                target_date.year, 
+                target_date.month
+            )
+
+            # Get upcoming events (next 7 events from today)
+            upcoming_events = get_upcoming_events(service, max_results=7)
+
+    # Prepare week dates for the template
+    start_of_week = target_date - timedelta(days=target_date.weekday())
+    week_dates = []
+    for i in range(7):
+        day = start_of_week + timedelta(days=i)
+        week_dates.append({
+            'date': day,
+            'day_name': day.strftime('%A'),
+            'day_num': day.day,
+            'is_today': day.date() == datetime.now().date()
+        })
+
     return render_template(
         'schedule.html',
         title='Schedule',
         tasks=tasks,
-        calendar_events=calendar_events,
-        calendar_connected=calendar_connected
+        calendar_connected=calendar_connected,
+        week_events=week_events,
+        month_events=month_events,
+        upcoming_events=upcoming_events,
+        week_dates=week_dates,
+        target_date=target_date,
+        current_month=target_date.strftime('%B, %Y')
     )
     
 @main.route('/sync_task_to_calendar/<int:task_id>', methods=['POST'])
