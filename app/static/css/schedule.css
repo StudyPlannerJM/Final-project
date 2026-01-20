@@ -510,11 +510,13 @@ body.dark-theme .status-badge.disconnected {
     cursor: pointer;
     transition: all 0.2s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1;
 }
 
 .event-block:hover {
     transform: scale(1.02);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    z-index: 2;
 }
 
 .event-block.personal {
@@ -527,6 +529,37 @@ body.dark-theme .status-badge.disconnected {
 
 .event-block.study {
     background-color: #fbbc04;
+}
+
+/* Task Blocks */
+.task-block {
+    border-left: 4px solid rgba(255, 255, 255, 0.5);
+}
+
+.task-block.synced::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 8px;
+    height: 8px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+}
+
+.task-block.status-done {
+    opacity: 0.7;
+    text-decoration: line-through;
+}
+
+.task-block.status-doing {
+    border-left-color: #ffeb3b;
+    border-left-width: 4px;
+}
+
+.task-block i {
+    font-size: 0.65rem;
+    margin-right: 2px;
 }
 
 .event-title {

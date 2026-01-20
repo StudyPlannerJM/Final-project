@@ -447,10 +447,34 @@ def schedule():
             'is_today': day.date() == datetime.now().date()
         })
 
+    # Prepare tasks data for JavaScript
+    tasks_json = []
+    for task in tasks:
+        if task.due_date:
+            tasks_json.append({
+                'id': task.id,
+                'title': task.title,
+                'due_date': task.due_date.isoformat(),
+                'status': task.status,
+                'category': task.category,
+                'synced': task.synced_to_calendar
+            })
+    
+    print(f"\n=== Schedule Debug ===")
+    print(f"Target date: {target_date}")
+    print(f"Start of week: {start_of_week}")
+    print(f"Week dates: {[d['date'].strftime('%Y-%m-%d') for d in week_dates]}")
+    print(f"Tasks count: {len(tasks)}")
+    print(f"Tasks with due_date: {len(tasks_json)}")
+    for task in tasks_json:
+        print(f"  - {task['title']}: {task['due_date']}")
+    print(f"======================\n")
+
     return render_template(
         'schedule.html',
         title='Schedule',
         tasks=tasks,
+        tasks_json=tasks_json,
         calendar_connected=calendar_connected,
         week_events=week_events,
         month_events=month_events,

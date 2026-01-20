@@ -1,87 +1,91 @@
 // =============================================================================
 // INITIALIZE CALENDAR DATA FROM JSON SCRIPT TAG
 // =============================================================================
+let weekEvents = [];
+let monthEvents = {};
+let tasks = [];
+let currentDate;
+let currentMonth;
+let currentYear;
+
 document.addEventListener('DOMContentLoaded', function() {
     const calendarDataEl = document.getElementById('calendarData');
     const calendarData = calendarDataEl ? JSON.parse(calendarDataEl.textContent) : {};
     
-    const weekEvents = calendarData.weekEvents || [];
-    const monthEvents = calendarData.monthEvents || {};
+    weekEvents = calendarData.weekEvents || [];
+    monthEvents = calendarData.monthEvents || {};
+    tasks = calendarData.tasks || [];
     const targetDate = calendarData.targetDate || new Date().toISOString().split('T')[0];
-    let currentMonth = calendarData.currentMonth || new Date().getMonth() + 1;
-    let currentYear = calendarData.currentYear || new Date().getFullYear();
-    let currentDate = new Date(targetDate);
+    currentMonth = calendarData.currentMonth || new Date().getMonth() + 1;
+    currentYear = calendarData.currentYear || new Date().getFullYear();
+    currentDate = new Date(targetDate);
     
-    console.log('Calendar data loaded:', { weekEvents, monthEvents, targetDate, currentMonth, currentYear });
+    console.log('Calendar data loaded:', { weekEvents, monthEvents, tasks, targetDate, currentMonth, currentYear });
+    
+    // Initialize calendar after data is loaded
+    initializeCalendar();
 });
 
-// Handle sync to calendar
-document.querySelectorAll('.sync-task').forEach(button => {
-    button.addEventListener('click', function() {
-        const taskId = this.getAttribute('data-task-id');
+function initializeCalendar() {
+    // =============================================================================
+    // SYNC/REMOVE TASK HANDLERS
+    // =============================================================================
 
-        fetch(`/sync_task_to_calendar/${taskId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                location.reload();
-            } else {
-                alert('Error: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while syncing the task.');
+    // Handle sync to calendar
+    document.querySelectorAll('.sync-task').forEach(button => {
+        button.addEventListener('click', function() {
+            const taskId = this.getAttribute('data-task-id');
+
+            fetch(`/sync_task_to_calendar/${taskId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while syncing the task.');
+            });
         });
     });
-});
 
-// Handle remove from calendar
-document.querySelectorAll('.remove-task').forEach(button => {
-    button.addEventListener('click', function() {
-        if (!confirm('Remove this task from Google Calendar?')) return;
+    // Handle remove from calendar
+    document.querySelectorAll('.remove-task').forEach(button => {
+        button.addEventListener('click', function() {
+            if (!confirm('Remove this task from Google Calendar?')) return;
 
-        const taskId = this.getAttribute('data-task-id');
+            const taskId = this.getAttribute('data-task-id');
 
-        fetch(`/remove_task_from_calendar/${taskId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                location.reload();
-            } else {
-                alert('Error: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred.');
+            fetch(`/remove_task_from_calendar/${taskId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred.');
+            });
         });
     });
-});
-
-// =============================================================================
-// CALENDAR JavaScript - Handles interactive features
-// =============================================================================
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Get calendar data from template
-    const weekEvents = window.calendarData.weekEvents || [];
-    const monthEvents = window.calendarData.monthEvents || {};
-    let currentDate = new Date(window.calendarData.targetDate);
-    let currentMonth = window.calendarData.currentMonth;
-    let currentYear = window.calendarData.currentYear;
 
     // =============================================================================
     // MINI CALENDAR FUNCTIONALITY
@@ -224,9 +228,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // =============================================================================
 
     function renderWeekEvents() {
+        console.log('renderWeekEvents called with:', { tasks, weekEvents });
+        
         // Clear existing events
         document.querySelectorAll('.event-block').forEach(el => el.remove());
 
+        // Render Google Calendar events
         weekEvents.forEach(event => {
             const startDate = new Date(event.start);
             const endDate = new Date(event.end);
@@ -258,6 +265,70 @@ document.addEventListener('DOMContentLoaded', function() {
 
             dayColumn.appendChild(eventBlock);
         });
+
+        // Render local tasks
+        console.log('About to render tasks. Total tasks:', tasks.length);
+        tasks.forEach((task, index) => {
+            console.log(`Processing task ${index + 1}:`, task);
+            
+            if (!task.due_date) {
+                console.log(`  Skipping task ${index + 1}: no due_date`);
+                return;
+            }
+
+            const taskDate = new Date(task.due_date);
+            const dateStr = taskDate.toISOString().split('T')[0];
+            console.log(`  Task ${index + 1} date:`, dateStr);
+            
+            const dayColumn = document.querySelector(`.day-column[data-date="${dateStr}"]`);
+            console.log(`  Found dayColumn:`, dayColumn ? 'yes' : 'NO');
+
+            if (!dayColumn) return;
+
+            const startHour = taskDate.getHours();
+            const startMinutes = taskDate.getMinutes();
+            const duration = 1; // Default 1 hour duration for tasks
+
+            const topOffset = ((startHour - 6) * 60 + startMinutes);
+
+            const taskBlock = document.createElement('div');
+            taskBlock.className = 'event-block task-block';
+            taskBlock.classList.add(`status-${task.status}`);
+            if (task.synced) taskBlock.classList.add('synced');
+            
+            taskBlock.style.top = `${topOffset}px`;
+            taskBlock.style.height = `${duration * 60}px`;
+            taskBlock.style.backgroundColor = getCategoryColor(task.category);
+
+            taskBlock.innerHTML = `
+                <div class="event-title">
+                    ${task.synced ? '<i class="fas fa-sync-alt"></i> ' : ''}
+                    ${task.title}
+                </div>
+                <div class="event-time-range">
+                    ${formatTime(taskDate)}
+                </div>
+            `;
+
+            // Make task clickable to edit
+            taskBlock.style.cursor = 'pointer';
+            taskBlock.addEventListener('click', function() {
+                window.location.href = `/edit_task/${task.id}`;
+            });
+
+            dayColumn.appendChild(taskBlock);
+        });
+    }
+
+    function getCategoryColor(category) {
+        const colors = {
+            'Work': '#4285f4',
+            'Personal': '#ea4335',
+            'Study': '#fbbc04',
+            'Health': '#34a853',
+            'Other': '#9e9e9e'
+        };
+        return colors[category] || colors['Other'];
     }
 
     function formatTime(date) {
@@ -369,4 +440,4 @@ document.addEventListener('DOMContentLoaded', function() {
 
     renderMiniCalendar();
     renderWeekEvents();
-});
+}
