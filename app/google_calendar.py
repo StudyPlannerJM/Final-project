@@ -320,7 +320,52 @@ def get_upcoming_events(service, max_results=10):
         print(f"An error occurred: {error}")
         return []  # Return empty list instead of crashing
     
+def get_events_for_date_range(service, start_date, end_date):
+    """
+    Get calendar events for a specific date range.
 
+    Args:
+        service: Google Calendar service object
+        start_date: datetime object for start of range
+        end_date: datetime object for end of range
+
+    Returns:
+        List of events with formatted data
+    """
+    try:
+        # Convert dates to RFC3339 format required by Google Calendar API
+        time_min = start_date.isoformat() + 'Z'
+        time_max = end_date.isoformat() + 'Z'
+
+        events_result = service.events().list(
+            calendarId='primary',
+            timeMin=time_min,
+            timeMax=time_max,
+            singleEvents=True,
+            orderBy='startTime'
+        ).execute()
+
+        events = events_result.get('items', [])
+
+        formatted_events = []
+        for event in events:
+            start = event['start'].get('dateTime', event['start'].get('date'))
+            end = event['end'].get('dateTime', event['end'].get('date'))
+
+            formatted_events.append({
+                'id': event['id'],
+                'title': event.get('summary', 'Untitled'),
+                'start': start,
+                'end': end,
+                'description': event.get('description', ''),
+                'location': event.get('location', ''),
+                'color': event.get('colorId', '1')  # Default blue
+            })
+
+        return formatted_events
+    except Exception as e:
+        print(f"Error fetching events: {e}")
+        return []
 
 
 # ==============================================================================
