@@ -13,7 +13,8 @@ from werkzeug.utils import secure_filename
 from app.google_calendar import (
     get_google_auth_flow, get_calendar_service,
     create_calendar_event, update_calendar_event,
-    delete_calendar_event, get_upcoming_events
+    delete_calendar_event, get_upcoming_events,
+    get_week_events, get_events_for_month
 )
 # Summarizer functions
 from app.summarizer import (
@@ -410,20 +411,29 @@ def schedule():
     if current_user.calendar_sync_enabled:
         service = get_calendar_service(current_user)
         if service:
-            calendar_connected = True
+            try:
+                calendar_connected = True
 
-            # Get events for the week view
-            week_events = get_week_events(service, target_date)
+                # Get events for the week view
+                week_events = get_week_events(service, target_date)
 
-            # Get events for the mini calendar (current month)
-            month_events = get_events_for_month(
-                service, 
-                target_date.year, 
-                target_date.month
-            )
+                # Get events for the mini calendar (current month)
+                month_events = get_events_for_month(
+                    service, 
+                    target_date.year, 
+                    target_date.month
+                )
 
-            # Get upcoming events (next 7 events from today)
-            upcoming_events = get_upcoming_events(service, max_results=7)
+                # Get upcoming events (next 7 events from today)
+                upcoming_events = get_upcoming_events(service, max_results=7)
+            except Exception as e:
+                # Token expired or other error - disconnect calendar
+                print(f"Calendar error: {e}")
+                current_user.google_token = None
+                current_user.calendar_sync_enabled = False
+                db.session.commit()
+                calendar_connected = False
+                flash('Your Google Calendar connection has expired. Please reconnect.', 'warning')
 
     # Prepare week dates for the template
     start_of_week = target_date - timedelta(days=target_date.weekday())

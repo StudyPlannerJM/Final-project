@@ -1,3 +1,20 @@
+// =============================================================================
+// INITIALIZE CALENDAR DATA FROM JSON SCRIPT TAG
+// =============================================================================
+document.addEventListener('DOMContentLoaded', function() {
+    const calendarDataEl = document.getElementById('calendarData');
+    const calendarData = calendarDataEl ? JSON.parse(calendarDataEl.textContent) : {};
+    
+    const weekEvents = calendarData.weekEvents || [];
+    const monthEvents = calendarData.monthEvents || {};
+    const targetDate = calendarData.targetDate || new Date().toISOString().split('T')[0];
+    let currentMonth = calendarData.currentMonth || new Date().getMonth() + 1;
+    let currentYear = calendarData.currentYear || new Date().getFullYear();
+    let currentDate = new Date(targetDate);
+    
+    console.log('Calendar data loaded:', { weekEvents, monthEvents, targetDate, currentMonth, currentYear });
+});
+
 // Handle sync to calendar
 document.querySelectorAll('.sync-task').forEach(button => {
     button.addEventListener('click', function() {

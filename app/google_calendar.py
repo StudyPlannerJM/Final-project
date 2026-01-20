@@ -315,9 +315,9 @@ def get_upcoming_events(service, max_results=10):
         events = events_result.get('items', [])
         return events
     
-    except HttpError as error:
-        # If something goes wrong (network issue, auth problem, etc.)
-        print(f"An error occurred: {error}")
+    except Exception as error:
+        # If something goes wrong (network issue, auth problem, expired token, etc.)
+        print(f"Error fetching events: {error}")
         return []  # Return empty list instead of crashing
     
 def get_events_for_date_range(service, start_date, end_date):

@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 {% extends "base.html" %}
 
 {% block head_extra %}
@@ -249,15 +248,14 @@
     </div>
 </div>
 
-<script>
-    // Pass server data to JavaScript
-    window.calendarData = {
-        weekEvents: {{ week_events | tojson }},
-        monthEvents: {{ month_events | tojson }},
-        targetDate: '{{ target_date.strftime("%Y-%m-%d") }}',
-        currentMonth: {{ target_date.month }},
-        currentYear: {{ target_date.year }}
-    };
+<script type="application/json" id="calendarData">
+{{ {
+    'weekEvents': week_events,
+    'monthEvents': month_events,
+    'targetDate': target_date.strftime('%Y-%m-%d'),
+    'currentMonth': target_date.month,
+    'currentYear': target_date.year
+} | tojson | safe }}
 </script>
 
 <script src="{{ url_for('static', filename='js/schedule.js') }}"></script>
