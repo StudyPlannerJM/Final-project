@@ -450,6 +450,35 @@ def schedule():
         current_month=target_date.strftime('%B, %Y')
     )
     
+@main.route('/api/calendar/week')
+@login_required
+def api_week_events():
+    """
+    API endpoint to get events for a specific week.
+    Used for AJAX updates when navigating calendar.
+    """
+    from datetime import datetime
+
+    date_str = request.args.get('date', datetime.now().strftime('%Y-%m-%d'))
+    try:
+        target_date = datetime.strptime(date_str, '%Y-%m-%d')
+    except:
+        return {'success': False, 'error': 'Invalid date format'}, 400
+
+    if not current_user.calendar_sync_enabled:
+        return {'success': False, 'error': 'Calendar not connected'}, 400
+
+    service = get_calendar_service(current_user)
+    if not service:
+        return {'success': False, 'error': 'Failed to connect'}, 500
+
+    week_events = get_week_events(service, target_date)
+
+    return {
+        'success': True,
+        'events': week_events
+    }
+    
 @main.route('/sync_task_to_calendar/<int:task_id>', methods=['POST'])
 @login_required
 def sync_task_to_calendar(task_id):
