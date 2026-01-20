@@ -479,6 +479,47 @@ def api_week_events():
         'events': week_events
     }
     
+@main.route('/api/calendar/event', methods=['POST'])
+@login_required
+def api_create_event():
+    """
+    API endpoint to create a new calendar event.
+    Called from the event dialog modal.
+    """
+    if not current_user.calendar_sync_enabled:
+        return {'success': False, 'error': 'Calendar not connected'}, 400
+
+    service = get_calendar_service(current_user)
+    if not service:
+        return {'success': False, 'error': 'Failed to connect'}, 500
+
+    data = request.get_json()
+
+    # Create event in Google Calendar
+    event = {
+        'summary': data.get('title'),
+        'description': data.get('description', ''),
+        'location': data.get('location', ''),
+        'start': {
+            'dateTime': data.get('start'),
+            'timeZone': 'UTC',
+        },
+        'end': {
+            'dateTime': data.get('end'),
+            'timeZone': 'UTC',
+        },
+    }
+
+    try:
+        result = service.events().insert(calendarId='primary', body=event).execute()
+        return {
+            'success': True,
+            'event_id': result['id'],
+            'message': 'Event created successfully'
+        }
+    except Exception as e:
+        return {'success': False, 'error': str(e)}, 500
+    
 @main.route('/sync_task_to_calendar/<int:task_id>', methods=['POST'])
 @login_required
 def sync_task_to_calendar(task_id):
