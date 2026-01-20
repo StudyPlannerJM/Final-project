@@ -319,6 +319,8 @@ def get_upcoming_events(service, max_results=10):
         # If something goes wrong (network issue, auth problem, etc.)
         print(f"An error occurred: {error}")
         return []  # Return empty list instead of crashing
+    
+
 
 
 # ==============================================================================
