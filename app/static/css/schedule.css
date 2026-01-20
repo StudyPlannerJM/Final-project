@@ -404,11 +404,13 @@ body.dark-theme .status-badge.disconnected {
 
 .day-header {
     background-color: var(--bg-color-tertiary);
-    padding: 12px;
+    padding: 15px 8px;
     text-align: center;
     display: flex;
     flex-direction: column;
     gap: 4px;
+    align-items: center;
+    justify-content: center;
 }
 
 .day-header.today {
@@ -417,15 +419,34 @@ body.dark-theme .status-badge.disconnected {
 }
 
 .day-name {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-color-secondary);
+}
+
+.day-header.today .day-name {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.day-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1;
+    margin: 4px 0;
+}
+
+.day-date {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: var(--text-color-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
-.day-number {
-    font-size: 1.2rem;
-    font-weight: 700;
+.day-header.today .day-date {
+    color: rgba(255, 255, 255, 0.8);
 }
 
 /* Week Calendar Grid */

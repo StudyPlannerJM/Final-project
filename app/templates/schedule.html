@@ -122,8 +122,9 @@
             <div class="time-column-header"></div>
             {% for day in week_dates %}
             <div class="day-header {{ 'today' if day.is_today else '' }}">
-                <span class="day-name">{{ day.day_name[:3] }}</span>
+                <span class="day-name">{{ day.day_name }}</span>
                 <span class="day-number">{{ day.day_num }}</span>
+                <span class="day-date">{{ day.date.strftime('%b %d') }}</span>
             </div>
             {% endfor %}
         </div>

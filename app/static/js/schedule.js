@@ -190,6 +190,36 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // =============================================================================
+    // VIEW SWITCHER (Month/Week/Day)
+    // =============================================================================
+
+    document.querySelectorAll('.view-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const view = this.getAttribute('data-view');
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Handle different views
+            if (view === 'week') {
+                // Week view is already displayed (default)
+                console.log('Week view active');
+            } else if (view === 'month') {
+                // Month view not yet implemented
+                alert('Month view coming soon! For now, use the mini calendar on the left to navigate.');
+            } else if (view === 'day') {
+                // Day view not yet implemented
+                alert('Day view coming soon! Week view shows daily time slots.');
+            }
+        });
+    });
+
+    // =============================================================================
     // RENDER WEEK EVENTS ON CALENDAR GRID
     // =============================================================================
 
