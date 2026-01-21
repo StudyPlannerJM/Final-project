@@ -13,7 +13,8 @@ from werkzeug.utils import secure_filename
 from app.google_calendar import (
     get_google_auth_flow, get_calendar_service,
     create_calendar_event, update_calendar_event,
-    delete_calendar_event, get_upcoming_events
+    delete_calendar_event, get_upcoming_events,
+    get_week_events, get_events_for_month
 )
 # Summarizer functions
 from app.summarizer import (
@@ -26,6 +27,84 @@ from app.forms import TaskForm, FlashcardForm
 
 # Blueprint: Groups related routes together
 main = Blueprint('main', __name__)
+
+# ==============================================================================
+# HELPER FUNCTIONS
+# ==============================================================================
+
+def sync_calendar_events_to_tasks(calendar_events, user):
+    """
+    Syncs Google Calendar events to local tasks.
+    Creates tasks for calendar events that don't already exist in the database.
+    
+    Args:
+        calendar_events: List of Google Calendar event dictionaries
+        user: Current user object
+    """
+    from datetime import datetime
+    
+    for event in calendar_events:
+        # Get event ID
+        event_id = event.get('id')
+        if not event_id:
+            continue
+            
+        # Check if task already exists with this google_event_id
+        existing_task = Task.query.filter_by(
+            google_event_id=event_id,
+            user_id=user.id
+        ).first()
+        
+        if existing_task:
+            continue  # Task already exists, skip
+        
+        # Get event details
+        title = event.get('summary', 'Untitled Event')
+        description = event.get('description', '')
+        
+        # Get start time
+        start = event.get('start', {})
+        due_date_str = start.get('dateTime') or start.get('date')
+        
+        if not due_date_str:
+            continue  # Skip events without a date
+        
+        # Parse the date
+        try:
+            if 'T' in due_date_str:
+                # DateTime format - remove timezone info and parse as naive datetime
+                # Google Calendar sends times in the user's timezone already
+                date_str_clean = due_date_str.split('+')[0].split('-', 3)[-1] if '+' in due_date_str else due_date_str.replace('Z', '')
+                if '.' in date_str_clean:
+                    date_str_clean = date_str_clean.split('.')[0]  # Remove microseconds
+                due_date = datetime.strptime(date_str_clean, '%Y-%m-%dT%H:%M:%S')
+            else:
+                # Date only format
+                due_date = datetime.strptime(due_date_str, '%Y-%m-%d')
+        except Exception as e:
+            print(f"Error parsing date {due_date_str}: {e}")
+            continue  # Skip if date parsing fails
+        
+        # Create new task
+        new_task = Task(
+            title=title,
+            description=description,
+            due_date=due_date,
+            category='Personal',  # Default category
+            status='todo',
+            user_id=user.id,
+            google_event_id=event_id,
+            synced_to_calendar=True
+        )
+        
+        db.session.add(new_task)
+    
+    # Commit all new tasks
+    try:
+        db.session.commit()
+    except Exception as e:
+        print(f"Error syncing calendar events to tasks: {e}")
+        db.session.rollback()
 
 
 # ==============================================================================
@@ -378,35 +457,179 @@ def disconnect_google():
 @main.route('/schedule')
 @login_required
 def schedule():
-    # Show schedule page with tasks and Google Calendar events combined
-    # If calendar is connected, fetch upcoming events from Google
-    
-    # STEP 1: Get all my tasks sorted by due date (earliest first)
+    """
+    Enhanced schedule page with week view calendar.
+    Shows mini calendar, week view, and upcoming events.
+    """
+    from datetime import datetime, timedelta
+
+    # Get date parameter (if navigating to specific date)
+    date_param = request.args.get('date')
+    if date_param:
+        try:
+            target_date = datetime.strptime(date_param, '%Y-%m-%d')
+        except:
+            target_date = datetime.now()
+    else:
+        target_date = datetime.now()
+
+    # Get all tasks sorted by due date
     tasks = Task.query.filter_by(user_id=current_user.id).order_by(
         Task.due_date.asc()
     ).all()
 
-    # STEP 2: Initialize calendar variables
+    # Initialize calendar variables
     calendar_events = []
+    week_events = []
+    month_events = {}
     calendar_connected = False
+    upcoming_events = []
 
-    # STEP 3: Check if I've connected Google Calendar
+    # Check if Google Calendar is connected
     if current_user.calendar_sync_enabled:
-        # Try to get calendar service
         service = get_calendar_service(current_user)
         if service:
-            # Successfully connected - mark as connected and fetch events
-            calendar_connected = True
-            calendar_events = get_upcoming_events(service, max_results=20)
+            try:
+                calendar_connected = True
 
-    # STEP 4: Render the schedule page with all data
+                # Get events for the week view
+                week_events = get_week_events(service, target_date)
+
+                # Get events for the mini calendar (current month)
+                month_events = get_events_for_month(
+                    service, 
+                    target_date.year, 
+                    target_date.month
+                )
+
+                # Get upcoming events (next 7 events from today)
+                upcoming_events = get_upcoming_events(service, max_results=7)
+                
+                # Sync Google Calendar events to local tasks
+                sync_calendar_events_to_tasks(upcoming_events, current_user)
+                
+                # Filter out events that have been synced to tasks to avoid duplication
+                synced_event_ids = [task.google_event_id for task in tasks if task.google_event_id]
+                upcoming_events = [e for e in upcoming_events if e.get('id') not in synced_event_ids]
+                week_events = [e for e in week_events if e.get('id') not in synced_event_ids]
+                
+            except Exception as e:
+                # Token expired or other error - disconnect calendar
+                print(f"Calendar error: {e}")
+                current_user.google_token = None
+                current_user.calendar_sync_enabled = False
+                db.session.commit()
+                calendar_connected = False
+                flash('Your Google Calendar connection has expired. Please reconnect.', 'warning')
+
+    # Prepare week dates for the template
+    start_of_week = target_date - timedelta(days=target_date.weekday())
+    week_dates = []
+    for i in range(7):
+        day = start_of_week + timedelta(days=i)
+        week_dates.append({
+            'date': day,
+            'day_name': day.strftime('%A'),
+            'day_num': day.day,
+            'is_today': day.date() == datetime.now().date()
+        })
+
+    # Prepare tasks data for JavaScript
+    tasks_json = []
+    for task in tasks:
+        if task.due_date:
+            tasks_json.append({
+                'id': task.id,
+                'title': task.title,
+                'due_date': task.due_date.isoformat(),
+                'status': task.status,
+                'category': task.category,
+                'synced': task.synced_to_calendar
+            })
+
     return render_template(
         'schedule.html',
         title='Schedule',
         tasks=tasks,
-        calendar_events=calendar_events,
-        calendar_connected=calendar_connected
+        tasks_json=tasks_json,
+        calendar_connected=calendar_connected,
+        week_events=week_events,
+        month_events=month_events,
+        upcoming_events=upcoming_events,
+        week_dates=week_dates,
+        target_date=target_date,
+        current_month=target_date.strftime('%B, %Y')
     )
+    
+@main.route('/api/calendar/week')
+@login_required
+def api_week_events():
+    """
+    API endpoint to get events for a specific week.
+    Used for AJAX updates when navigating calendar.
+    """
+    from datetime import datetime
+
+    date_str = request.args.get('date', datetime.now().strftime('%Y-%m-%d'))
+    try:
+        target_date = datetime.strptime(date_str, '%Y-%m-%d')
+    except:
+        return {'success': False, 'error': 'Invalid date format'}, 400
+
+    if not current_user.calendar_sync_enabled:
+        return {'success': False, 'error': 'Calendar not connected'}, 400
+
+    service = get_calendar_service(current_user)
+    if not service:
+        return {'success': False, 'error': 'Failed to connect'}, 500
+
+    week_events = get_week_events(service, target_date)
+
+    return {
+        'success': True,
+        'events': week_events
+    }
+    
+@main.route('/api/calendar/event', methods=['POST'])
+@login_required
+def api_create_event():
+    """
+    API endpoint to create a new calendar event.
+    Called from the event dialog modal.
+    """
+    if not current_user.calendar_sync_enabled:
+        return {'success': False, 'error': 'Calendar not connected'}, 400
+
+    service = get_calendar_service(current_user)
+    if not service:
+        return {'success': False, 'error': 'Failed to connect'}, 500
+
+    data = request.get_json()
+
+    # Create event in Google Calendar
+    event = {
+        'summary': data.get('title'),
+        'description': data.get('description', ''),
+        'location': data.get('location', ''),
+        'start': {
+            'dateTime': data.get('start'),
+            'timeZone': 'UTC',
+        },
+        'end': {
+            'dateTime': data.get('end'),
+            'timeZone': 'UTC',
+        },
+    }
+
+    try:
+        result = service.events().insert(calendarId='primary', body=event).execute()
+        return {
+            'success': True,
+            'event_id': result['id'],
+            'message': 'Event created successfully'
+        }
+    except Exception as e:
+        return {'success': False, 'error': str(e)}, 500
     
 @main.route('/sync_task_to_calendar/<int:task_id>', methods=['POST'])
 @login_required

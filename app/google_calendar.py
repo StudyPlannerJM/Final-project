@@ -315,10 +315,122 @@ def get_upcoming_events(service, max_results=10):
         events = events_result.get('items', [])
         return events
     
-    except HttpError as error:
-        # If something goes wrong (network issue, auth problem, etc.)
-        print(f"An error occurred: {error}")
+    except Exception as error:
+        # If something goes wrong (network issue, auth problem, expired token, etc.)
+        print(f"Error fetching events: {error}")
         return []  # Return empty list instead of crashing
+    
+def get_events_for_date_range(service, start_date, end_date):
+    """
+    Get calendar events for a specific date range.
+
+    Args:
+        service: Google Calendar service object
+        start_date: datetime object for start of range
+        end_date: datetime object for end of range
+
+    Returns:
+        List of events with formatted data
+    """
+    try:
+        # Convert dates to RFC3339 format required by Google Calendar API
+        time_min = start_date.isoformat() + 'Z'
+        time_max = end_date.isoformat() + 'Z'
+
+        events_result = service.events().list(
+            calendarId='primary',
+            timeMin=time_min,
+            timeMax=time_max,
+            singleEvents=True,
+            orderBy='startTime'
+        ).execute()
+
+        events = events_result.get('items', [])
+
+        formatted_events = []
+        for event in events:
+            start = event['start'].get('dateTime', event['start'].get('date'))
+            end = event['end'].get('dateTime', event['end'].get('date'))
+
+            formatted_events.append({
+                'id': event['id'],
+                'title': event.get('summary', 'Untitled'),
+                'start': start,
+                'end': end,
+                'description': event.get('description', ''),
+                'location': event.get('location', ''),
+                'color': event.get('colorId', '1')  # Default blue
+            })
+
+        return formatted_events
+    except Exception as e:
+        print(f"Error fetching events: {e}")
+        return []
+    
+def get_week_events(service, target_date=None):
+    """
+    Get all events for the week containing the target date.
+
+    Args:
+        service: Google Calendar service object
+        target_date: datetime object (defaults to today)
+
+    Returns:
+        List of events for the week
+    """
+    from datetime import datetime, timedelta
+
+    if target_date is None:
+        target_date = datetime.now()
+
+    # Find the start of the week (Monday)
+    start_of_week = target_date - timedelta(days=target_date.weekday())
+    start_of_week = start_of_week.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    # Find the end of the week (Sunday)
+    end_of_week = start_of_week + timedelta(days=7)
+
+    return get_events_for_date_range(service, start_of_week, end_of_week)
+
+def get_events_for_month(service, year, month):
+    """
+    Get all events for a specific month.
+    Used for the mini calendar to show event indicators.
+
+    Args:
+        service: Google Calendar service object
+        year: Year (e.g., 2026)
+        month: Month (1-12)
+
+    Returns:
+        Dictionary with dates as keys and event counts as values
+    """
+    from datetime import datetime
+    from calendar import monthrange
+
+    # Get first and last day of the month
+    first_day = datetime(year, month, 1, 0, 0, 0)
+    last_day_num = monthrange(year, month)[1]
+    last_day = datetime(year, month, last_day_num, 23, 59, 59)
+
+    events = get_events_for_date_range(service, first_day, last_day)
+
+    # Count events per date
+    events_by_date = {}
+    for event in events:
+        # Extract date from start time
+        start_str = event['start']
+        if 'T' in start_str:  # DateTime format
+            event_date = start_str.split('T')[0]
+        else:  # Date-only format
+            event_date = start_str
+
+        if event_date not in events_by_date:
+            events_by_date[event_date] = 0
+        events_by_date[event_date] += 1
+
+    return events_by_date
+
 
 
 # ==============================================================================
