@@ -133,7 +133,7 @@
         <div class="week-calendar-grid">
             <!-- Time Column -->
             <div class="time-column">
-                {% for hour in range(6, 19) %}
+                {% for hour in range(0, 24) %}
                 <div class="time-slot">
                     {{ '%02d:00' % hour }}
                 </div>
@@ -143,7 +143,7 @@
             <!-- Days Columns -->
             {% for day in week_dates %}
             <div class="day-column" data-date="{{ day.date.strftime('%Y-%m-%d') }}">
-                {% for hour in range(6, 19) %}
+                {% for hour in range(0, 24) %}
                 <div class="hour-slot" data-hour="{{ hour }}">
                     <!-- Events will be positioned here -->
                 </div>

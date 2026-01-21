@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Date Parsing</title>
+    <style>
+        .day-column { border: 1px solid black; margin: 10px; padding: 10px; position: relative; height: 1440px; width: 100px; float: left; }
+        .event-block { position: absolute; background: #4285f4; color: white; padding: 5px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>Testing Date Parsing and Overlap Detection</h1>
+    <div class="day-column" data-date="2026-01-20">
+        <h3>2026-01-20</h3>
+    </div>
+    
+    <script>
+        const tasks = [
+            { id: 1, title: "Task 1", due_date: "2026-01-20T10:00:00", category: "Work", status: "todo", synced: false },
+            { id: 2, title: "Task 2", due_date: "2026-01-20T23:12:00", category: "Study", status: "doing", synced: false },
+            { id: 3, title: "Task 3", due_date: "2026-01-20T10:30:00", category: "Personal", status: "todo", synced: false }
+        ];
+        
+        console.log('Testing tasks:', tasks);
+        
+        tasks.forEach((task, index) => {
+            console.log(`\\nProcessing task ${index + 1}:`, task);
+            
+            // Parse date string components to avoid timezone issues
+            const [datePart, timePart] = task.due_date.split('T');
+            const [year, month, day] = datePart.split('-').map(Number);
+            const [hour, minute] = timePart.split(':').map(Number);
+            
+            const taskDate = new Date(year, month - 1, day, hour, minute);
+            const dateStr = datePart;
+            
+            console.log(`  Date: ${dateStr}, Time: ${hour}:${minute}`);
+            console.log(`  Parsed taskDate:`, taskDate);
+            
+            const dayColumn = document.querySelector(`.day-column[data-date="${dateStr}"]`);
+            console.log(`  Found column:`, dayColumn ? 'YES' : 'NO');
+            
+            if (!dayColumn) return;
+            
+            const startHour = taskDate.getHours();
+            const startMinutes = taskDate.getMinutes();
+            const topOffset = (startHour * 60 + startMinutes);
+            
+            console.log(`  Position: ${topOffset}px (${startHour}:${startMinutes})`);
+            
+            const taskBlock = document.createElement('div');
+            taskBlock.className = 'event-block';
+            taskBlock.style.top = `${topOffset}px`;
+            taskBlock.style.height = `60px`;
+            taskBlock.style.left = '2px';
+            taskBlock.style.right = '2px';
+            taskBlock.innerHTML = `<strong>${task.title}</strong><br>${startHour}:${String(startMinutes).padStart(2, '0')}`;
+            
+            dayColumn.appendChild(taskBlock);
+        });
+        
+        // Test overlap detection
+        console.log('\\nTesting overlap detection...');
+        document.querySelectorAll('.day-column').forEach(dayColumn => {
+            const blocks = Array.from(dayColumn.querySelectorAll('.event-block'));
+            console.log(`Column has ${blocks.length} blocks`);
+            
+            blocks.forEach((block, idx) => {
+                const blockTop = parseFloat(block.style.top);
+                const blockHeight = parseFloat(block.style.height);
+                const blockBottom = blockTop + blockHeight;
+                
+                console.log(`  Block ${idx}: top=${blockTop}, bottom=${blockBottom}`);
+                
+                let overlapCount = 0;
+                let overlapIndex = 0;
+                
+                blocks.forEach((otherBlock, otherIdx) => {
+                    if (idx === otherIdx) return;
+                    
+                    const otherTop = parseFloat(otherBlock.style.top);
+                    const otherHeight = parseFloat(otherBlock.style.height);
+                    const otherBottom = otherTop + otherHeight;
+                    
+                    if (blockTop < otherBottom && blockBottom > otherTop) {
+                        console.log(`    Overlaps with block ${otherIdx}`);
+                        overlapCount++;
+                        if (otherIdx < idx) overlapIndex++;
+                    }
+                });
+                
+                if (overlapCount > 0) {
+                    const totalOverlapping = overlapCount + 1;
+                    const width = 100 / totalOverlapping;
+                    const leftOffset = width * overlapIndex;
+                    
+                    console.log(`    Adjusting: width=${width}%, left=${leftOffset}%`);
+                    
+                    block.style.left = `${leftOffset}%`;
+                    block.style.width = `${width - 1}%`;
+                    block.style.right = 'auto';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

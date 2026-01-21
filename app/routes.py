@@ -459,16 +459,6 @@ def schedule():
                 'category': task.category,
                 'synced': task.synced_to_calendar
             })
-    
-    print(f"\n=== Schedule Debug ===")
-    print(f"Target date: {target_date}")
-    print(f"Start of week: {start_of_week}")
-    print(f"Week dates: {[d['date'].strftime('%Y-%m-%d') for d in week_dates]}")
-    print(f"Tasks count: {len(tasks)}")
-    print(f"Tasks with due_date: {len(tasks_json)}")
-    for task in tasks_json:
-        print(f"  - {task['title']}: {task['due_date']}")
-    print(f"======================\n")
 
     return render_template(
         'schedule.html',

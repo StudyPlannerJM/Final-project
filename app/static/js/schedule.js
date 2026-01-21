@@ -228,17 +228,16 @@ function initializeCalendar() {
     // =============================================================================
 
     function renderWeekEvents() {
-        console.log('renderWeekEvents called with:', { tasks, weekEvents });
-        
         // Clear existing events
         document.querySelectorAll('.event-block').forEach(el => el.remove());
 
         // Render Google Calendar events
         weekEvents.forEach(event => {
+            // Parse dates properly to avoid timezone issues
             const startDate = new Date(event.start);
             const endDate = new Date(event.end);
 
-            const dateStr = startDate.toISOString().split('T')[0];
+            const dateStr = event.start.split('T')[0];
             const dayColumn = document.querySelector(`.day-column[data-date="${dateStr}"]`);
 
             if (!dayColumn) return;
@@ -249,7 +248,7 @@ function initializeCalendar() {
             const endMinutes = endDate.getMinutes();
 
             const duration = (endHour - startHour) + (endMinutes - startMinutes) / 60;
-            const topOffset = ((startHour - 6) * 60 + startMinutes);
+            const topOffset = (startHour * 60 + startMinutes);
 
             const eventBlock = document.createElement('div');
             eventBlock.className = 'event-block';
@@ -267,56 +266,99 @@ function initializeCalendar() {
         });
 
         // Render local tasks
-        console.log('About to render tasks. Total tasks:', tasks.length);
         tasks.forEach((task, index) => {
-            console.log(`Processing task ${index + 1}:`, task);
+            if (!task.due_date) return;
+
+            // Parse date string components to avoid timezone issues
+            const [datePart, timePart] = task.due_date.split('T');
+            const [year, month, day] = datePart.split('-').map(Number);
+            const [hour, minute] = timePart.split(':').map(Number);
             
-            if (!task.due_date) {
-                console.log(`  Skipping task ${index + 1}: no due_date`);
+            const taskDate = new Date(year, month - 1, day, hour, minute);
+            const dateStr = datePart;
+            
+            console.log(`Task: ${task.title}, Hour: ${hour}, Minute: ${minute}, Date: ${dateStr}`);
+            
+            const dayColumn = document.querySelector(`.day-column[data-date="${dateStr}"]`);
+            if (!dayColumn) {
+                console.warn(`No day column found for date: ${dateStr}`);
                 return;
             }
 
-            const taskDate = new Date(task.due_date);
-            const dateStr = taskDate.toISOString().split('T')[0];
-            console.log(`  Task ${index + 1} date:`, dateStr);
-            
-            const dayColumn = document.querySelector(`.day-column[data-date="${dateStr}"]`);
-            console.log(`  Found dayColumn:`, dayColumn ? 'yes' : 'NO');
-
-            if (!dayColumn) return;
-
-            const startHour = taskDate.getHours();
-            const startMinutes = taskDate.getMinutes();
-            const duration = 1; // Default 1 hour duration for tasks
-
-            const topOffset = ((startHour - 6) * 60 + startMinutes);
+            // Find the correct hour slot
+            const hourSlot = dayColumn.querySelector(`.hour-slot[data-hour="${hour}"]`);
+            if (!hourSlot) {
+                console.warn(`No hour slot found for hour: ${hour} in date: ${dateStr}`);
+                return;
+            }
 
             const taskBlock = document.createElement('div');
             taskBlock.className = 'event-block task-block';
             taskBlock.classList.add(`status-${task.status}`);
             if (task.synced) taskBlock.classList.add('synced');
             
-            taskBlock.style.top = `${topOffset}px`;
-            taskBlock.style.height = `${duration * 60}px`;
-            taskBlock.style.backgroundColor = getCategoryColor(task.category);
+            // Set border color based on category
+            const categoryColor = getCategoryColor(task.category);
+            taskBlock.style.borderLeftColor = categoryColor;
+            taskBlock.style.backgroundColor = categoryColor + '25'; // Add transparency
 
-            taskBlock.innerHTML = `
-                <div class="event-title">
-                    ${task.synced ? '<i class="fas fa-sync-alt"></i> ' : ''}
-                    ${task.title}
-                </div>
-                <div class="event-time-range">
-                    ${formatTime(taskDate)}
-                </div>
-            `;
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'event-time-range';
+            timeDiv.textContent = formatTime(taskDate);
+            
+            const titleDiv = document.createElement('div');
+            titleDiv.className = 'event-title';
+            titleDiv.textContent = task.title;
+            
+            taskBlock.appendChild(timeDiv);
+            taskBlock.appendChild(titleDiv);
 
-            // Make task clickable to edit
             taskBlock.style.cursor = 'pointer';
             taskBlock.addEventListener('click', function() {
                 window.location.href = `/edit_task/${task.id}`;
             });
 
-            dayColumn.appendChild(taskBlock);
+            hourSlot.appendChild(taskBlock);
+            console.log(`Task appended to hour slot ${hour}`);
+        });
+        
+        // Adjust hour slot heights based on number of tasks
+        const grid = document.querySelector('.week-calendar-grid');
+        const timeColumn = grid.querySelector('.time-column');
+        const timeSlots = Array.from(timeColumn.querySelectorAll('.time-slot'));
+        
+        // Track max tasks per hour across all days
+        const maxTasksPerHour = new Array(24).fill(0);
+        
+        document.querySelectorAll('.day-column').forEach(dayColumn => {
+            dayColumn.querySelectorAll('.hour-slot').forEach(hourSlot => {
+                const hour = parseInt(hourSlot.getAttribute('data-hour'));
+                const tasksInSlot = hourSlot.querySelectorAll('.event-block').length;
+                if (tasksInSlot > 0) {
+                    console.log(`Hour ${hour}: ${tasksInSlot} tasks`);
+                }
+                maxTasksPerHour[hour] = Math.max(maxTasksPerHour[hour], tasksInSlot);
+            });
+        });
+        
+        // Apply heights to all columns uniformly
+        maxTasksPerHour.forEach((taskCount, hour) => {
+            const newHeight = taskCount > 1 ? (taskCount * 60) : 60;
+            
+            // Update time slot
+            if (timeSlots[hour]) {
+                timeSlots[hour].style.height = `${newHeight}px`;
+                timeSlots[hour].style.minHeight = `${newHeight}px`;
+                if (taskCount > 1) {
+                    console.log(`Setting hour ${hour} height to ${newHeight}px for ${taskCount} tasks`);
+                }
+            }
+            
+            // Update all day column hour slots for this hour
+            document.querySelectorAll(`.hour-slot[data-hour="${hour}"]`).forEach(slot => {
+                slot.style.height = `${newHeight}px`;
+                slot.style.minHeight = `${newHeight}px`;
+            });
         });
     }
 
