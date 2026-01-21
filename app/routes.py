@@ -28,6 +28,84 @@ from app.forms import TaskForm, FlashcardForm
 # Blueprint: Groups related routes together
 main = Blueprint('main', __name__)
 
+# ==============================================================================
+# HELPER FUNCTIONS
+# ==============================================================================
+
+def sync_calendar_events_to_tasks(calendar_events, user):
+    """
+    Syncs Google Calendar events to local tasks.
+    Creates tasks for calendar events that don't already exist in the database.
+    
+    Args:
+        calendar_events: List of Google Calendar event dictionaries
+        user: Current user object
+    """
+    from datetime import datetime
+    
+    for event in calendar_events:
+        # Get event ID
+        event_id = event.get('id')
+        if not event_id:
+            continue
+            
+        # Check if task already exists with this google_event_id
+        existing_task = Task.query.filter_by(
+            google_event_id=event_id,
+            user_id=user.id
+        ).first()
+        
+        if existing_task:
+            continue  # Task already exists, skip
+        
+        # Get event details
+        title = event.get('summary', 'Untitled Event')
+        description = event.get('description', '')
+        
+        # Get start time
+        start = event.get('start', {})
+        due_date_str = start.get('dateTime') or start.get('date')
+        
+        if not due_date_str:
+            continue  # Skip events without a date
+        
+        # Parse the date
+        try:
+            if 'T' in due_date_str:
+                # DateTime format - remove timezone info and parse as naive datetime
+                # Google Calendar sends times in the user's timezone already
+                date_str_clean = due_date_str.split('+')[0].split('-', 3)[-1] if '+' in due_date_str else due_date_str.replace('Z', '')
+                if '.' in date_str_clean:
+                    date_str_clean = date_str_clean.split('.')[0]  # Remove microseconds
+                due_date = datetime.strptime(date_str_clean, '%Y-%m-%dT%H:%M:%S')
+            else:
+                # Date only format
+                due_date = datetime.strptime(due_date_str, '%Y-%m-%d')
+        except Exception as e:
+            print(f"Error parsing date {due_date_str}: {e}")
+            continue  # Skip if date parsing fails
+        
+        # Create new task
+        new_task = Task(
+            title=title,
+            description=description,
+            due_date=due_date,
+            category='Personal',  # Default category
+            status='todo',
+            user_id=user.id,
+            google_event_id=event_id,
+            synced_to_calendar=True
+        )
+        
+        db.session.add(new_task)
+    
+    # Commit all new tasks
+    try:
+        db.session.commit()
+    except Exception as e:
+        print(f"Error syncing calendar events to tasks: {e}")
+        db.session.rollback()
+
 
 # ==============================================================================
 # BASIC PAGE ROUTES
@@ -426,6 +504,15 @@ def schedule():
 
                 # Get upcoming events (next 7 events from today)
                 upcoming_events = get_upcoming_events(service, max_results=7)
+                
+                # Sync Google Calendar events to local tasks
+                sync_calendar_events_to_tasks(upcoming_events, current_user)
+                
+                # Filter out events that have been synced to tasks to avoid duplication
+                synced_event_ids = [task.google_event_id for task in tasks if task.google_event_id]
+                upcoming_events = [e for e in upcoming_events if e.get('id') not in synced_event_ids]
+                week_events = [e for e in week_events if e.get('id') not in synced_event_ids]
+                
             except Exception as e:
                 # Token expired or other error - disconnect calendar
                 print(f"Calendar error: {e}")
