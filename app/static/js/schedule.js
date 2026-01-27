@@ -252,26 +252,25 @@ function initializeCalendar() {
 
             const startHour = startDate.getHours();
             const startMinutes = startDate.getMinutes();
-            const endHour = endDate.getHours();
-            const endMinutes = endDate.getMinutes();
 
-            const duration = (endHour - startHour) + (endMinutes - startMinutes) / 60;
-            const topOffset = (startHour * 60 + startMinutes);
+            // Find the correct hour slot
+            const hourSlot = dayColumn.querySelector(`.hour-slot[data-hour="${startHour}"]`);
+            if (!hourSlot) {
+                console.warn(`No hour slot found for hour: ${startHour} in date: ${dateStr}`);
+                return;
+            }
 
             const eventBlock = document.createElement('div');
             eventBlock.className = 'event-block calendar-event';
-            eventBlock.style.position = 'absolute';
-            eventBlock.style.top = `${topOffset}px`;
-            eventBlock.style.height = `${duration * 60}px`;
 
             eventBlock.innerHTML = `
-                <div class="event-title">${event.title}</div>
                 <div class="event-time-range">
                     ${formatTime(startDate)} - ${formatTime(endDate)}
                 </div>
+                <div class="event-title">${event.title}</div>
             `;
 
-            dayColumn.appendChild(eventBlock);
+            hourSlot.appendChild(eventBlock);
         });
 
         // Render local tasks

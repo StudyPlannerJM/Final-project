@@ -353,7 +353,7 @@
 
 .day-header {
     background-color: var(--bg-color-tertiary);
-    padding: 15px 0;
+    padding: 15px 0px;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -523,12 +523,9 @@
     opacity: 0.6;
 }
 
-/* Calendar Events (Google Calendar) - absolute positioning */
+/* Calendar Events (Google Calendar) - use same positioning as tasks */
 .event-block.calendar-event {
-    position: absolute;
-    left: 5px;
-    right: 5px;
-    width: auto;
+    position: relative;
     z-index: 3;
 }
 
