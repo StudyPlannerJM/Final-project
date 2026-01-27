@@ -259,7 +259,8 @@ function initializeCalendar() {
             const topOffset = (startHour * 60 + startMinutes);
 
             const eventBlock = document.createElement('div');
-            eventBlock.className = 'event-block';
+            eventBlock.className = 'event-block calendar-event';
+            eventBlock.style.position = 'absolute';
             eventBlock.style.top = `${topOffset}px`;
             eventBlock.style.height = `${duration * 60}px`;
 

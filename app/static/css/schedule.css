@@ -521,6 +521,15 @@
     opacity: 0.6;
 }
 
+/* Calendar Events (Google Calendar) - absolute positioning */
+.event-block.calendar-event {
+    position: absolute;
+    left: 5px;
+    right: 5px;
+    width: auto;
+    z-index: 3;
+}
+
 /* =============================================================================
    UPCOMING EVENTS
    ============================================================================= */
