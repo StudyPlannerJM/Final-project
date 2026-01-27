@@ -531,7 +531,7 @@ def schedule():
             'date': day,
             'day_name': day.strftime('%A'),
             'day_num': day.day,
-            'is_today': day.date() == datetime.now().date()
+            'is_today': day.date() == target_date.date()
         })
 
     # Prepare tasks data for JavaScript

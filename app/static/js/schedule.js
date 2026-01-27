@@ -104,6 +104,9 @@ function initializeCalendar() {
         const prevLastDayDate = prevLastDay.getDate();
 
         const today = new Date();
+        
+        // Check if we're viewing the same month as the selected date
+        const viewingSelectedMonth = currentDate.getMonth() + 1 === currentMonth && currentDate.getFullYear() === currentYear;
 
         let daysHTML = '';
 
@@ -115,11 +118,16 @@ function initializeCalendar() {
         // Current month days
         for (let day = 1; day <= lastDayDate; day++) {
             const dateStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const isToday = today.getDate() === day && today.getMonth() + 1 === currentMonth && today.getFullYear() === currentYear;
+            const isSelected = viewingSelectedMonth && currentDate.getDate() === day;
             const hasEvents = monthEvents[dateStr] && monthEvents[dateStr] > 0;
 
             const classes = ['calendar-day'];
-            if (isToday) classes.push('today');
+            
+            // Only highlight the selected date
+            if (isSelected) {
+                classes.push('selected');
+            }
+            
             if (hasEvents) classes.push('has-events');
 
             daysHTML += `<div class="${classes.join(' ')}" data-date="${dateStr}">${day}</div>`;
@@ -135,7 +143,7 @@ function initializeCalendar() {
         calendarDays.innerHTML = daysHTML;
 
         // Add click handlers for date selection
-        document.querySelectorAll('.calendar-day:not(.other-month)').forEach(dayEl => {
+        calendarDays.querySelectorAll('.calendar-day:not(.other-month)').forEach(dayEl => {
             dayEl.addEventListener('click', function() {
                 const selectedDate = this.getAttribute('data-date');
                 window.location.href = `/schedule?date=${selectedDate}`;

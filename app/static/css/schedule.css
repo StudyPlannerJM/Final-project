@@ -208,6 +208,12 @@
 .calendar-day.selected {
     background-color: var(--accent-color);
     color: white;
+    font-weight: 700;
+}
+
+/* Selected takes priority over today */
+.calendar-day.today.selected {
+    background-color: var(--accent-color);
 }
 
 /* =============================================================================
