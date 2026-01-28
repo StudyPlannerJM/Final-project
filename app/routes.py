@@ -255,6 +255,11 @@ def edit_task(task_id):
         # Save changes to database
         db.session.commit()
         flash("Your task has been updated!", "success")
+        
+        # Redirect back to referring page if it was the schedule, otherwise go to tasks
+        referrer = request.referrer
+        if referrer and '/schedule' in referrer:
+            return redirect(url_for("main.schedule"))
         return redirect(url_for("main.tasks"))
     
     return render_template(
@@ -502,16 +507,19 @@ def schedule():
                     target_date.month
                 )
 
-                # Get upcoming events (next 7 events from today)
-                upcoming_events = get_upcoming_events(service, max_results=7)
+                # Get upcoming events (within next 7 days from TODAY)
+                upcoming_events = get_upcoming_events(service, max_results=20)
+                print(f"DEBUG: Fetched {len(upcoming_events)} upcoming events from Google Calendar")
                 
-                # Sync Google Calendar events to local tasks
+                # Sync Google Calendar events to local tasks (only from upcoming events)
                 sync_calendar_events_to_tasks(upcoming_events, current_user)
                 
-                # Filter out events that have been synced to tasks to avoid duplication
+                # Filter out events that have been synced to tasks to avoid duplication in week view
                 synced_event_ids = [task.google_event_id for task in tasks if task.google_event_id]
-                upcoming_events = [e for e in upcoming_events if e.get('id') not in synced_event_ids]
                 week_events = [e for e in week_events if e.get('id') not in synced_event_ids]
+                
+                # Don't filter upcoming_events - show all events in the upcoming section
+                print(f"DEBUG: Passing {len(upcoming_events)} events to template for upcoming section")
                 
             except Exception as e:
                 # Token expired or other error - disconnect calendar
@@ -541,6 +549,7 @@ def schedule():
             tasks_json.append({
                 'id': task.id,
                 'title': task.title,
+                'description': task.description,
                 'due_date': task.due_date.isoformat(),
                 'status': task.status,
                 'category': task.category,
@@ -716,6 +725,69 @@ def remove_task_from_calendar(task_id):
     else:
         # Failed to delete from calendar
         return {'success': False, 'error': 'Failed to remove'}, 500
+
+
+@main.route('/update_calendar_event/<event_id>', methods=['POST'])
+@login_required
+def update_calendar_event_route(event_id):
+    """
+    Update a Google Calendar event directly.
+    Used for editing events from the upcoming events section.
+    """
+    # STEP 1: Check if Google Calendar is connected
+    service = get_calendar_service(current_user)
+    if not service:
+        return {'success': False, 'error': 'Google Calendar not connected'}, 500
+
+    # STEP 2: Get the update data from request
+    data = request.get_json()
+    
+    try:
+        # STEP 3: Get the existing event from Google Calendar
+        event = service.events().get(
+            calendarId='primary',
+            eventId=event_id
+        ).execute()
+        
+        # STEP 4: Update the event fields
+        if 'summary' in data:
+            event['summary'] = data['summary']
+        if 'description' in data:
+            event['description'] = data['description']
+        if 'location' in data:
+            event['location'] = data['location']
+        
+        # STEP 5: Send the updated event back to Google Calendar
+        updated_event = service.events().update(
+            calendarId='primary',
+            eventId=event_id,
+            body=event
+        ).execute()
+        
+        return {'success': True, 'message': 'Event updated successfully'}
+    
+    except Exception as e:
+        print(f"Error updating calendar event: {e}")
+        return {'success': False, 'error': str(e)}, 500
+
+
+@main.route('/delete_calendar_event/<event_id>', methods=['POST'])
+@login_required
+def delete_calendar_event_route(event_id):
+    """
+    Delete a Google Calendar event directly.
+    Used for deleting events from the upcoming events section.
+    """
+    # STEP 1: Check if Google Calendar is connected
+    service = get_calendar_service(current_user)
+    if not service:
+        return {'success': False, 'error': 'Google Calendar not connected'}, 500
+
+    # STEP 2: Delete the event from Google Calendar
+    if delete_calendar_event(service, event_id):
+        return {'success': True, 'message': 'Event deleted successfully'}
+    else:
+        return {'success': False, 'error': 'Failed to delete event'}, 500
 
 
 # ==============================================================================

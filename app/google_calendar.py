@@ -277,14 +277,15 @@ def delete_calendar_event(service, event_id):
     
 def get_upcoming_events(service, max_results=10):
     """
-    Fetches upcoming events from Google Calendar to display in my app.
+    Fetches upcoming events from Google Calendar within the next 7 days.
     
     How it works:
     1. Gets the current time
-    2. Asks Google Calendar for events happening from now into the future
-    3. Returns them sorted by start time (earliest first)
+    2. Calculates 7 days from now
+    3. Asks Google Calendar for events happening within this week
+    4. Returns them sorted by start time (earliest first)
     
-    Use case: Show what events are coming up in the user's Google Calendar,
+    Use case: Show what events are coming up this week in the user's Google Calendar,
     so they can see everything in one place (my app + their calendar).
     
     Args:
@@ -299,18 +300,24 @@ def get_upcoming_events(service, max_results=10):
         # STEP 1: Get current time in ISO format with 'Z' at the end
         # 'Z' means UTC time (Universal Coordinated Time)
         # Example: "2024-01-15T10:30:00Z"
-        now = datetime.utcnow().isoformat() + 'Z'
+        now = datetime.utcnow()
+        now_iso = now.isoformat() + 'Z'
         
-        # STEP 2: Request events from Google Calendar
+        # STEP 2: Calculate 7 days from now
+        week_from_now = now + timedelta(days=7)
+        week_from_now_iso = week_from_now.isoformat() + 'Z'
+        
+        # STEP 3: Request events from Google Calendar
         events_result = service.events().list(
             calendarId='primary',  # User's main calendar
-            timeMin=now,  # Only get events from now onwards (no past events)
+            timeMin=now_iso,  # Only get events from now onwards (no past events)
+            timeMax=week_from_now_iso,  # Only get events within the next 7 days
             maxResults=max_results,  # Limit how many events to get
             singleEvents=True,  # Break recurring events into separate instances
             orderBy='startTime'  # Sort by start time (earliest first)
         ).execute()
         
-        # STEP 3: Extract the events from the response
+        # STEP 4: Extract the events from the response
         # If no events found, this returns an empty list
         events = events_result.get('items', [])
         return events

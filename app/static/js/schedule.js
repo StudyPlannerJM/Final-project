@@ -322,8 +322,9 @@ function initializeCalendar() {
             taskBlock.appendChild(titleDiv);
 
             taskBlock.style.cursor = 'pointer';
-            taskBlock.addEventListener('click', function() {
-                window.location.href = `/edit_task/${task.id}`;
+            taskBlock.addEventListener('click', function(e) {
+                e.stopPropagation();
+                showTaskDetails(task);
             });
 
             hourSlot.appendChild(taskBlock);
@@ -482,6 +483,82 @@ function initializeCalendar() {
             document.getElementById('eventStartTime').value = `${String(hour).padStart(2, '0')}:00`;
             document.getElementById('eventEndTime').value = `${String(parseInt(hour) + 1).padStart(2, '0')}:00`;
         });
+    });
+
+    // =============================================================================
+    // TASK DETAILS MODAL
+    // =============================================================================
+
+    const taskDetailsModal = document.getElementById('taskDetailsModal');
+    const closeTaskDetails = document.getElementById('closeTaskDetails');
+    const closeTaskDetailsBtn = document.getElementById('closeTaskDetailsBtn');
+    const editTaskBtn = document.getElementById('editTaskBtn');
+    let currentTaskId = null;
+
+    function showTaskDetails(task) {
+        currentTaskId = task.id;
+        
+        // Populate modal with task details
+        document.getElementById('detailTitle').textContent = task.title || 'No title';
+        
+        const descEl = document.getElementById('detailDescription');
+        if (task.description) {
+            descEl.textContent = task.description;
+            descEl.classList.remove('empty');
+        } else {
+            descEl.textContent = 'No description provided';
+            descEl.classList.add('empty');
+        }
+        
+        // Format due date
+        if (task.due_date) {
+            const dueDate = new Date(task.due_date.replace(' ', 'T'));
+            document.getElementById('detailDueDate').textContent = dueDate.toLocaleString('en-US', {
+                weekday: 'short',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } else {
+            document.getElementById('detailDueDate').textContent = 'No due date';
+        }
+        
+        document.getElementById('detailCategory').textContent = task.category || 'None';
+        document.getElementById('detailStatus').textContent = task.status || 'pending';
+        
+        // Show synced status if applicable
+        if (task.synced) {
+            document.getElementById('detailSyncedRow').style.display = 'flex';
+            document.getElementById('detailSynced').textContent = 'Yes - Synced to Google Calendar';
+        } else {
+            document.getElementById('detailSyncedRow').style.display = 'none';
+        }
+        
+        // Show modal
+        taskDetailsModal.classList.add('active');
+    }
+
+    function closeTaskDetailsModal() {
+        taskDetailsModal.classList.remove('active');
+        currentTaskId = null;
+    }
+
+    closeTaskDetails.addEventListener('click', closeTaskDetailsModal);
+    closeTaskDetailsBtn.addEventListener('click', closeTaskDetailsModal);
+    
+    editTaskBtn.addEventListener('click', function() {
+        if (currentTaskId) {
+            window.location.href = `/edit_task/${currentTaskId}`;
+        }
+    });
+
+    // Close modal when clicking outside
+    taskDetailsModal.addEventListener('click', function(e) {
+        if (e.target === taskDetailsModal) {
+            closeTaskDetailsModal();
+        }
     });
 
     // =============================================================================
