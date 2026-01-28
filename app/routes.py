@@ -537,15 +537,13 @@ def schedule():
                 upcoming_events = get_upcoming_events(service, max_results=20)
                 print(f"DEBUG: Fetched {len(upcoming_events)} upcoming events from Google Calendar")
                 
-                # Sync Google Calendar events to local tasks (only from upcoming events)
-                sync_calendar_events_to_tasks(upcoming_events, current_user)
-                
-                # Filter out events that have been synced to tasks to avoid duplication in week view
+                # Filter out Google Calendar events that match local tasks (to avoid duplicates)
                 synced_event_ids = [task.google_event_id for task in tasks if task.google_event_id]
                 week_events = [e for e in week_events if e.get('id') not in synced_event_ids]
+                upcoming_events = [e for e in upcoming_events if e.get('id') not in synced_event_ids]
                 
-                # Don't filter upcoming_events - show all events in the upcoming section
-                print(f"DEBUG: Passing {len(upcoming_events)} events to template for upcoming section")
+                print(f"DEBUG: Passing {len(week_events)} events to week view")
+                print(f"DEBUG: Passing {len(upcoming_events)} events to upcoming section")
                 
             except Exception as e:
                 # Token expired or other error - disconnect calendar
