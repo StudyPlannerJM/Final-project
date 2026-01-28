@@ -160,6 +160,12 @@ function initializeCalendar() {
         }
         updateMiniCalendarHeader();
         renderMiniCalendar();
+        
+        // If month view is active, update it too
+        const monthView = document.getElementById('monthView');
+        if (monthView && monthView.style.display !== 'none') {
+            renderMonthView();
+        }
     });
 
     document.getElementById('nextMonth')?.addEventListener('click', function() {
@@ -170,6 +176,12 @@ function initializeCalendar() {
         }
         updateMiniCalendarHeader();
         renderMiniCalendar();
+        
+        // If month view is active, update it too
+        const monthView = document.getElementById('monthView');
+        if (monthView && monthView.style.display !== 'none') {
+            renderMonthView();
+        }
     });
 
     function updateMiniCalendarHeader() {
@@ -219,13 +231,15 @@ function initializeCalendar() {
             
             // Handle different views
             if (view === 'week') {
-                // Week view is already displayed (default)
-                console.log('Week view active');
+                document.getElementById('weekView').style.display = 'grid';
+                document.getElementById('monthView').style.display = 'none';
+                document.querySelector('.week-days-header').style.display = 'grid';
             } else if (view === 'month') {
-                // Month view not yet implemented
-                alert('Month view coming soon! For now, use the mini calendar on the left to navigate.');
+                document.getElementById('weekView').style.display = 'none';
+                document.getElementById('monthView').style.display = 'block';
+                document.querySelector('.week-days-header').style.display = 'none';
+                renderMonthView();
             } else if (view === 'day') {
-                // Day view not yet implemented
                 alert('Day view coming soon! Week view shows daily time slots.');
             }
         });
@@ -657,4 +671,162 @@ function initializeCalendar() {
 
     renderMiniCalendar();
     renderWeekEvents();
+
+    // =============================================================================
+    // MONTH VIEW RENDERING
+    // =============================================================================
+
+    function renderMonthView() {
+        const monthDaysGrid = document.getElementById('monthDaysGrid');
+        monthDaysGrid.innerHTML = '';
+
+        // Get first day of the month
+        const firstDay = new Date(currentYear, currentMonth - 1, 1);
+        const lastDay = new Date(currentYear, currentMonth, 0);
+        
+        // Get the day of week (0 = Sunday, 1 = Monday, etc.)
+        // Adjust so Monday is first day (0 = Monday, 6 = Sunday)
+        let firstDayOfWeek = firstDay.getDay();
+        firstDayOfWeek = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
+        
+        const daysInMonth = lastDay.getDate();
+        const prevMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+        const prevMonthYear = currentMonth === 1 ? currentYear - 1 : currentYear;
+        const daysInPrevMonth = new Date(prevMonthYear, prevMonth, 0).getDate();
+        
+        // Calculate total cells needed
+        const totalCells = Math.ceil((firstDayOfWeek + daysInMonth) / 7) * 7;
+        
+        // Get today's date
+        const today = new Date();
+        const isCurrentMonth = today.getMonth() === currentMonth - 1 && today.getFullYear() === currentYear;
+        const todayDate = today.getDate();
+        
+        // Create array of all events by date
+        const eventsByDate = {};
+        
+        // Add week events (Google Calendar events)
+        weekEvents.forEach(event => {
+            const eventDate = event.start.split('T')[0];
+            if (!eventsByDate[eventDate]) {
+                eventsByDate[eventDate] = [];
+            }
+            eventsByDate[eventDate].push({
+                ...event,
+                type: 'calendar'
+            });
+        });
+        
+        // Add tasks
+        tasks.forEach(task => {
+            if (task.due_date) {
+                const taskDate = task.due_date.split('T')[0];
+                if (!eventsByDate[taskDate]) {
+                    eventsByDate[taskDate] = [];
+                }
+                eventsByDate[taskDate].push({
+                    ...task,
+                    title: task.title,
+                    type: 'task'
+                });
+            }
+        });
+        
+        // Render calendar cells
+        for (let i = 0; i < totalCells; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'month-day-cell';
+            
+            let day, month, year, isOtherMonth = false;
+            
+            // Previous month days
+            if (i < firstDayOfWeek) {
+                day = daysInPrevMonth - firstDayOfWeek + i + 1;
+                month = prevMonth;
+                year = prevMonthYear;
+                isOtherMonth = true;
+            }
+            // Current month days
+            else if (i < firstDayOfWeek + daysInMonth) {
+                day = i - firstDayOfWeek + 1;
+                month = currentMonth;
+                year = currentYear;
+            }
+            // Next month days
+            else {
+                day = i - firstDayOfWeek - daysInMonth + 1;
+                month = currentMonth === 12 ? 1 : currentMonth + 1;
+                year = currentMonth === 12 ? currentYear + 1 : currentYear;
+                isOtherMonth = true;
+            }
+            
+            if (isOtherMonth) {
+                cell.classList.add('other-month');
+            }
+            
+            if (isCurrentMonth && day === todayDate && !isOtherMonth) {
+                cell.classList.add('today');
+            }
+            
+            // Create date string
+            const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            cell.dataset.date = dateStr;
+            
+            // Add day number
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'month-day-number';
+            dayNumber.textContent = day;
+            cell.appendChild(dayNumber);
+            
+            // Add events for this day
+            const eventsContainer = document.createElement('div');
+            eventsContainer.className = 'month-events';
+            
+            if (eventsByDate[dateStr]) {
+                const dayEvents = eventsByDate[dateStr];
+                const maxDisplay = 3;
+                
+                dayEvents.slice(0, maxDisplay).forEach(event => {
+                    const eventItem = document.createElement('div');
+                    eventItem.className = `month-event-item ${event.type}-event`;
+                    eventItem.textContent = event.title;
+                    
+                    // Add click handler
+                    eventItem.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        if (event.type === 'calendar') {
+                            showCalendarEventDetails(event);
+                        } else {
+                            showTaskDetails(event);
+                        }
+                    });
+                    
+                    eventsContainer.appendChild(eventItem);
+                });
+                
+                // Show "more" indicator if there are more events
+                if (dayEvents.length > maxDisplay) {
+                    const moreItem = document.createElement('div');
+                    moreItem.className = 'month-event-more';
+                    moreItem.textContent = `+${dayEvents.length - maxDisplay} more`;
+                    moreItem.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        // Could show a modal with all events for this day
+                        alert(`${dayEvents.length} events on this day. Click individual events to view details.`);
+                    });
+                    eventsContainer.appendChild(moreItem);
+                }
+            }
+            
+            cell.appendChild(eventsContainer);
+            
+            // Add click handler for empty space
+            cell.addEventListener('click', function() {
+                // Could navigate to day view or show add event dialog
+                console.log('Clicked date:', dateStr);
+            });
+            
+            monthDaysGrid.appendChild(cell);
+        }
+    }
 }
