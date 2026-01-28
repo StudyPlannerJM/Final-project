@@ -158,27 +158,19 @@
 
             {% if upcoming_events %}
             <div class="upcoming-events-list">
-                {% for event in upcoming_events[:5] %}
+                {% for event in upcoming_events %}
                 <div class="upcoming-event-card">
                     <div class="event-time">
-                        <span class="event-date">{{ (event.start.get('dateTime') or event.start.get('date'))[:10] }}</span>
-                        <span class="event-hour">{{ (event.start.get('dateTime') or event.start.get('date'))[11:16] if event.start.get('dateTime') else 'All Day' }}</span>
+                        <span class="event-date">{{ event.start[:10] }}</span>
+                        <span class="event-hour">{{ event.start[11:16] if 'T' in event.start else 'All Day' }}</span>
                     </div>
                     <div class="event-details">
-                        <h4>{{ event.get('summary', 'No Title') }}</h4>
-                        {% if event.get('location') %}
+                        <h4>{{ event.title }}</h4>
+                        {% if event.location %}
                         <p class="event-location">
                             <i class="fas fa-map-marker-alt"></i> {{ event.location }}
                         </p>
                         {% endif %}
-                    </div>
-                    <div class="event-actions">
-                        <button class="btn-icon" title="Edit">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn-icon" title="Delete">
-                            <i class="fas fa-trash"></i>
-                        </button>
                     </div>
                 </div>
                 {% endfor %}
@@ -197,6 +189,55 @@
 <button class="fab-add-event" id="addEventBtn" title="Add Event">
     <i class="fas fa-plus"></i>
 </button>
+
+<!-- Task Details Modal -->
+<div class="modal-overlay" id="taskDetailsModal">
+    <div class="modal-dialog task-details-dialog">
+        <div class="modal-header">
+            <h3 id="taskDetailsTitle">Task Details</h3>
+            <button class="modal-close" id="closeTaskDetails">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="modal-body task-details-body">
+            <div class="detail-row">
+                <span class="detail-label"><i class="fas fa-heading"></i> Title:</span>
+                <span class="detail-value" id="detailTitle"></span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label"><i class="fas fa-align-left"></i> Description:</span>
+                <span class="detail-value" id="detailDescription"></span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label"><i class="fas fa-calendar"></i> Due Date:</span>
+                <span class="detail-value" id="detailDueDate"></span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label"><i class="fas fa-folder"></i> Category:</span>
+                <span class="detail-value" id="detailCategory"></span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label"><i class="fas fa-tasks"></i> Status:</span>
+                <span class="detail-value" id="detailStatus"></span>
+            </div>
+
+            <div class="detail-row" id="detailSyncedRow" style="display: none;">
+                <span class="detail-label"><i class="fas fa-sync"></i> Synced:</span>
+                <span class="detail-value" id="detailSynced"></span>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" id="closeTaskDetailsBtn">Close</button>
+                <button type="button" class="btn-save" id="editTaskBtn">Edit Task</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Event Dialog Modal -->
 <div class="modal-overlay" id="eventModal">

@@ -203,11 +203,21 @@ def add_task():
             author=current_user  # Link task to current user
         )
         
-        # STEP 3: Save to database
+        # STEP 3: Save to database first to get task ID
         db.session.add(new_task)
         db.session.commit()
         
-        # STEP 4: Show success message and redirect to tasks page
+        # STEP 4: Automatically sync to Google Calendar if enabled
+        if current_user.calendar_sync_enabled and new_task.due_date:
+            service = get_calendar_service(current_user)
+            if service:
+                event_id = create_calendar_event(service, new_task)
+                if event_id:
+                    new_task.google_event_id = event_id
+                    new_task.synced_to_calendar = True
+                    db.session.commit()
+        
+        # STEP 5: Show success message and redirect to tasks page
         flash('Task added successfully!', 'success')
         return redirect(url_for('main.tasks'))
     
@@ -254,7 +264,28 @@ def edit_task(task_id):
 
         # Save changes to database
         db.session.commit()
+        
+        # Update Google Calendar if task is synced
+        if current_user.calendar_sync_enabled and task.google_event_id:
+            service = get_calendar_service(current_user)
+            if service:
+                update_calendar_event(service, task.google_event_id, task)
+        # If not synced but calendar is enabled and task has due date, create event
+        elif current_user.calendar_sync_enabled and not task.google_event_id and task.due_date:
+            service = get_calendar_service(current_user)
+            if service:
+                event_id = create_calendar_event(service, task)
+                if event_id:
+                    task.google_event_id = event_id
+                    task.synced_to_calendar = True
+                    db.session.commit()
+        
         flash("Your task has been updated!", "success")
+        
+        # Redirect back to referring page if it was the schedule, otherwise go to tasks
+        referrer = request.referrer
+        if referrer and '/schedule' in referrer:
+            return redirect(url_for("main.schedule"))
         return redirect(url_for("main.tasks"))
     
     return render_template(
@@ -502,16 +533,17 @@ def schedule():
                     target_date.month
                 )
 
-                # Get upcoming events (next 7 events from today)
-                upcoming_events = get_upcoming_events(service, max_results=7)
+                # Get upcoming events (within next 7 days from TODAY)
+                upcoming_events = get_upcoming_events(service, max_results=20)
+                print(f"DEBUG: Fetched {len(upcoming_events)} upcoming events from Google Calendar")
                 
-                # Sync Google Calendar events to local tasks
-                sync_calendar_events_to_tasks(upcoming_events, current_user)
-                
-                # Filter out events that have been synced to tasks to avoid duplication
+                # Filter out Google Calendar events that match local tasks (to avoid duplicates)
                 synced_event_ids = [task.google_event_id for task in tasks if task.google_event_id]
-                upcoming_events = [e for e in upcoming_events if e.get('id') not in synced_event_ids]
                 week_events = [e for e in week_events if e.get('id') not in synced_event_ids]
+                upcoming_events = [e for e in upcoming_events if e.get('id') not in synced_event_ids]
+                
+                print(f"DEBUG: Passing {len(week_events)} events to week view")
+                print(f"DEBUG: Google Calendar events for upcoming: {len(upcoming_events)}")
                 
             except Exception as e:
                 # Token expired or other error - disconnect calendar
@@ -522,6 +554,30 @@ def schedule():
                 calendar_connected = False
                 flash('Your Google Calendar connection has expired. Please reconnect.', 'warning')
 
+    # Add local tasks to upcoming events (tasks with due dates in the next 7 days)
+    now = datetime.now()
+    week_from_now = now + timedelta(days=7)
+    upcoming_tasks = [task for task in tasks if task.due_date and now <= task.due_date <= week_from_now]
+    
+    # Convert tasks to event format for display in upcoming section
+    for task in upcoming_tasks:
+        upcoming_events.append({
+            'id': f'task_{task.id}',
+            'title': task.title,
+            'start': task.due_date.isoformat(),
+            'end': task.due_date.isoformat(),
+            'description': task.description or '',
+            'location': '',
+            'color': '#6c757d',  # Gray color for local tasks
+            'color_transparent': 'rgba(108, 117, 125, 0.1)',
+            'htmlLink': '',
+            'isLocalTask': True
+        })
+    
+    # Sort all upcoming events by start time
+    upcoming_events.sort(key=lambda x: x['start'])
+    print(f"DEBUG: Total upcoming events (Google + Local): {len(upcoming_events)}")
+
     # Prepare week dates for the template
     start_of_week = target_date - timedelta(days=target_date.weekday())
     week_dates = []
@@ -531,7 +587,7 @@ def schedule():
             'date': day,
             'day_name': day.strftime('%A'),
             'day_num': day.day,
-            'is_today': day.date() == datetime.now().date()
+            'is_today': day.date() == target_date.date()
         })
 
     # Prepare tasks data for JavaScript
@@ -541,6 +597,7 @@ def schedule():
             tasks_json.append({
                 'id': task.id,
                 'title': task.title,
+                'description': task.description,
                 'due_date': task.due_date.isoformat(),
                 'status': task.status,
                 'category': task.category,
@@ -716,6 +773,69 @@ def remove_task_from_calendar(task_id):
     else:
         # Failed to delete from calendar
         return {'success': False, 'error': 'Failed to remove'}, 500
+
+
+@main.route('/update_calendar_event/<event_id>', methods=['POST'])
+@login_required
+def update_calendar_event_route(event_id):
+    """
+    Update a Google Calendar event directly.
+    Used for editing events from the upcoming events section.
+    """
+    # STEP 1: Check if Google Calendar is connected
+    service = get_calendar_service(current_user)
+    if not service:
+        return {'success': False, 'error': 'Google Calendar not connected'}, 500
+
+    # STEP 2: Get the update data from request
+    data = request.get_json()
+    
+    try:
+        # STEP 3: Get the existing event from Google Calendar
+        event = service.events().get(
+            calendarId='primary',
+            eventId=event_id
+        ).execute()
+        
+        # STEP 4: Update the event fields
+        if 'summary' in data:
+            event['summary'] = data['summary']
+        if 'description' in data:
+            event['description'] = data['description']
+        if 'location' in data:
+            event['location'] = data['location']
+        
+        # STEP 5: Send the updated event back to Google Calendar
+        updated_event = service.events().update(
+            calendarId='primary',
+            eventId=event_id,
+            body=event
+        ).execute()
+        
+        return {'success': True, 'message': 'Event updated successfully'}
+    
+    except Exception as e:
+        print(f"Error updating calendar event: {e}")
+        return {'success': False, 'error': str(e)}, 500
+
+
+@main.route('/delete_calendar_event/<event_id>', methods=['POST'])
+@login_required
+def delete_calendar_event_route(event_id):
+    """
+    Delete a Google Calendar event directly.
+    Used for deleting events from the upcoming events section.
+    """
+    # STEP 1: Check if Google Calendar is connected
+    service = get_calendar_service(current_user)
+    if not service:
+        return {'success': False, 'error': 'Google Calendar not connected'}, 500
+
+    # STEP 2: Delete the event from Google Calendar
+    if delete_calendar_event(service, event_id):
+        return {'success': True, 'message': 'Event deleted successfully'}
+    else:
+        return {'success': False, 'error': 'Failed to delete event'}, 500
 
 
 # ==============================================================================

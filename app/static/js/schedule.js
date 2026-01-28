@@ -104,6 +104,9 @@ function initializeCalendar() {
         const prevLastDayDate = prevLastDay.getDate();
 
         const today = new Date();
+        
+        // Check if we're viewing the same month as the selected date
+        const viewingSelectedMonth = currentDate.getMonth() + 1 === currentMonth && currentDate.getFullYear() === currentYear;
 
         let daysHTML = '';
 
@@ -115,11 +118,16 @@ function initializeCalendar() {
         // Current month days
         for (let day = 1; day <= lastDayDate; day++) {
             const dateStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const isToday = today.getDate() === day && today.getMonth() + 1 === currentMonth && today.getFullYear() === currentYear;
+            const isSelected = viewingSelectedMonth && currentDate.getDate() === day;
             const hasEvents = monthEvents[dateStr] && monthEvents[dateStr] > 0;
 
             const classes = ['calendar-day'];
-            if (isToday) classes.push('today');
+            
+            // Only highlight the selected date
+            if (isSelected) {
+                classes.push('selected');
+            }
+            
             if (hasEvents) classes.push('has-events');
 
             daysHTML += `<div class="${classes.join(' ')}" data-date="${dateStr}">${day}</div>`;
@@ -135,7 +143,7 @@ function initializeCalendar() {
         calendarDays.innerHTML = daysHTML;
 
         // Add click handlers for date selection
-        document.querySelectorAll('.calendar-day:not(.other-month)').forEach(dayEl => {
+        calendarDays.querySelectorAll('.calendar-day:not(.other-month)').forEach(dayEl => {
             dayEl.addEventListener('click', function() {
                 const selectedDate = this.getAttribute('data-date');
                 window.location.href = `/schedule?date=${selectedDate}`;
@@ -244,25 +252,31 @@ function initializeCalendar() {
 
             const startHour = startDate.getHours();
             const startMinutes = startDate.getMinutes();
-            const endHour = endDate.getHours();
-            const endMinutes = endDate.getMinutes();
 
-            const duration = (endHour - startHour) + (endMinutes - startMinutes) / 60;
-            const topOffset = (startHour * 60 + startMinutes);
+            // Find the correct hour slot
+            const hourSlot = dayColumn.querySelector(`.hour-slot[data-hour="${startHour}"]`);
+            if (!hourSlot) {
+                console.warn(`No hour slot found for hour: ${startHour} in date: ${dateStr}`);
+                return;
+            }
 
             const eventBlock = document.createElement('div');
-            eventBlock.className = 'event-block';
-            eventBlock.style.top = `${topOffset}px`;
-            eventBlock.style.height = `${duration * 60}px`;
+            eventBlock.className = 'event-block calendar-event';
 
             eventBlock.innerHTML = `
-                <div class="event-title">${event.title}</div>
                 <div class="event-time-range">
                     ${formatTime(startDate)} - ${formatTime(endDate)}
                 </div>
+                <div class="event-title">${event.title}</div>
             `;
 
-            dayColumn.appendChild(eventBlock);
+            eventBlock.style.cursor = 'pointer';
+            eventBlock.addEventListener('click', function(e) {
+                e.stopPropagation();
+                showCalendarEventDetails(event);
+            });
+
+            hourSlot.appendChild(eventBlock);
         });
 
         // Render local tasks
@@ -314,8 +328,9 @@ function initializeCalendar() {
             taskBlock.appendChild(titleDiv);
 
             taskBlock.style.cursor = 'pointer';
-            taskBlock.addEventListener('click', function() {
-                window.location.href = `/edit_task/${task.id}`;
+            taskBlock.addEventListener('click', function(e) {
+                e.stopPropagation();
+                showTaskDetails(task);
             });
 
             hourSlot.appendChild(taskBlock);
@@ -474,6 +489,166 @@ function initializeCalendar() {
             document.getElementById('eventStartTime').value = `${String(hour).padStart(2, '0')}:00`;
             document.getElementById('eventEndTime').value = `${String(parseInt(hour) + 1).padStart(2, '0')}:00`;
         });
+    });
+
+    // =============================================================================
+    // TASK DETAILS MODAL
+    // =============================================================================
+
+    const taskDetailsModal = document.getElementById('taskDetailsModal');
+    const closeTaskDetails = document.getElementById('closeTaskDetails');
+    const closeTaskDetailsBtn = document.getElementById('closeTaskDetailsBtn');
+    const editTaskBtn = document.getElementById('editTaskBtn');
+    let currentTaskId = null;
+    let currentEventId = null;
+    let isGoogleCalendarEvent = false;
+
+    function showCalendarEventDetails(event) {
+        isGoogleCalendarEvent = true;
+        currentEventId = event.id;
+        currentTaskId = null;
+        
+        // Update modal title
+        document.getElementById('taskDetailsTitle').textContent = 'Google Calendar Event';
+        
+        // Populate modal with event details
+        document.getElementById('detailTitle').textContent = event.title || 'No title';
+        
+        const descEl = document.getElementById('detailDescription');
+        if (event.description) {
+            descEl.textContent = event.description;
+            descEl.classList.remove('empty');
+        } else {
+            descEl.textContent = 'No description provided';
+            descEl.classList.add('empty');
+        }
+        
+        // Format dates
+        const startDate = new Date(event.start);
+        const endDate = new Date(event.end);
+        document.getElementById('detailDueDate').textContent = startDate.toLocaleString('en-US', {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }) + ' - ' + endDate.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        // Hide category and status for calendar events
+        document.getElementById('detailCategory').parentElement.style.display = 'none';
+        document.getElementById('detailStatus').parentElement.style.display = 'none';
+        
+        // Show location if available
+        if (event.location) {
+            const categoryEl = document.getElementById('detailCategory').parentElement;
+            categoryEl.style.display = 'flex';
+            categoryEl.querySelector('.detail-label').innerHTML = '<i class="fas fa-map-marker-alt"></i> Location:';
+            document.getElementById('detailCategory').textContent = event.location;
+        }
+        
+        // Hide synced status
+        document.getElementById('detailSyncedRow').style.display = 'none';
+        
+        // Update button text
+        editTaskBtn.textContent = 'Edit in Google Calendar';
+        
+        // Show modal
+        taskDetailsModal.classList.add('active');
+    }
+
+    function showTaskDetails(task) {
+        isGoogleCalendarEvent = false;
+        currentTaskId = task.id;
+        currentEventId = null;
+        
+        // Reset modal title
+        document.getElementById('taskDetailsTitle').textContent = 'Task Details';
+        
+        // Populate modal with task details
+        document.getElementById('detailTitle').textContent = task.title || 'No title';
+        
+        const descEl = document.getElementById('detailDescription');
+        if (task.description) {
+            descEl.textContent = task.description;
+            descEl.classList.remove('empty');
+        } else {
+            descEl.textContent = 'No description provided';
+            descEl.classList.add('empty');
+        }
+        
+        // Format due date
+        if (task.due_date) {
+            const dueDate = new Date(task.due_date.replace(' ', 'T'));
+            document.getElementById('detailDueDate').textContent = dueDate.toLocaleString('en-US', {
+                weekday: 'short',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } else {
+            document.getElementById('detailDueDate').textContent = 'No due date';
+        }
+        
+        document.getElementById('detailCategory').parentElement.style.display = 'flex';
+        document.getElementById('detailCategory').parentElement.querySelector('.detail-label').innerHTML = '<i class="fas fa-folder"></i> Category:';
+        document.getElementById('detailCategory').textContent = task.category || 'None';
+        
+        document.getElementById('detailStatus').parentElement.style.display = 'flex';
+        document.getElementById('detailStatus').textContent = task.status || 'pending';
+        
+        // Update button text
+        editTaskBtn.textContent = 'Edit Task';
+        
+        // Show synced status if applicable
+        if (task.synced) {
+            document.getElementById('detailSyncedRow').style.display = 'flex';
+            document.getElementById('detailSynced').textContent = 'Yes - Synced to Google Calendar';
+        } else {
+            document.getElementById('detailSyncedRow').style.display = 'none';
+        }
+        
+        // Show modal
+        taskDetailsModal.classList.add('active');
+    }
+
+    function closeTaskDetailsModal() {
+        taskDetailsModal.classList.remove('active');
+        currentTaskId = null;
+        currentEventId = null;
+        isGoogleCalendarEvent = false;
+    }
+
+    closeTaskDetails.addEventListener('click', closeTaskDetailsModal);
+    closeTaskDetailsBtn.addEventListener('click', closeTaskDetailsModal);
+    
+    editTaskBtn.addEventListener('click', function() {
+        if (isGoogleCalendarEvent && currentEventId) {
+            // Try to use the htmlLink from the event, otherwise construct URL
+            const currentEvent = weekEvents.find(e => e.id === currentEventId);
+            if (currentEvent && currentEvent.htmlLink) {
+                window.open(currentEvent.htmlLink, '_blank');
+            } else {
+                // Fallback: construct URL with encoded event ID
+                const encodedEventId = encodeURIComponent(currentEventId);
+                const googleCalendarUrl = `https://calendar.google.com/calendar/u/0/r/eventedit/${encodedEventId}`;
+                window.open(googleCalendarUrl, '_blank');
+            }
+        } else if (currentTaskId) {
+            window.location.href = `/edit_task/${currentTaskId}`;
+        }
+    });
+
+    // Close modal when clicking outside
+    taskDetailsModal.addEventListener('click', function(e) {
+        if (e.target === taskDetailsModal) {
+            closeTaskDetailsModal();
+        }
     });
 
     // =============================================================================
