@@ -203,11 +203,21 @@ def add_task():
             author=current_user  # Link task to current user
         )
         
-        # STEP 3: Save to database
+        # STEP 3: Save to database first to get task ID
         db.session.add(new_task)
         db.session.commit()
         
-        # STEP 4: Show success message and redirect to tasks page
+        # STEP 4: Automatically sync to Google Calendar if enabled
+        if current_user.calendar_sync_enabled and new_task.due_date:
+            service = get_calendar_service(current_user)
+            if service:
+                event_id = create_calendar_event(service, new_task)
+                if event_id:
+                    new_task.google_event_id = event_id
+                    new_task.synced_to_calendar = True
+                    db.session.commit()
+        
+        # STEP 5: Show success message and redirect to tasks page
         flash('Task added successfully!', 'success')
         return redirect(url_for('main.tasks'))
     
@@ -254,6 +264,22 @@ def edit_task(task_id):
 
         # Save changes to database
         db.session.commit()
+        
+        # Update Google Calendar if task is synced
+        if current_user.calendar_sync_enabled and task.google_event_id:
+            service = get_calendar_service(current_user)
+            if service:
+                update_calendar_event(service, task.google_event_id, task)
+        # If not synced but calendar is enabled and task has due date, create event
+        elif current_user.calendar_sync_enabled and not task.google_event_id and task.due_date:
+            service = get_calendar_service(current_user)
+            if service:
+                event_id = create_calendar_event(service, task)
+                if event_id:
+                    task.google_event_id = event_id
+                    task.synced_to_calendar = True
+                    db.session.commit()
+        
         flash("Your task has been updated!", "success")
         
         # Redirect back to referring page if it was the schedule, otherwise go to tasks

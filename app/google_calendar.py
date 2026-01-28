@@ -320,7 +320,25 @@ def get_upcoming_events(service, max_results=10):
         # STEP 4: Extract the events from the response
         # If no events found, this returns an empty list
         events = events_result.get('items', [])
-        return events
+        
+        # STEP 5: Format events consistently with other functions
+        formatted_events = []
+        for event in events:
+            start = event['start'].get('dateTime', event['start'].get('date'))
+            end = event['end'].get('dateTime', event['end'].get('date'))
+            
+            formatted_events.append({
+                'id': event['id'],
+                'title': event.get('summary', 'Untitled'),
+                'start': start,
+                'end': end,
+                'description': event.get('description', ''),
+                'location': event.get('location', ''),
+                'color': event.get('colorId', '1'),
+                'htmlLink': event.get('htmlLink', '')
+            })
+        
+        return formatted_events
     
     except Exception as error:
         # If something goes wrong (network issue, auth problem, expired token, etc.)
@@ -366,7 +384,8 @@ def get_events_for_date_range(service, start_date, end_date):
                 'end': end,
                 'description': event.get('description', ''),
                 'location': event.get('location', ''),
-                'color': event.get('colorId', '1')  # Default blue
+                'color': event.get('colorId', '1'),  # Default blue
+                'htmlLink': event.get('htmlLink', '')  # Direct link to event in Google Calendar
             })
 
         return formatted_events

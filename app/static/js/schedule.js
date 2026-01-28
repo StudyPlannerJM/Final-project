@@ -270,6 +270,12 @@ function initializeCalendar() {
                 <div class="event-title">${event.title}</div>
             `;
 
+            eventBlock.style.cursor = 'pointer';
+            eventBlock.addEventListener('click', function(e) {
+                e.stopPropagation();
+                showCalendarEventDetails(event);
+            });
+
             hourSlot.appendChild(eventBlock);
         });
 
@@ -494,9 +500,73 @@ function initializeCalendar() {
     const closeTaskDetailsBtn = document.getElementById('closeTaskDetailsBtn');
     const editTaskBtn = document.getElementById('editTaskBtn');
     let currentTaskId = null;
+    let currentEventId = null;
+    let isGoogleCalendarEvent = false;
+
+    function showCalendarEventDetails(event) {
+        isGoogleCalendarEvent = true;
+        currentEventId = event.id;
+        currentTaskId = null;
+        
+        // Update modal title
+        document.getElementById('taskDetailsTitle').textContent = 'Google Calendar Event';
+        
+        // Populate modal with event details
+        document.getElementById('detailTitle').textContent = event.title || 'No title';
+        
+        const descEl = document.getElementById('detailDescription');
+        if (event.description) {
+            descEl.textContent = event.description;
+            descEl.classList.remove('empty');
+        } else {
+            descEl.textContent = 'No description provided';
+            descEl.classList.add('empty');
+        }
+        
+        // Format dates
+        const startDate = new Date(event.start);
+        const endDate = new Date(event.end);
+        document.getElementById('detailDueDate').textContent = startDate.toLocaleString('en-US', {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }) + ' - ' + endDate.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        // Hide category and status for calendar events
+        document.getElementById('detailCategory').parentElement.style.display = 'none';
+        document.getElementById('detailStatus').parentElement.style.display = 'none';
+        
+        // Show location if available
+        if (event.location) {
+            const categoryEl = document.getElementById('detailCategory').parentElement;
+            categoryEl.style.display = 'flex';
+            categoryEl.querySelector('.detail-label').innerHTML = '<i class="fas fa-map-marker-alt"></i> Location:';
+            document.getElementById('detailCategory').textContent = event.location;
+        }
+        
+        // Hide synced status
+        document.getElementById('detailSyncedRow').style.display = 'none';
+        
+        // Update button text
+        editTaskBtn.textContent = 'Edit in Google Calendar';
+        
+        // Show modal
+        taskDetailsModal.classList.add('active');
+    }
 
     function showTaskDetails(task) {
+        isGoogleCalendarEvent = false;
         currentTaskId = task.id;
+        currentEventId = null;
+        
+        // Reset modal title
+        document.getElementById('taskDetailsTitle').textContent = 'Task Details';
         
         // Populate modal with task details
         document.getElementById('detailTitle').textContent = task.title || 'No title';
@@ -525,8 +595,15 @@ function initializeCalendar() {
             document.getElementById('detailDueDate').textContent = 'No due date';
         }
         
+        document.getElementById('detailCategory').parentElement.style.display = 'flex';
+        document.getElementById('detailCategory').parentElement.querySelector('.detail-label').innerHTML = '<i class="fas fa-folder"></i> Category:';
         document.getElementById('detailCategory').textContent = task.category || 'None';
+        
+        document.getElementById('detailStatus').parentElement.style.display = 'flex';
         document.getElementById('detailStatus').textContent = task.status || 'pending';
+        
+        // Update button text
+        editTaskBtn.textContent = 'Edit Task';
         
         // Show synced status if applicable
         if (task.synced) {
@@ -543,13 +620,26 @@ function initializeCalendar() {
     function closeTaskDetailsModal() {
         taskDetailsModal.classList.remove('active');
         currentTaskId = null;
+        currentEventId = null;
+        isGoogleCalendarEvent = false;
     }
 
     closeTaskDetails.addEventListener('click', closeTaskDetailsModal);
     closeTaskDetailsBtn.addEventListener('click', closeTaskDetailsModal);
     
     editTaskBtn.addEventListener('click', function() {
-        if (currentTaskId) {
+        if (isGoogleCalendarEvent && currentEventId) {
+            // Try to use the htmlLink from the event, otherwise construct URL
+            const currentEvent = weekEvents.find(e => e.id === currentEventId);
+            if (currentEvent && currentEvent.htmlLink) {
+                window.open(currentEvent.htmlLink, '_blank');
+            } else {
+                // Fallback: construct URL with encoded event ID
+                const encodedEventId = encodeURIComponent(currentEventId);
+                const googleCalendarUrl = `https://calendar.google.com/calendar/u/0/r/eventedit/${encodedEventId}`;
+                window.open(googleCalendarUrl, '_blank');
+            }
+        } else if (currentTaskId) {
             window.location.href = `/edit_task/${currentTaskId}`;
         }
     });

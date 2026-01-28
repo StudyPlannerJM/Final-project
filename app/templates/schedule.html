@@ -158,15 +158,15 @@
 
             {% if upcoming_events %}
             <div class="upcoming-events-list">
-                {% for event in upcoming_events[:5] %}
+                {% for event in upcoming_events %}
                 <div class="upcoming-event-card">
                     <div class="event-time">
-                        <span class="event-date">{{ (event.start.get('dateTime') or event.start.get('date'))[:10] }}</span>
-                        <span class="event-hour">{{ (event.start.get('dateTime') or event.start.get('date'))[11:16] if event.start.get('dateTime') else 'All Day' }}</span>
+                        <span class="event-date">{{ event.start[:10] }}</span>
+                        <span class="event-hour">{{ event.start[11:16] if 'T' in event.start else 'All Day' }}</span>
                     </div>
                     <div class="event-details">
-                        <h4>{{ event.get('summary', 'No Title') }}</h4>
-                        {% if event.get('location') %}
+                        <h4>{{ event.title }}</h4>
+                        {% if event.location %}
                         <p class="event-location">
                             <i class="fas fa-map-marker-alt"></i> {{ event.location }}
                         </p>
