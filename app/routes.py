@@ -543,7 +543,7 @@ def schedule():
                 upcoming_events = [e for e in upcoming_events if e.get('id') not in synced_event_ids]
                 
                 print(f"DEBUG: Passing {len(week_events)} events to week view")
-                print(f"DEBUG: Passing {len(upcoming_events)} events to upcoming section")
+                print(f"DEBUG: Google Calendar events for upcoming: {len(upcoming_events)}")
                 
             except Exception as e:
                 # Token expired or other error - disconnect calendar
@@ -553,6 +553,30 @@ def schedule():
                 db.session.commit()
                 calendar_connected = False
                 flash('Your Google Calendar connection has expired. Please reconnect.', 'warning')
+
+    # Add local tasks to upcoming events (tasks with due dates in the next 7 days)
+    now = datetime.now()
+    week_from_now = now + timedelta(days=7)
+    upcoming_tasks = [task for task in tasks if task.due_date and now <= task.due_date <= week_from_now]
+    
+    # Convert tasks to event format for display in upcoming section
+    for task in upcoming_tasks:
+        upcoming_events.append({
+            'id': f'task_{task.id}',
+            'title': task.title,
+            'start': task.due_date.isoformat(),
+            'end': task.due_date.isoformat(),
+            'description': task.description or '',
+            'location': '',
+            'color': '#6c757d',  # Gray color for local tasks
+            'color_transparent': 'rgba(108, 117, 125, 0.1)',
+            'htmlLink': '',
+            'isLocalTask': True
+        })
+    
+    # Sort all upcoming events by start time
+    upcoming_events.sort(key=lambda x: x['start'])
+    print(f"DEBUG: Total upcoming events (Google + Local): {len(upcoming_events)}")
 
     # Prepare week dates for the template
     start_of_week = target_date - timedelta(days=target_date.weekday())
