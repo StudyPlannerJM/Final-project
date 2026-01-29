@@ -633,7 +633,11 @@ def schedule():
                 'description': task.description,
                 'due_date': task.due_date.isoformat(),
                 'status': task.status,
-                'category': task.category,
+                'category': {
+                    'name': task.task_category.name if task.task_category else None,
+                    'color': task.task_category.color if task.task_category else '#3498db',
+                    'icon': task.task_category.icon if task.task_category else None
+                } if task.task_category else None,
                 'synced': task.synced_to_calendar
             })
 
