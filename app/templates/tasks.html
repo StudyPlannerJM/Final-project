@@ -31,12 +31,15 @@
                                     <i class="far fa-calendar"></i> {{ task.due_date.strftime('%d-%m-%Y %H:%M') }}
                                 </p>
                             {% endif %}
-                            {% if task.category %}
-                                <span class="task-category">{{ task.category }}</span>
+                            {% if task.task_category %}
+                            <span class="task-category" style="--category-color: {{ task.task_category.color }}; background-color: var(--category-color);">
+                                {% if task.task_category.icon %}{{ task.task_category.icon }}{% endif %}
+                                {{ task.task_category.name }}
+                            </span>
                             {% endif %}
                             <div class="task-actions">
                                 <a href="{{ url_for('main.edit_task', task_id=task.id) }}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
-                                <button type="button" class="btn btn-sm btn-danger" onclick="showDeleteModal({{ task.id }})"><i class="fas fa-trash"></i></button>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="showDeleteModal('{{ task.id }}')"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
                     {% endfor %}
@@ -66,12 +69,15 @@
                                     <i class="far fa-calendar"></i> {{ task.due_date.strftime('%d-%m-%Y %H:%M') }}
                                 </p>
                             {% endif %}
-                            {% if task.category %}
-                                <span class="task-category">{{ task.category }}</span>
+                           {% if task.task_category %}
+                            <span class="task-category" style="--category-color: {{ task.task_category.color }}; background-color: var(--category-color);">
+                                {% if task.task_category.icon %}{{ task.task_category.icon }}{% endif %}
+                                {{ task.task_category.name }}
+                            </span>
                             {% endif %}
                             <div class="task-actions">
                                 <a href="{{ url_for('main.edit_task', task_id=task.id) }}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
-                                <button type="button" class="btn btn-sm btn-danger" onclick="showDeleteModal({{ task.id }})"><i class="fas fa-trash"></i></button>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="showDeleteModal('{{ task.id }}')"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
                     {% endfor %}
@@ -101,12 +107,15 @@
                                     <i class="far fa-calendar"></i> {{ task.due_date.strftime('%d-%m-%Y %H:%M') }}
                                 </p>
                             {% endif %}
-                            {% if task.category %}
-                                <span class="task-category">{{ task.category }}</span>
+                            {% if task.task_category %}
+                            <span class="task-category" style="--category-color: {{ task.task_category.color }}; background-color: var(--category-color);">
+                                {% if task.task_category.icon %}{{ task.task_category.icon }}{% endif %}
+                                {{ task.task_category.name }}
+                            </span>
                             {% endif %}
                             <div class="task-actions">
                                 <a href="{{ url_for('main.edit_task', task_id=task.id) }}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
-                                <button type="button" class="btn btn-sm btn-danger" onclick="showDeleteModal({{ task.id }})"><i class="fas fa-trash"></i></button>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="showDeleteModal('{{ task.id }}')"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
                     {% endfor %}

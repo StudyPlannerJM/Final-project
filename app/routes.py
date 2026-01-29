@@ -20,7 +20,7 @@ from app.google_calendar import (
 from app.summarizer import (
     extract_text, generate_summary, get_allowed_extensions, get_file_type
 )
-from app.models import Task, Flashcard, Summary
+from app.models import Task, Flashcard, Summary, Category
 from app import db
 from flask_login import login_required, current_user
 from app.forms import TaskForm, FlashcardForm
@@ -182,115 +182,148 @@ def update_task_status(task_id, status):
 @main.route('/add_task', methods=['GET', 'POST'])
 @login_required
 def add_task():
-    # Create a new task with title, description, due date, and category
-    # Shows form on GET, processes submission on POST
+    """
+    Create a new task and optionally sync to Google Calendar.
     
+    Handles both predefined categories and custom user-created categories.
+    If Google Calendar sync is enabled, automatically creates a calendar event.
+    """
     form = TaskForm()
-    
-    if form.validate_on_submit():
-        # STEP 1: Handle custom category
-        # If user selected "Other", use the custom text they entered
-        category = form.category.data
-        if category == "Other" and form.other_category.data.strip():
-            category = form.other_category.data.strip()
 
-        # STEP 2: Create new task object with form data
+    if form.validate_on_submit():
+        # STEP 1: Determine which category to use
+        # Form can have either a dropdown selection OR a custom typed category
+        selected_category = form.category.data  # Category object from dropdown
+        category_id = None
+
+        # STEP 2: Handle custom category if user typed one in "Other" field
+        if form.other_category.data and form.other_category.data.strip():
+            category_name = form.other_category.data.strip().title()  # Normalize to Title Case
+
+            # Check if this custom category already exists for this user
+            category = Category.query.filter_by(
+                user_id=current_user.id,
+                name=category_name
+            ).first()
+
+            # Create new category if it doesn't exist yet
+            if not category:
+                category = Category(
+                    name=category_name,
+                    user_id=current_user.id,
+                    is_default=False  # Mark as user-created (not system default)
+                )
+                db.session.add(category)
+                db.session.flush()  # Get the ID without committing yet
+
+            category_id = category.id
+            
+        # STEP 3: Use dropdown selection if no custom category was entered
+        elif selected_category:
+            category_id = selected_category.id
+        # STEP 4: No category selected (category_id remains None)
+        else:
+            category_id = None          
+        
+
+        # STEP 5: Create the new task with all form data
         new_task = Task(
             title=form.title.data,
             description=form.description.data,
             due_date=form.due_date.data,
-            category=category,
-            author=current_user  # Link task to current user
+            category_id=category_id,  # Foreign key to Category table
+            # BACKWARDS COMPATIBILITY: Keep old string field in sync for now
+            category=selected_category.name if selected_category else None,
+            author=current_user  # Links task to current logged-in user
         )
-        
-        # STEP 3: Save to database first to get task ID
+
+        # STEP 6: Save task to database
         db.session.add(new_task)
         db.session.commit()
-        
-        # STEP 4: Automatically sync to Google Calendar if enabled
+
+        # STEP 7: Sync to Google Calendar if user has it enabled
         if current_user.calendar_sync_enabled and new_task.due_date:
             service = get_calendar_service(current_user)
             if service:
+                # Create event on Google Calendar
                 event_id = create_calendar_event(service, new_task)
                 if event_id:
+                    # Update task with Google event ID for future sync
                     new_task.google_event_id = event_id
                     new_task.synced_to_calendar = True
                     db.session.commit()
-        
-        # STEP 5: Show success message and redirect to tasks page
+
+        # STEP 8: Show success message and return to tasks page
         flash('Task added successfully!', 'success')
         return redirect(url_for('main.tasks'))
-    
-    # If GET request, just show the form
-    return render_template('add_task.html', title='Add New Task', form=form)
 
+    # GET request: Show empty form
+    return render_template('add_task.html', title='Add New Task', form=form)
 
 @main.route('/edit_task/<int:task_id>', methods=['GET', 'POST'])
 @login_required
 def edit_task(task_id):
     # Edit an existing task - modify title, description, date, or category
-    # Pre-fills form with current task data
-    
-    # STEP 1: Get the task from database
+    # Pre-fills form with current task data   
+
     task = Task.query.get_or_404(task_id)
-    
-    # STEP 2: Security check - verify user owns this task
+
     if task.user_id != current_user.id:
         flash('You are not authorized to edit this task.', 'danger')
         return redirect(url_for('main.tasks'))
 
-    # STEP 3: Create form pre-filled with task data
     form = TaskForm(obj=task)
 
-    # STEP 4: On GET request, handle custom categories
-    # If task has a custom category (not in default list), set form to "Other"
+    # On GET request, pre-select the category
     if request.method == "GET":
-        default_choices = [c[0] for c in form.category.choices]
-        if task.category not in default_choices:
-            form.category.data = "Other"
-            form.other_category.data = task.category
+        if task.category_id:
+            form.category.data = Category.query.get(task.category_id)
 
-    # STEP 5: On POST (form submission), update the task
     if form.validate_on_submit():
         task.title = form.title.data
         task.description = form.description.data
         task.due_date = form.due_date.data
 
-        # Handle custom category
-        category = form.category.data
-        if category == "Other" and form.other_category.data.strip():
-            category = form.other_category.data.strip()
-        task.category = category
+        # Handle category
+        selected_category = form.category.data
 
-        # Save changes to database
+        if form.other_category.data and form.other_category.data.strip():
+            # Custom category
+            category_name = form.other_category.data.strip().title()  # Normalize to Title Case
+            category = Category.query.filter_by(
+                user_id=current_user.id,
+                name=category_name
+            ).first()
+
+            if not category:
+                category = Category(
+                    name=category_name,
+                    user_id=current_user.id
+                )
+                db.session.add(category)
+                db.session.flush()
+
+            task.category_id = category.id
+            task.category = category.name  # Keep old field in sync
+        elif selected_category:
+            task.category_id = selected_category.id
+            task.category = selected_category.name
+        else:
+            task.category_id = None
+            task.category = None
+
         db.session.commit()
-        
-        # Update Google Calendar if task is synced
+
+        # Update Google Calendar if synced
         if current_user.calendar_sync_enabled and task.google_event_id:
             service = get_calendar_service(current_user)
             if service:
                 update_calendar_event(service, task.google_event_id, task)
-        # If not synced but calendar is enabled and task has due date, create event
-        elif current_user.calendar_sync_enabled and not task.google_event_id and task.due_date:
-            service = get_calendar_service(current_user)
-            if service:
-                event_id = create_calendar_event(service, task)
-                if event_id:
-                    task.google_event_id = event_id
-                    task.synced_to_calendar = True
-                    db.session.commit()
-        
+
         flash("Your task has been updated!", "success")
-        
-        # Redirect back to referring page if it was the schedule, otherwise go to tasks
-        referrer = request.referrer
-        if referrer and '/schedule' in referrer:
-            return redirect(url_for("main.schedule"))
         return redirect(url_for("main.tasks"))
-    
-    return render_template(
-        "edit_task.html", title="Edit Task", form=form, task=task
-    )
+
+    return render_template("edit_task.html", title="Edit Task", form=form, task=task)
 
 
 @main.route('/delete_task/<int:task_id>', methods=['POST'])
@@ -600,7 +633,11 @@ def schedule():
                 'description': task.description,
                 'due_date': task.due_date.isoformat(),
                 'status': task.status,
-                'category': task.category,
+                'category': {
+                    'name': task.task_category.name if task.task_category else None,
+                    'color': task.task_category.color if task.task_category else '#3498db',
+                    'icon': task.task_category.icon if task.task_category else None
+                } if task.task_category else None,
                 'synced': task.synced_to_calendar
             })
 

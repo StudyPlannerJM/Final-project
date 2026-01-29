@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
     currentDate = new Date(targetDate);
     
     console.log('Calendar data loaded:', { weekEvents, monthEvents, tasks, targetDate, currentMonth, currentYear });
+    console.log('First task example:', tasks[0]);
     
     // Initialize calendar after data is loaded
     initializeCalendar();
@@ -392,6 +393,12 @@ function initializeCalendar() {
     }
 
     function getCategoryColor(category) {
+        // Handle new category object format
+        if (category && typeof category === 'object' && category.color) {
+            return category.color;
+        }
+        
+        // Fallback for old string format or default
         const colors = {
             'Work': '#4285f4',
             'Personal': '#ea4335',
@@ -575,6 +582,7 @@ function initializeCalendar() {
     }
 
     function showTaskDetails(task) {
+                
         isGoogleCalendarEvent = false;
         currentTaskId = task.id;
         currentEventId = null;
@@ -611,7 +619,18 @@ function initializeCalendar() {
         
         document.getElementById('detailCategory').parentElement.style.display = 'flex';
         document.getElementById('detailCategory').parentElement.querySelector('.detail-label').innerHTML = '<i class="fas fa-folder"></i> Category:';
-        document.getElementById('detailCategory').textContent = task.category || 'None';
+        
+        // Display category with color and icon if available
+        const categoryEl = document.getElementById('detailCategory');
+        if (task.category && task.category.name) {
+            const categoryHTML = `<span style="background-color: ${task.category.color}; color: white; padding: 4px 8px; border-radius: 4px; display: inline-block;">
+                ${task.category.icon ? task.category.icon + ' ' : ''}${task.category.name}
+            </span>`;
+            categoryEl.innerHTML = categoryHTML;
+        } else {
+            // Show a muted badge for uncategorized tasks
+            categoryEl.innerHTML = '<span style="background-color: #95a5a6; color: white; padding: 4px 8px; border-radius: 4px; display: inline-block; font-style: italic;">Uncategorized</span>';
+        }
         
         document.getElementById('detailStatus').parentElement.style.display = 'flex';
         document.getElementById('detailStatus').textContent = task.status || 'pending';
