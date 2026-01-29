@@ -32,12 +32,9 @@ class Task(db.Model):
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
     data_created = db.Column(db.DateTime, default=datetime.utcnow)
-    due_date = db.Column(db.DateTime, nullable=True)
-    
-    #keep this for the moment "change later"
-    category = db.Column(db.String(50), nullable=True)
-    
-    #new category column
+    due_date = db.Column(db.DateTime, nullable=True)   
+       
+    # category column
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=True)
     task_category = db.relationship('Category', backref='tasks', foreign_keys=[category_id])
     
