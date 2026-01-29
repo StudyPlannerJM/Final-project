@@ -6,7 +6,9 @@ from wtforms import (
 from wtforms.validators import (
     DataRequired, Email, EqualTo, ValidationError, Optional
 )
-from app.models import User
+from wtforms_sqlalchemy.fields import QuerySelectField
+from app.models import User, Category
+from flask_login import current_user
 
 
 class LoginForm(FlaskForm):
@@ -45,15 +47,26 @@ class TaskForm(FlaskForm):
         format="%Y-%m-%dT%H:%M",
         validators=[Optional()]
     )
-    category = SelectField(
-        "Category",
-        choices=[
-            ("Study", "Study"),
-            ("Work", "Work"),
-            ("Personal", "Personal"),
-            ("Other", "Other")
-        ],
-        validators=[DataRequired()]
+    # category = SelectField(
+    #     "Category",
+    #     choices=[
+    #         ("Study", "Study"),
+    #         ("Work", "Work"),
+    #         ("Personal", "Personal"),
+    #         ("Other", "Other")
+    #     ],
+    #     validators=[DataRequired()]
+    # )
+    
+    category = QuerySelectField(
+        'Category',
+        query_factory=lambda: Category.query.filter_by(
+            user_id=current_user.id,
+            deleted_at=None
+        ).order_by(Category.name).all(),
+        get_label='name',
+        allow_blank=True,
+        blank_text='-- No Category --'
     )
     other_category = StringField("Other Category", validators=[Optional()])
     submit = SubmitField("Save Task")
