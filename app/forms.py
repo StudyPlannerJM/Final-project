@@ -1,10 +1,10 @@
 from flask_wtf import FlaskForm
 from wtforms import (
     DateTimeLocalField, SelectField, StringField, PasswordField,
-    BooleanField, SubmitField, TextAreaField
+    BooleanField, SubmitField, TextAreaField, IntegerField, FloatField
 )
 from wtforms.validators import (
-    DataRequired, Email, EqualTo, ValidationError, Optional
+    DataRequired, Email, EqualTo, ValidationError, Optional, NumberRange
 )
 from wtforms_sqlalchemy.fields import QuerySelectField
 from app.models import User, Category
@@ -77,3 +77,31 @@ class FlashcardForm(FlaskForm):
     answer = TextAreaField("Answer", validators=[DataRequired()])
     submit = SubmitField("Save Flashcard")
 
+
+class StudyPlanForm(FlaskForm):
+    """Form for AI-powered study plan generation"""
+    subject = StringField(
+        'Subject/Topic',
+        validators=[DataRequired()],
+        render_kw={"placeholder": "e.g., Calculus, Biology"}
+    )
+    days_until_exam = IntegerField(
+        'Days Until Exam',
+        validators=[DataRequired(), NumberRange(min=1, max=365)],
+        render_kw={"placeholder": "e.g., 14"}
+    )
+    hours_per_day = FloatField(
+        'Hours Available/Day',
+        validators=[DataRequired(), NumberRange(min=0.5, max=24)],
+        render_kw={"placeholder": "e.g., 3"}
+    )
+    knowledge_level = SelectField(
+        'Current Knowledge Level',
+        choices=[
+            ('beginner', 'Beginner'),
+            ('intermediate', 'Intermediate'),
+            ('advanced', 'Advanced')
+        ],
+        validators=[DataRequired()]
+    )
+    submit = SubmitField('Generate Personalized Plan')

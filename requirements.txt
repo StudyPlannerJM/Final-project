@@ -7,8 +7,9 @@ Flask-WTF>=1.2.1,<2.0.0
 WTForms-SQLAlchemy==0.4.1
 email-validator==2.0.0
 Flask-Migrate==4.0.5
-google-auth==2.25.2
+google-auth>=2.25.2
 google-auth-oauthlib==1.2.0
 google-auth-httplib2==0.2.0
 google-api-python-client==2.111.0
 requests>=2.31.0
+google-genai>=0.2.0
