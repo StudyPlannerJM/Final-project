@@ -119,3 +119,27 @@ class Category(db.Model):
 
     def __repr__(self):
         return f'<Category {self.name}>'
+
+
+class StudyPlan(db.Model):
+    """Model for storing AI-generated study plans"""
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    # Input parameters
+    subject = db.Column(db.String(200), nullable=False)
+    days_until_exam = db.Column(db.Integer, nullable=False)
+    hours_per_day = db.Column(db.Float, nullable=False)
+    knowledge_level = db.Column(db.String(50), nullable=False)
+    
+    # Generated plan content
+    plan_content = db.Column(db.Text, nullable=False)
+    
+    # Metadata
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationship
+    user = db.relationship('User', backref=db.backref('study_plans', lazy='dynamic'))
+    
+    def __repr__(self):
+        return f'<StudyPlan {self.subject} for {self.user_id}>'
