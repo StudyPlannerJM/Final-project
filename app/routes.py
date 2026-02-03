@@ -5,8 +5,11 @@
 
 import json
 import os
+from datetime import datetime, timedelta
+from app.models import StudySession, PomodoroSession
+
 from flask import (
-    Blueprint, render_template, request, redirect, url_for, flash, current_app
+    Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify
 )
 from werkzeug.utils import secure_filename
 # Google Calendar integration functions
@@ -411,6 +414,83 @@ def settings():
 def pomodoro():
     # Pomodoro timer page - helps with time management using 25-minute work intervals
     return render_template("pomodoro.html", title="Pomodoro Timer")
+
+@main.route('/api/pomodoro/complete', methods=['POST'])
+@login_required
+def api_complete_pomodoro():
+    """
+    API endpoint to save completed Pomodoro session
+    Called from JavaScript when timer finishes
+    """
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({'success': False, 'error': 'No data provided'}), 400
+
+        # Extract data
+        duration = data.get('duration', 25)
+        task_id = data.get('task_id')  # Optional
+        completed = data.get('completed', True)
+
+        # Create Pomodoro session
+        pomodoro = PomodoroSession(
+            user_id=current_user.id,
+            task_id=task_id if task_id else None,
+            duration_minutes=duration,
+            break_duration_minutes=5,
+            start_time=datetime.utcnow() - timedelta(minutes=duration),  # Estimate start time
+            end_time=datetime.utcnow(),
+            completed=completed
+        )
+        db.session.add(pomodoro)
+
+        # Create corresponding study session
+        study_session = StudySession(
+            user_id=current_user.id,
+            task_id=task_id if task_id else None,
+            start_time=pomodoro.start_time,
+            end_time=pomodoro.end_time,
+            duration_minutes=duration
+        )
+        db.session.add(study_session)
+        db.session.flush()  # Get IDs
+
+        # Link them
+        pomodoro.study_session_id = study_session.id
+
+        # Update task's actual time
+        if task_id:
+            task = Task.query.get(task_id)
+            if task and task.user_id == current_user.id:
+                task.actual_minutes = (task.actual_minutes or 0) + duration
+
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Pomodoro session saved!',
+            'session_id': pomodoro.id,
+            'total_minutes_today': get_today_study_minutes(current_user.id)
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+def get_today_study_minutes(user_id):
+    """Helper function to get total study minutes for today"""
+    from datetime import datetime, timedelta
+
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+
+    total = db.session.query(db.func.sum(StudySession.duration_minutes)).filter(
+        StudySession.user_id == user_id,
+        StudySession.start_time >= today_start
+    ).scalar()
+
+    return total or 0
 
 
 # ==============================================================================
