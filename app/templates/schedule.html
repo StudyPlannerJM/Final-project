@@ -5,10 +5,13 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/schedule.css') }}">
 {% endblock %}
 
+{% block page_title %}Calendar{% endblock %}
+
 {% block content %}
-<div class="calendar-layout">
-    <!-- Left Sidebar: Mini Calendar + Connection Status -->
-    <aside class="calendar-sidebar">
+<div class="calendar-container">   
+    <div class="calendar-layout">
+        <!-- Left Sidebar: Mini Calendar + Connection Status -->
+        <aside class="calendar-sidebar">
         <!-- Google Calendar Connection Card -->
         <div class="calendar-integration-card">
             <div class="integration-header-mini">
@@ -318,4 +321,5 @@
 </script>
 
 <script src="{{ url_for('static', filename='js/schedule.js') }}"></script>
+</div>
 {% endblock %}
