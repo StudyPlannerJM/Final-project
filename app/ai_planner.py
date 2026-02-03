@@ -4,7 +4,8 @@
 # ==============================================================================
 
 import os
-import google.generativeai as genai
+from google import genai
+from google.genai.types import GenerateContentConfig
 from flask import current_app
 
 

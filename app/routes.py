@@ -152,10 +152,56 @@ def sync_calendar_events_to_tasks(calendar_events, user):
 @main.route('/dashboard')
 @login_required
 def dashboard():
-    # Main landing page - shows after user logs in
-    # This is the home page where users start their session
+    """Dashboard - overview of tasks and stats"""
+
+    # Existing code for tasks
+    tasks = Task.query.filter_by(user_id=current_user.id).all()
+
+    # Count tasks by status
+    todo_count = sum(1 for task in tasks if task.status == 'todo')
+    doing_count = sum(1 for task in tasks if task.status == 'doing')
+    done_count = sum(1 for task in tasks if task.status == 'done')
+
+    # Get recent tasks
+    recent_tasks = Task.query.filter_by(user_id=current_user.id).order_by(
+        Task.data_created.desc()
+    ).limit(5).all()
+
+    # NEW: Get study statistics
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    week_start = today_start - timedelta(days=7)
+
+    # Today's study time
+    today_minutes = db.session.query(db.func.sum(StudySession.duration_minutes)).filter(
+        StudySession.user_id == current_user.id,
+        StudySession.start_time >= today_start
+    ).scalar() or 0
+
+    # This week's study time
+    week_minutes = db.session.query(db.func.sum(StudySession.duration_minutes)).filter(
+        StudySession.user_id == current_user.id,
+        StudySession.start_time >= week_start
+    ).scalar() or 0
+
+    # Pomodoros completed today
+    pomodoros_today = PomodoroSession.query.filter(
+        PomodoroSession.user_id == current_user.id,
+        PomodoroSession.start_time >= today_start,
+        PomodoroSession.completed == True
+    ).count()
+
     return render_template(
-        'dashboard.html', title='Dashboard'
+        'dashboard.html',
+        title='Dashboard',
+        tasks=tasks,
+        todo_count=todo_count,
+        doing_count=doing_count,
+        done_count=done_count,
+        recent_tasks=recent_tasks,
+        # NEW: Pass study stats
+        today_minutes=today_minutes,
+        week_minutes=week_minutes,
+        pomodoros_today=pomodoros_today
     )
 
 
