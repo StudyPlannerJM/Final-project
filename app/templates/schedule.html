@@ -5,10 +5,13 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/schedule.css') }}">
 {% endblock %}
 
+{% block page_title %}Calendar{% endblock %}
+
 {% block content %}
-<div class="calendar-layout">
-    <!-- Left Sidebar: Mini Calendar + Connection Status -->
-    <aside class="calendar-sidebar">
+<div class="calendar-container">   
+    <div class="calendar-layout">
+        <!-- Left Sidebar: Mini Calendar + Connection Status -->
+        <aside class="calendar-sidebar">
         <!-- Google Calendar Connection Card -->
         <div class="calendar-integration-card">
             <div class="integration-header-mini">
@@ -31,6 +34,11 @@
 
             <div class="connection-actions">
                 {% if calendar_connected %}
+                    <form method="POST" action="{{ url_for('main.sync_existing_tasks') }}" style="margin-bottom: 8px;">
+                        <button type="submit" class="btn-sync-mini" title="Sync all unsynced tasks">
+                            <i class="fas fa-sync-alt"></i> Sync All Tasks
+                        </button>
+                    </form>
                     <a href="{{ url_for('main.disconnect_google') }}" class="btn-disconnect-mini">
                         <i class="fas fa-unlink"></i> Disconnect
                     </a>
@@ -318,4 +326,5 @@
 </script>
 
 <script src="{{ url_for('static', filename='js/schedule.js') }}"></script>
+</div>
 {% endblock %}

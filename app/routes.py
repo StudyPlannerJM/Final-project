@@ -5,8 +5,11 @@
 
 import json
 import os
+from datetime import datetime, timedelta
+from app.models import StudySession, PomodoroSession
+
 from flask import (
-    Blueprint, render_template, request, redirect, url_for, flash, current_app
+    Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify
 )
 from werkzeug.utils import secure_filename
 # Google Calendar integration functions
@@ -33,6 +36,38 @@ main = Blueprint('main', __name__)
 # ==============================================================================
 # HELPER FUNCTIONS
 # ==============================================================================
+
+def sync_unsynced_tasks_to_calendar(user):
+    """
+    Sync all existing tasks (with due dates) that aren't synced to Google Calendar.
+    Returns tuple: (success_count, total_count)
+    """
+    service = get_calendar_service(user)
+    if not service:
+        return (0, 0)
+    
+    # Get all unsynced tasks with due dates
+    unsynced_tasks = Task.query.filter_by(
+        user_id=user.id,
+        synced_to_calendar=False
+    ).filter(Task.due_date.isnot(None)).all()
+    
+    success_count = 0
+    total_count = len(unsynced_tasks)
+    
+    for task in unsynced_tasks:
+        event_id = create_calendar_event(service, task)
+        if event_id:
+            task.google_event_id = event_id
+            task.synced_to_calendar = True
+            success_count += 1
+    
+    # Commit all changes at once
+    if success_count > 0:
+        db.session.commit()
+    
+    return (success_count, total_count)
+
 
 def sync_calendar_events_to_tasks(calendar_events, user):
     """
@@ -117,10 +152,56 @@ def sync_calendar_events_to_tasks(calendar_events, user):
 @main.route('/dashboard')
 @login_required
 def dashboard():
-    # Main landing page - shows after user logs in
-    # This is the home page where users start their session
+    """Dashboard - overview of tasks and stats"""
+
+    # Existing code for tasks
+    tasks = Task.query.filter_by(user_id=current_user.id).all()
+
+    # Count tasks by status
+    todo_count = sum(1 for task in tasks if task.status == 'todo')
+    doing_count = sum(1 for task in tasks if task.status == 'doing')
+    done_count = sum(1 for task in tasks if task.status == 'done')
+
+    # Get recent tasks
+    recent_tasks = Task.query.filter_by(user_id=current_user.id).order_by(
+        Task.data_created.desc()
+    ).limit(5).all()
+
+    # NEW: Get study statistics
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    week_start = today_start - timedelta(days=7)
+
+    # Today's study time
+    today_minutes = db.session.query(db.func.sum(StudySession.duration_minutes)).filter(
+        StudySession.user_id == current_user.id,
+        StudySession.start_time >= today_start
+    ).scalar() or 0
+
+    # This week's study time
+    week_minutes = db.session.query(db.func.sum(StudySession.duration_minutes)).filter(
+        StudySession.user_id == current_user.id,
+        StudySession.start_time >= week_start
+    ).scalar() or 0
+
+    # Pomodoros completed today
+    pomodoros_today = PomodoroSession.query.filter(
+        PomodoroSession.user_id == current_user.id,
+        PomodoroSession.start_time >= today_start,
+        PomodoroSession.completed == True
+    ).count()
+
     return render_template(
-        'dashboard.html', title='Dashboard'
+        'dashboard.html',
+        title='Dashboard',
+        tasks=tasks,
+        todo_count=todo_count,
+        doing_count=doing_count,
+        done_count=done_count,
+        recent_tasks=recent_tasks,
+        # NEW: Pass study stats
+        today_minutes=today_minutes,
+        week_minutes=week_minutes,
+        pomodoros_today=pomodoros_today
     )
 
 
@@ -380,6 +461,83 @@ def pomodoro():
     # Pomodoro timer page - helps with time management using 25-minute work intervals
     return render_template("pomodoro.html", title="Pomodoro Timer")
 
+@main.route('/api/pomodoro/complete', methods=['POST'])
+@login_required
+def api_complete_pomodoro():
+    """
+    API endpoint to save completed Pomodoro session
+    Called from JavaScript when timer finishes
+    """
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({'success': False, 'error': 'No data provided'}), 400
+
+        # Extract data
+        duration = data.get('duration', 25)
+        task_id = data.get('task_id')  # Optional
+        completed = data.get('completed', True)
+
+        # Create Pomodoro session
+        pomodoro = PomodoroSession(
+            user_id=current_user.id,
+            task_id=task_id if task_id else None,
+            duration_minutes=duration,
+            break_duration_minutes=5,
+            start_time=datetime.utcnow() - timedelta(minutes=duration),  # Estimate start time
+            end_time=datetime.utcnow(),
+            completed=completed
+        )
+        db.session.add(pomodoro)
+
+        # Create corresponding study session
+        study_session = StudySession(
+            user_id=current_user.id,
+            task_id=task_id if task_id else None,
+            start_time=pomodoro.start_time,
+            end_time=pomodoro.end_time,
+            duration_minutes=duration
+        )
+        db.session.add(study_session)
+        db.session.flush()  # Get IDs
+
+        # Link them
+        pomodoro.study_session_id = study_session.id
+
+        # Update task's actual time
+        if task_id:
+            task = Task.query.get(task_id)
+            if task and task.user_id == current_user.id:
+                task.actual_minutes = (task.actual_minutes or 0) + duration
+
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Pomodoro session saved!',
+            'session_id': pomodoro.id,
+            'total_minutes_today': get_today_study_minutes(current_user.id)
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+def get_today_study_minutes(user_id):
+    """Helper function to get total study minutes for today"""
+    from datetime import datetime, timedelta
+
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+
+    total = db.session.query(db.func.sum(StudySession.duration_minutes)).filter(
+        StudySession.user_id == user_id,
+        StudySession.start_time >= today_start
+    ).scalar()
+
+    return total or 0
+
 
 # ==============================================================================
 # FLASHCARD ROUTES
@@ -504,6 +662,66 @@ def oauth2callback():
     db.session.commit()
 
     flash('Google Calendar connected successfully!', 'success')
+    
+    # Check if user has existing tasks with due dates that could be synced
+    unsynced_count = Task.query.filter_by(
+        user_id=current_user.id,
+        synced_to_calendar=False
+    ).filter(Task.due_date.isnot(None)).count()
+    
+    if unsynced_count > 0:
+        # Redirect to sync prompt
+        return redirect(url_for('main.calendar_sync_prompt', count=unsynced_count))
+    else:
+        # No tasks to sync, go directly to schedule
+        return redirect(url_for('main.schedule'))
+
+@main.route('/calendar_sync_prompt')
+@login_required
+def calendar_sync_prompt():
+    """
+    Show prompt asking user if they want to sync existing tasks to Google Calendar.
+    This is shown after first connecting Google Calendar.
+    """
+    count = request.args.get('count', 0, type=int)
+    
+    if not current_user.calendar_sync_enabled:
+        flash('Please connect Google Calendar first.', 'warning')
+        return redirect(url_for('main.schedule'))
+    
+    return render_template('calendar_sync_prompt.html', 
+                         title='Sync Tasks to Calendar',
+                         count=count)
+
+@main.route('/sync_existing_tasks', methods=['POST'])
+@login_required
+def sync_existing_tasks():
+    """
+    Sync all existing unsynced tasks to Google Calendar.
+    Called when user clicks 'Yes, Sync All' on the prompt.
+    """
+    if not current_user.calendar_sync_enabled:
+        flash('Google Calendar not connected.', 'danger')
+        return redirect(url_for('main.schedule'))
+    
+    success_count, total_count = sync_unsynced_tasks_to_calendar(current_user)
+    
+    if success_count == total_count:
+        flash(f'Successfully synced {success_count} tasks to Google Calendar!', 'success')
+    elif success_count > 0:
+        flash(f'Synced {success_count} out of {total_count} tasks. Some tasks may have failed.', 'warning')
+    else:
+        flash('Failed to sync tasks to Google Calendar.', 'danger')
+    
+    return redirect(url_for('main.schedule'))
+
+@main.route('/skip_sync_existing_tasks', methods=['POST'])
+@login_required
+def skip_sync_existing_tasks():
+    """
+    Skip syncing existing tasks. Only new tasks will auto-sync.
+    """
+    flash('Only new tasks will be synced to Google Calendar.', 'info')
     return redirect(url_for('main.schedule'))
 
 @main.route('/disconnect_google')

@@ -35,13 +35,16 @@ class Task(db.Model):
     data_created = db.Column(db.DateTime, default=datetime.utcnow)
     due_date = db.Column(db.DateTime, nullable=True)   
        
-    # category column
+    # Category column
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=True)
     task_category = db.relationship('Category', backref='tasks', foreign_keys=[category_id])
     
     is_complete = db.Column(db.Boolean, default=False)
     status = db.Column(db.String(20), default='todo', nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    # Pomodoro Session
+    actual_minutes = db.Column(db.Integer, default=0)  # Auto-calculated from sessions
     
     # Google Calendar Integration
     google_event_id = db.Column(db.String(255), nullable=True)  # Link to calendar event
@@ -144,40 +147,76 @@ class StudyPlan(db.Model):
     
     def __repr__(self):
         return f'<StudyPlan {self.subject} for {self.user_id}>'
-
-
-# ============================================================================
-# Event Listeners - Automatically triggered on database events
-# ============================================================================
-
-@event.listens_for(User, 'after_insert')
-def create_default_categories(mapper, connection, target):
-    """
-    Automatically create default categories when a new user is created.
-    This is triggered by SQLAlchemy after a User is inserted into the database.
     
-    Benefits:
-    - Separates concern from authentication logic
-    - Automatically runs whenever a user is created (any route, any method)
-    - Easy to maintain in one place
-    - Follows Single Responsibility Principle
+
+class StudySession(db.Model):
     """
-    default_categories = [
-        {'name': 'Study', 'description': 'Academic and learning tasks', 'color': '#3498db'},
-        {'name': 'Work', 'description': 'Professional tasks', 'color': '#2ecc71'},
-        {'name': 'Personal', 'description': 'Personal errands and tasks', 'color': '#e74c3c'},
-        {'name': 'Homework', 'description': 'School assignments', 'color': '#f39c12'},
-        {'name': 'Projects', 'description': 'Long-term projects', 'color': '#9b59b6'},
-    ]
-    
-    for cat_data in default_categories:
-        connection.execute(
-            Category.__table__.insert().values(  # type: ignore
-                name=cat_data['name'],
-                description=cat_data['description'],
-                color=cat_data['color'],
-                user_id=target.id,
-                is_default=True,
-                created_at=datetime.utcnow()
-            )
-        )
+    Tracks study time spent on tasks
+    Can be created manually or automatically from PomodoroSession
+    """
+    __tablename__ = 'study_session'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    # Time tracking
+    start_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    end_time = db.Column(db.DateTime, nullable=True)
+    duration_minutes = db.Column(db.Integer, nullable=True)  # Calculated on end
+
+    # Relationships
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=True)
+
+    # Optional details
+    notes = db.Column(db.Text, nullable=True)
+    productivity_rating = db.Column(db.Integer, nullable=True)  # 1-5 stars
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationships
+    user = db.relationship('User', backref=db.backref('study_sessions', lazy='dynamic'))
+    task = db.relationship('Task', backref=db.backref('study_sessions', lazy='dynamic'))
+
+    def calculate_duration(self):
+        """Calculate duration in minutes"""
+        if self.end_time and self.start_time:
+            delta = self.end_time - self.start_time
+            self.duration_minutes = int(delta.total_seconds() / 60)
+
+    def __repr__(self):
+        return f'<StudySession {self.id}: {self.duration_minutes}min>'
+
+
+class PomodoroSession(db.Model):
+    """
+    Tracks individual Pomodoro timer sessions
+    Each session can link to a StudySession
+    """
+    __tablename__ = 'pomodoro_session'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    # Session details
+    duration_minutes = db.Column(db.Integer, default=25)
+    break_duration_minutes = db.Column(db.Integer, default=5)
+
+    # Time
+    start_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    end_time = db.Column(db.DateTime, nullable=True)
+    completed = db.Column(db.Boolean, default=False)  # Did user finish or abandon?
+
+    # Relationships
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=True)
+    study_session_id = db.Column(db.Integer, db.ForeignKey('study_session.id'), nullable=True)
+
+    notes = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationships
+    user = db.relationship('User', backref=db.backref('pomodoro_sessions', lazy='dynamic'))
+    task = db.relationship('Task', backref=db.backref('pomodoro_sessions', lazy='dynamic'))
+    study_session = db.relationship('StudySession', backref=db.backref('pomodoro_session', uselist=False))
+
+    def __repr__(self):
+        return f'<PomodoroSession {self.id}: {self.duration_minutes}min>'

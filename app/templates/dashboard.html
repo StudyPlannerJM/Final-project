@@ -3,20 +3,132 @@
 
 {% block title %}{{ title }} - Study Hub{% endblock %}
 
+{% block head_extra %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
 {% block page_title %}{{ title }}{% endblock %}
 
 {% block content %}
-    <div class="dashboard-container">
-        <h2>Study Hub</h2>
-        <p>Welcome to your personalized study dashboard.</p>
-        
-        <div class="dashboard-overview">
-            <div class="dashboard-section">
-                <h3>Quick Access</h3>
-                <p><a class="btn btn-primary" href="{{ url_for('main.tasks') }}">View All Tasks</a></p>
-                <p><a class="btn btn-primary" href="{{ url_for('main.flashcards') }}">Flashcards</a></p>
-                <p><a class="btn btn-primary" href="{{ url_for('main.pomodoro') }}">Pomodoro Timer</a></p>
+<div class="dashboard-container">
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+        <h1>Welcome back, {{ current_user.username }}! 👋</h1>
+        <p class="welcome-subtitle">Here's your study progress overview</p>
+    </div>
+
+    <!-- Task Overview -->
+    <div class="section">
+        <h2 class="section-title">📋 Task Overview</h2>
+        <div class="stats-grid">
+            <div class="stat-card todo">
+                <div class="stat-icon">📝</div>
+                <div class="stat-content">
+                    <h3>{{ todo_count }}</h3>
+                    <p>To Do</p>
+                </div>
+            </div>
+            <div class="stat-card doing">
+                <div class="stat-icon">⚡</div>
+                <div class="stat-content">
+                    <h3>{{ doing_count }}</h3>
+                    <p>In Progress</p>
+                </div>
+            </div>
+            <div class="stat-card done">
+                <div class="stat-icon">✅</div>
+                <div class="stat-content">
+                    <h3>{{ done_count }}</h3>
+                    <p>Completed</p>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Study Statistics -->
+    <div class="section">
+        <h2 class="section-title">📊 Study Time</h2>
+        <div class="stats-grid four-cols">
+            <div class="stat-card study">
+                <div class="stat-icon">🕐</div>
+                <div class="stat-content">
+                    <h3>{{ today_minutes }}</h3>
+                    <p>Minutes Today</p>
+                </div>
+            </div>
+            <div class="stat-card study">
+                <div class="stat-icon">📅</div>
+                <div class="stat-content">
+                    <h3>{{ week_minutes }}</h3>
+                    <p>Minutes This Week</p>
+                </div>
+            </div>
+            <div class="stat-card study">
+                <div class="stat-icon">🍅</div>
+                <div class="stat-content">
+                    <h3>{{ pomodoros_today }}</h3>
+                    <p>Pomodoros Today</p>
+                </div>
+            </div>
+            <div class="stat-card study">
+                <div class="stat-icon">⏱️</div>
+                <div class="stat-content">
+                    <h3>{{ (week_minutes / 60) | round(1) }}</h3>
+                    <p>Hours This Week</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="section">
+        <h2 class="section-title">🚀 Quick Actions</h2>
+        <div class="quick-actions">
+            <a href="{{ url_for('main.add_task') }}" class="action-btn primary">
+                <span class="btn-icon">➕</span>
+                <span>Add Task</span>
+            </a>
+            <a href="{{ url_for('main.pomodoro') }}" class="action-btn secondary">
+                <span class="btn-icon">🍅</span>
+                <span>Start Pomodoro</span>
+            </a>
+            <a href="{{ url_for('main.schedule') }}" class="action-btn tertiary">
+                <span class="btn-icon">📅</span>
+                <span>View Schedule</span>
+            </a>
+            <a href="{{ url_for('main.ai_plan_generator') }}" class="action-btn quaternary">
+                <span class="btn-icon">🤖</span>
+                <span>AI Study Plan</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent Tasks -->
+    {% if recent_tasks %}
+    <div class="section">
+        <h2 class="section-title">📌 Recent Tasks</h2>
+        <div class="recent-tasks-list">
+            {% for task in recent_tasks %}
+            <div class="task-item">
+                <div class="task-status-dot {{ task.status }}"></div>
+                <div class="task-info">
+                    <h4>{{ task.title }}</h4>
+                    <p class="task-meta">
+                        {% if task.task_category %}
+                            <span class="task-category" style="--category-color: {{ task.task_category.color }};">
+                                {{ task.task_category.name }}
+                            </span>
+                        {% endif %}
+                        {% if task.due_date %}
+                            <span class="task-date">Due: {{ task.due_date.strftime('%b %d, %Y') }}</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <a href="{{ url_for('main.edit_task', task_id=task.id) }}" class="task-edit-btn">Edit</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}

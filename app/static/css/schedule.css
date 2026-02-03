@@ -79,12 +79,13 @@
 
 .connection-actions {
     display: flex;
+    flex-direction: column;
     gap: 8px;
 }
 
 .btn-connect-mini,
-.btn-disconnect-mini {
-    flex: 1;
+.btn-disconnect-mini,
+.btn-sync-mini {
     padding: 8px 12px;
     border-radius: 6px;
     border: none;
@@ -97,6 +98,8 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .btn-connect-mini {
@@ -106,6 +109,15 @@
 
 .btn-connect-mini:hover {
     background-color: #3367d6;
+}
+
+.btn-sync-mini {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-sync-mini:hover {
+    background-color: #218838;
 }
 
 .btn-disconnect-mini {
