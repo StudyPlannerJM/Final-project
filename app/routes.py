@@ -234,8 +234,6 @@ def add_task():
             description=form.description.data,
             due_date=form.due_date.data,
             category_id=category_id,  # Foreign key to Category table
-            # BACKWARDS COMPATIBILITY: Keep old string field in sync for now
-            category=selected_category.name if selected_category else None,
             author=current_user  # Links task to current logged-in user
         )
 

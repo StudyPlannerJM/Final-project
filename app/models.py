@@ -2,6 +2,7 @@ from app import db
 from datetime import datetime
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import event
 
 
 class User(UserMixin, db.Model):
@@ -143,3 +144,40 @@ class StudyPlan(db.Model):
     
     def __repr__(self):
         return f'<StudyPlan {self.subject} for {self.user_id}>'
+
+
+# ============================================================================
+# Event Listeners - Automatically triggered on database events
+# ============================================================================
+
+@event.listens_for(User, 'after_insert')
+def create_default_categories(mapper, connection, target):
+    """
+    Automatically create default categories when a new user is created.
+    This is triggered by SQLAlchemy after a User is inserted into the database.
+    
+    Benefits:
+    - Separates concern from authentication logic
+    - Automatically runs whenever a user is created (any route, any method)
+    - Easy to maintain in one place
+    - Follows Single Responsibility Principle
+    """
+    default_categories = [
+        {'name': 'Study', 'description': 'Academic and learning tasks', 'color': '#3498db'},
+        {'name': 'Work', 'description': 'Professional tasks', 'color': '#2ecc71'},
+        {'name': 'Personal', 'description': 'Personal errands and tasks', 'color': '#e74c3c'},
+        {'name': 'Homework', 'description': 'School assignments', 'color': '#f39c12'},
+        {'name': 'Projects', 'description': 'Long-term projects', 'color': '#9b59b6'},
+    ]
+    
+    for cat_data in default_categories:
+        connection.execute(
+            Category.__table__.insert().values(  # type: ignore
+                name=cat_data['name'],
+                description=cat_data['description'],
+                color=cat_data['color'],
+                user_id=target.id,
+                is_default=True,
+                created_at=datetime.utcnow()
+            )
+        )
