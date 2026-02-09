@@ -122,3 +122,119 @@ def format_plan_for_display(plan_content):
     plan_content = plan_content.replace('\n', '<br>')
     
     return plan_content
+
+
+def generate_flashcards_from_plan(subject, plan_content, num_cards=10):
+    """
+    Generate flashcards from a study plan using Google Gemini AI
+    
+    Args:
+        subject (str): The subject or topic
+        plan_content (str): The study plan content
+        num_cards (int): Number of flashcards to generate (default: 10)
+    
+    Returns:
+        list: List of dictionaries with 'question' and 'answer' keys
+    """
+    try:
+        # Configure the API
+        client = configure_gemini_api()
+        
+        # Create the prompt for the AI
+        prompt = f"""
+Based on the following study plan for {subject}, generate {num_cards} high-quality flashcards for effective learning.
+
+STUDY PLAN:
+{plan_content}
+
+Generate exactly {num_cards} flashcards that cover the most important concepts, terms, and ideas from this study plan.
+
+CRITICAL FORMATTING REQUIREMENTS:
+1. Return ONLY a valid JSON array with no additional text, markdown, or code blocks
+2. Each flashcard must be an object with "question" and "answer" fields
+3. Properly escape all special characters in JSON (use \\" for quotes, \\n for newlines)
+4. Avoid using backslashes in text unless absolutely necessary
+5. Keep text simple and avoid special formatting characters
+
+Example format:
+[
+  {{"question": "What is the definition of photosynthesis?", "answer": "Photosynthesis is the process by which plants convert light energy into chemical energy."}},
+  {{"question": "Explain Newton's First Law", "answer": "An object at rest stays at rest and an object in motion stays in motion unless acted upon by an external force."}}
+]
+
+Generate flashcards that:
+- Cover key concepts and terminology
+- Include both factual recall and conceptual understanding questions
+- Are clear, concise, and focused on one concept per card
+- Have complete, accurate answers
+- Are suitable for active recall practice
+
+Return ONLY the JSON array, no other text before or after.
+"""
+        
+        # Generate the flashcards using the AI with JSON response format
+        config = GenerateContentConfig(
+            response_mime_type="application/json"
+        )
+        
+        response = client.models.generate_content(
+            model='gemini-flash-latest',
+            contents=prompt,
+            config=config
+        )
+        
+        # Parse the response
+        import json
+        import re
+        
+        response_text = response.text.strip()
+        
+        # Remove markdown code blocks if present
+        response_text = re.sub(r'^```json\s*', '', response_text)
+        response_text = re.sub(r'^```\s*', '', response_text)
+        response_text = re.sub(r'\s*```$', '', response_text)
+        response_text = response_text.strip()
+        
+        # Clean up potential escape sequence issues
+        # Replace problematic backslashes that aren't part of valid escape sequences
+        # This handles cases where AI includes file paths or other backslash-containing text
+        try:
+            # Try parsing as-is first
+            flashcards = json.loads(response_text)
+        except json.JSONDecodeError as e:
+            current_app.logger.warning(f"Initial JSON parse failed: {str(e)}. Attempting to clean response.")
+            # If that fails, try to clean the text
+            # Use raw string decoder to handle escape sequences properly
+            try:
+                # Decode with strict=False to be more lenient
+                decoder = json.JSONDecoder(strict=False)
+                flashcards = decoder.decode(response_text)
+            except:
+                # Last resort: manually escape backslashes and try again
+                response_text_cleaned = response_text.replace('\\', '\\\\')
+                # But preserve valid JSON escapes
+                response_text_cleaned = response_text_cleaned.replace('\\\\n', '\\n')
+                response_text_cleaned = response_text_cleaned.replace('\\\\t', '\\t')
+                response_text_cleaned = response_text_cleaned.replace('\\\\r', '\\r')
+                response_text_cleaned = response_text_cleaned.replace('\\\\"', '\\"')
+                flashcards = json.loads(response_text_cleaned)
+        
+        # Validate the structure
+        if not isinstance(flashcards, list):
+            raise ValueError("Response is not a list")
+        
+        # Ensure all flashcards have required fields
+        validated_cards = []
+        for card in flashcards[:num_cards]:  # Limit to requested number
+            if isinstance(card, dict) and 'question' in card and 'answer' in card:
+                validated_cards.append({
+                    'question': str(card['question']).strip(),
+                    'answer': str(card['answer']).strip()
+                })
+        
+        return validated_cards
+        
+    except Exception as e:
+        current_app.logger.error(f"Error generating flashcards: {str(e)}")
+        # Return empty list on error
+        return []
