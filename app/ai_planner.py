@@ -39,49 +39,40 @@ def generate_study_plan(subject, days_until_exam, hours_per_day, knowledge_level
         
         # Create the prompt for the AI
         prompt = f"""
-You are an expert educational advisor. Create a detailed, personalized study plan based on the following information:
+You are an expert educational advisor. Create a concise, actionable study plan based on the following:
 
-**Subject/Topic:** {subject}
-**Days Until Exam:** {days_until_exam} days
-**Available Study Time:** {hours_per_day} hours per day (Total: {total_hours} hours)
-**Current Knowledge Level:** {knowledge_level}
+**Subject:** {subject}
+**Timeline:** {days_until_exam} days
+**Daily Time:** {hours_per_day} hours/day ({total_hours} total hours)
+**Level:** {knowledge_level}
 
-Please generate a comprehensive study plan that includes:
+Generate a CONCISE study plan with clear structure:
 
-1. **Overview & Goals**
-   - Brief assessment of the learning journey
-   - Key learning objectives to achieve
-   - Expected outcomes
+# 📋 Overview
+- Learning goals (2-3 key objectives)
+- Expected outcome
 
-2. **Week-by-Week Breakdown**
-   - Divide the {days_until_exam} days into clear study phases
-   - For each phase, specify:
-     * Topics to cover
-     * Recommended study methods
-     * Time allocation per topic
-     * Milestones to achieve
+# 📅 Study Schedule
+Divide the {days_until_exam} days into phases (e.g., Week 1, Week 2, or Phase 1-3):
+- **Phase [X]:** Topics to cover, time allocation, key milestone
 
-3. **Daily Study Schedule Template**
-   - Suggested daily routine structure
-   - Balance between learning new material and revision
-   - Break recommendations
+# 📖 Daily Routine
+- Morning/Afternoon/Evening study blocks
+- Include breaks (e.g., 25-min Pomodoro sessions)
 
-4. **Study Techniques & Resources**
-   - Recommended study methods based on {knowledge_level} level
-   - Suggested resources (textbooks, online courses, practice problems)
-   - Active learning strategies
+# 🎯 Study Methods
+- 3-4 most effective techniques for {knowledge_level} level
+- Recommended resources (be specific)
 
-5. **Practice & Assessment**
-   - Self-assessment checkpoints
-   - Practice problem recommendations
-   - Mock test schedule (especially in final days)
+# ✅ Assessment Points
+- When to self-test (e.g., end of each phase)
+- Practice problem schedule
+- Mock exam timing
 
-6. **Tips for Success**
-   - Subject-specific tips
-   - Memory retention techniques
-   - Exam preparation strategies
+# 💡 Success Tips
+3-5 actionable tips for {subject} mastery
 
-Please make the plan realistic, achievable, and tailored to the {knowledge_level} knowledge level. Use clear formatting with headers, bullet points, and numbered lists for easy reading.
+Keep it CONCISE and ACTIONABLE. Use markdown formatting: # for main headers, ## for subheaders, - for bullets, **bold** for emphasis.
 """
         
         # Generate the study plan using the new API
@@ -101,24 +92,73 @@ Please make the plan realistic, achievable, and tailored to the {knowledge_level
 
 def format_plan_for_display(plan_content):
     """
-    Format the AI-generated plan for better HTML display
+    Format the AI-generated plan for better HTML display with proper markdown conversion
     
     Args:
-        plan_content (str): Raw plan content from AI
+        plan_content (str): Raw plan content from AI with markdown
     
     Returns:
         str: Formatted HTML content
     """
-    # Replace markdown-style headers with HTML
     import re
     
-    # Replace **text** with <strong>text</strong>
-    plan_content = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', plan_content)
+    # Split into lines for processing
+    lines = plan_content.split('\n')
+    formatted_lines = []
+    in_list = False
     
-    # Replace *text* with <em>text</em>
-    plan_content = re.sub(r'\*(.+?)\*', r'<em>\1</em>', plan_content)
+    for line in lines:
+        stripped = line.strip()
+        
+        # Skip empty lines (we'll add spacing with CSS)
+        if not stripped:
+            if in_list:
+                formatted_lines.append('</ul>')
+                in_list = False
+            formatted_lines.append('<div class="section-spacing"></div>')
+            continue
+        
+        # Main headers (# Header with emoji)
+        if stripped.startswith('# '):
+            if in_list:
+                formatted_lines.append('</ul>')
+                in_list = False
+            header_text = stripped[2:].strip()
+            formatted_lines.append(f'<h2 class="plan-section-header">{header_text}</h2>')
+        
+        # Subheaders (## Subheader)
+        elif stripped.startswith('## '):
+            if in_list:
+                formatted_lines.append('</ul>')
+                in_list = False
+            header_text = stripped[3:].strip()
+            formatted_lines.append(f'<h3 class="plan-subsection-header">{header_text}</h3>')
+        
+        # Bullet points (- item or * item)
+        elif stripped.startswith('- ') or stripped.startswith('* '):
+            item_text = stripped[2:].strip()
+            # Format **bold** and *italic*
+            item_text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', item_text)
+            item_text = re.sub(r'\*(.+?)\*', r'<em>\1</em>', item_text)
+            
+            if not in_list:
+                formatted_lines.append('<ul class="plan-list">')
+                in_list = True
+            formatted_lines.append(f'<li>{item_text}</li>')
+        
+        # Regular paragraph text
+        else:
+            if in_list:
+                formatted_lines.append('</ul>')
+                in_list = False
+            
+            # Format **bold** and *italic*
+            text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', stripped)
+            text = re.sub(r'\*(.+?)\*', r'<em>\1</em>', text)
+            formatted_lines.append(f'<p class="plan-paragraph">{text}</p>')
     
-    # Replace line breaks with <br> tags
-    plan_content = plan_content.replace('\n', '<br>')
+    # Close any open list
+    if in_list:
+        formatted_lines.append('</ul>')
     
-    return plan_content
+    return '\n'.join(formatted_lines)
