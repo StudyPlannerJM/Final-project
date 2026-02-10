@@ -161,4 +161,4 @@ def format_plan_for_display(plan_content):
     if in_list:
         formatted_lines.append('</ul>')
     
-    return '\n'.join(formatted_lines)
+    return plan_content
