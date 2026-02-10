@@ -614,6 +614,79 @@ def delete_flashcard(flashcard_id):
     flash("Your flashcard has been deleted!", "success")
     return redirect(url_for("main.flashcards"))
 
+
+@main.route("/generate_flashcards_from_study_plan/<int:plan_id>", methods=["POST"])
+@login_required
+def generate_flashcards_from_study_plan(plan_id):
+    """Generate flashcards from a study plan using AI"""
+    # Get the study plan
+    plan = StudyPlan.query.get_or_404(plan_id)
+    
+    # Security check - verify user owns this plan
+    if plan.user_id != current_user.id:
+        flash('You are not authorized to access this plan.', 'danger')
+        return redirect(url_for('main.my_study_plans'))
+    
+    # Get number of cards from form
+    num_cards = int(request.form.get('num_cards', 10))
+    
+    try:
+        # Use Gemini AI to generate flashcards from the study plan
+        from google import genai
+        import os
+        
+        api_key = os.getenv('GEMINI_API_KEY', 'AIzaSyCbDUdL0WUWP20lS4rZM4bqGBSmUqoj54o')
+        client = genai.Client(api_key=api_key)
+        
+        prompt = f"""Based on the following study plan for {plan.subject}, generate {num_cards} flashcards 
+to help the student review key concepts. Each flashcard should have a clear question and a concise answer.
+
+Study Plan:
+{plan.plan_content}
+
+Generate exactly {num_cards} flashcards in the following format:
+Q: [Question]
+A: [Answer]
+
+Make the questions specific and the answers clear and educational."""
+        
+        response = client.models.generate_content(
+            model='gemini-flash-latest',
+            contents=prompt
+        )
+        
+        # Parse the response to extract Q&A pairs
+        flashcard_text = response.text
+        lines = flashcard_text.strip().split('\n')
+        
+        question = None
+        cards_added = 0
+        
+        for line in lines:
+            line = line.strip()
+            if line.startswith('Q:'):
+                question = line[2:].strip()
+            elif line.startswith('A:') and question:
+                answer = line[2:].strip()
+                # Create and save the flashcard
+                new_flashcard = Flashcard(
+                    question=question,
+                    answer=answer,
+                    author=current_user
+                )
+                db.session.add(new_flashcard)
+                cards_added += 1
+                question = None
+        
+        db.session.commit()
+        flash(f'Successfully generated {cards_added} flashcards from your study plan!', 'success')
+        
+    except Exception as e:
+        current_app.logger.error(f"Error generating flashcards: {str(e)}")
+        flash(f'Error generating flashcards: {str(e)}', 'danger')
+    
+    return redirect(url_for('main.flashcards'))
+
 # ==============================================================================
 # GOOGLE CALENDAR INTEGRATION ROUTES
 # ==============================================================================
