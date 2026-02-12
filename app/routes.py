@@ -470,23 +470,49 @@ def pomodoro():
 @main.route('/my-pomodoro-sessions')
 @login_required
 def my_pomodoro_sessions():
-    # Get ALL sessions for this user
-    sessions = PomodoroSession.query\
+    # Get page number from query params (default to 1)
+    page = request.args.get('page', 1, type=int)
+    per_page = 30
+    
+    # Paginated query
+    pagination = PomodoroSession.query\
         .filter_by(user_id=current_user.id)\
         .order_by(PomodoroSession.created_at.desc())\
-        .all()
+        .paginate(page=page, per_page=per_page, error_out=False)
     
-    # Calculate some useful stats
-    total_sessions = len(sessions)
-    completed_sessions = len([s for s in sessions if s.completed])
-    total_minutes = sum([s.duration_minutes for s in sessions if s.completed])
+    sessions = pagination.items
+    
+    # Calculate stats from ALL sessions (not just current page)
+    all_sessions = PomodoroSession.query.filter_by(user_id=current_user.id).all()
+    total_sessions = len(all_sessions)
+    completed_sessions = len([s for s in all_sessions if s.completed])
+    total_minutes = sum([s.duration_minutes for s in all_sessions if s.completed])
     
     return render_template('my_pomodoro_sessions.html', 
                          sessions=sessions,
+                         pagination=pagination,
                          total_sessions=total_sessions,
                          completed_sessions=completed_sessions,
                          total_minutes=total_minutes,
                          title="My Pomodoro Sessions")
+
+@main.route('/api/pomodoro/delete/<int:session_id>', methods=['DELETE'])
+@login_required
+def delete_pomodoro_session(session_id):
+    """Delete a pomodoro session"""
+    session = PomodoroSession.query.get_or_404(session_id)
+    
+    # Security check: ensure session belongs to current user
+    if session.user_id != current_user.id:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+    
+    try:
+        db.session.delete(session)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Session deleted successfully'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
     
 
 
