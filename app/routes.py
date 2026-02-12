@@ -458,8 +458,34 @@ def settings():
 @main.route("/pomodoro")
 @login_required
 def pomodoro():
-    # Pomodoro timer page - helps with time management using 25-minute work intervals
-    return render_template("pomodoro.html", title="Pomodoro Timer")
+    # Query the last 3 sessions for this user
+    recent_sessions = PomodoroSession.query\
+        .filter_by(user_id=current_user.id)\
+        .order_by(PomodoroSession.created_at.desc())\
+        .limit(3)\
+        .all()
+    
+    return render_template('pomodoro.html', recent_sessions=recent_sessions, title="Pomodoro Timer")
+
+@main.route('/my-pomodoro-sessions')
+@login_required
+def my_pomodoro_sessions():
+    # Get ALL sessions for this user
+    sessions = PomodoroSession.query\
+        .filter_by(user_id=current_user.id)\
+        .order_by(PomodoroSession.created_at.desc())\
+        .all()
+    
+    # Calculate some useful stats
+    total_sessions = len(sessions)
+    completed_sessions = len([s for s in sessions if s.completed])
+    total_minutes = sum([s.duration_minutes for s in sessions if s.completed])
+    
+    return render_template('my_pomodoro_sessions.html', 
+                         sessions=sessions,
+                         total_sessions=total_sessions,
+                         completed_sessions=completed_sessions,
+                         total_minutes=total_minutes)
 
 @main.route('/api/pomodoro/complete', methods=['POST'])
 @login_required
