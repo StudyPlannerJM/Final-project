@@ -74,9 +74,45 @@
                 </div>
                 {% endif %}
             </div>
+            
+            <div class="session-card-footer">
+                <button class="btn-delete-session" data-session-id="{{ session.id }}" title="Delete session">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
         </div>
         {% endfor %}
     </div>
+    
+    {# Pagination Controls #}
+        {% if pagination.pages > 1 %}
+        <div class="pagination">
+            {% if pagination.has_prev %}
+            <a href="{{ url_for('main.my_pomodoro_sessions', page=pagination.prev_num) }}" class="pagination-btn">
+                <i class="fas fa-chevron-left"></i> Previous
+            </a>
+            {% else %}
+            <span class="pagination-btn disabled">
+                <i class="fas fa-chevron-left"></i> Previous
+            </span>
+            {% endif %}
+            
+            <span class="pagination-info">
+                Page {{ pagination.page }} of {{ pagination.pages }}
+            </span>
+            
+            {% if pagination.has_next %}
+            <a href="{{ url_for('main.my_pomodoro_sessions', page=pagination.next_num) }}" class="pagination-btn">
+                Next <i class="fas fa-chevron-right"></i>
+            </a>
+            {% else %}
+            <span class="pagination-btn disabled">
+                Next <i class="fas fa-chevron-right"></i>
+            </span>
+            {% endif %}
+        </div>
+    {% endif %}
+    
     {% else %}
     <div class="empty-state">
         <i class="fas fa-clock"></i>
