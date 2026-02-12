@@ -486,6 +486,8 @@ def my_pomodoro_sessions():
                          total_sessions=total_sessions,
                          completed_sessions=completed_sessions,
                          total_minutes=total_minutes)
+    
+
 
 @main.route('/api/pomodoro/complete', methods=['POST'])
 @login_required

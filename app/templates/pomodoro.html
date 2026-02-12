@@ -28,6 +28,47 @@
             <p>Status: <span id="timer-status">Ready</span></p>
         </div>
     </div>
+
+    {# Recent Sessions Section - NEW #}
+    {% if recent_sessions %}
+    <div class="recent-sessions-section">
+        <h3><i class="fas fa-history"></i> Recent Sessions</h3>
+        <div class="sessions-list">
+            {% for session in recent_sessions %}
+            <div class="session-card {% if session.completed %}completed{% else %}incomplete{% endif %}">
+                <div class="session-header">
+                    {% if session.completed %}
+                    <span class="status-badge completed">
+                        <i class="fas fa-check-circle"></i> Completed
+                    </span>
+                    {% else %}
+                    <span class="status-badge incomplete">
+                        <i class="fas fa-times-circle"></i> Incomplete
+                    </span>
+                    {% endif %}
+                    <span class="session-duration">{{ session.duration_minutes }} min</span>
+                </div>
+                <div class="session-details">
+                    <p class="session-date">
+                        <i class="fas fa-calendar"></i> 
+                        {{ session.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                    </p>
+                    {% if session.notes %}
+                    <p class="session-notes">{{ session.notes }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="view-all-link">
+            <a href="{{ url_for('main.my_pomodoro_sessions') }}">
+                View All Sessions <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
 {% endblock %}
 
 {% block body_extra %}
