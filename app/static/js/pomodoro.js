@@ -1,14 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
     const timerDisplay = document.getElementById('timer-display');
-    const startBtn = document.getElementById('start-timer');
-    const pauseBtn = document.getElementById('pause-timer');
-    const resetBtn = document.getElementById('reset-timer');
-    const sessionCountSpan = document.getElementById('session-count');
-    const timerStatusSpan = document.getElementById('timer-status');
-    const time1Btn = document.getElementById('time-1');
-    const time25Btn = document.getElementById('time-25');
-    const time45Btn = document.getElementById('time-45');
-    const time60Btn = document.getElementById('time-60');
+    
+    // Only run timer code if we're on the pomodoro timer page
+    if (timerDisplay) {
+        const startBtn = document.getElementById('start-timer');
+        const pauseBtn = document.getElementById('pause-timer');
+        const resetBtn = document.getElementById('reset-timer');
+        const sessionCountSpan = document.getElementById('session-count');
+        const timerStatusSpan = document.getElementById('timer-status');
+        const time1Btn = document.getElementById('time-1');
+        const time25Btn = document.getElementById('time-25');
+        const time45Btn = document.getElementById('time-45');
+        const time60Btn = document.getElementById('time-60');
 
     let timer;
     let isRunning = false;
@@ -236,4 +239,98 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => notification.remove(), 500);
         }, 3000);
     }
+    
+    } // End of timer-specific code
+
+    // Handle delete button clicks for session history (works on all pages)
+    let sessionToDelete = null;
+    
+    function initDeleteButtons() {
+        const deleteButtons = document.querySelectorAll('.btn-delete-session');
+        console.log('Found delete buttons:', deleteButtons.length);
+        
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                sessionToDelete = this.getAttribute('data-session-id');
+                console.log('Delete clicked for session:', sessionToDelete);
+                showDeleteModal();
+            });
+        });
+        
+        // Set up confirm delete button
+        const confirmBtn = document.getElementById('confirmDeleteBtn');
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', function() {
+                if (sessionToDelete) {
+                    deleteSession(sessionToDelete);
+                }
+            });
+        }
+        
+        // Close modal when clicking overlay
+        const modal = document.getElementById('deleteModal');
+        if (modal) {
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    closeDeleteModal();
+                }
+            });
+        }
+    }
+    
+    function showDeleteModal() {
+        // Set custom message for session deletion
+        const messageEl = document.getElementById('deleteModalMessage');
+        if (messageEl) {
+            messageEl.textContent = 'Are you sure you want to delete this session?';
+        }
+        
+        const modal = document.getElementById('deleteModal');
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+    }
+    
+    window.closeDeleteModal = function() {
+        const modal = document.getElementById('deleteModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        sessionToDelete = null;
+    }
+
+    function deleteSession(sessionId) {
+        console.log('Deleting session:', sessionId);
+        
+        fetch(`/api/pomodoro/delete/${sessionId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            if (data.success) {
+                // Close modal and reload the page to show updated list
+                closeDeleteModal();
+                window.location.reload();
+            } else {
+                closeDeleteModal();
+                alert('Error deleting session: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            closeDeleteModal();
+            alert('Failed to delete session. Please try again.');
+        });
+    }
+
+    // Initialize delete buttons if they exist on the page
+    initDeleteButtons();
 });

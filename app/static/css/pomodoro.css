@@ -67,3 +67,561 @@
     font-weight: bold;
     color: var(--accent-color);
 }
+
+/* ========================================
+   RECENT SESSIONS SECTION (on main page)
+   ======================================== */
+
+.recent-sessions-section {
+    margin-top: 40px;
+    padding: 25px;
+    background: var(--card-bg, #ffffff);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.recent-sessions-section h3 {
+    margin-bottom: 20px;
+    color: var(--text-primary, #2d2d2d);
+    font-size: 1.3em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sessions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.session-card {
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #ddd;
+    background: #f9f9f9;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.session-card:hover {
+    transform: translateX(5px);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.session-card.completed {
+    border-left-color: #4CAF50;
+    background: #f1f8f4;
+}
+
+.session-card.incomplete {
+    border-left-color: #ff6b6b;
+    background: #fff5f5;
+}
+
+.session-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.status-badge.completed {
+    background: #4CAF50;
+    color: white;
+}
+
+.status-badge.incomplete {
+    background: #ff6b6b;
+    color: white;
+}
+
+.session-duration {
+    font-weight: bold;
+    color: var(--primary-color, #0066cc);
+    font-size: 1.1em;
+}
+
+.session-details {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.session-date {
+    margin: 5px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.session-notes {
+    margin-top: 8px;
+    padding: 8px;
+    background: white;
+    border-radius: 4px;
+    font-style: italic;
+    color: #555;
+}
+
+.view-all-link {
+    text-align: center;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.view-all-link a {
+    color: var(--primary-color, #0066cc);
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: gap 0.3s;
+}
+
+.view-all-link a:hover {
+    gap: 15px;
+}
+
+/* ================================================
+   MY POMODORO SESSIONS PAGE (view all page)
+   ================================================ */
+
+.my-sessions-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
+
+.sessions-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #eee;
+}
+
+.stats-cards-compact {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.stat-card-compact {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    border-left: 3px solid;
+    transition: transform 0.2s;
+}
+
+.stat-card-compact:hover {
+    transform: translateY(-2px);
+}
+
+.stat-card-compact i {
+    font-size: 1.5em;
+}
+
+.stat-card-compact.stat-card-total {
+    border-left-color: #3498db;
+}
+
+.stat-card-compact.stat-card-total i {
+    color: #3498db;
+}
+
+.stat-card-compact.stat-card-completed {
+    border-left-color: #4CAF50;
+}
+
+.stat-card-compact.stat-card-completed i {
+    color: #4CAF50;
+}
+
+.stat-card-compact.stat-card-time {
+    border-left-color: #ff9800;
+}
+
+.stat-card-compact.stat-card-time i {
+    color: #ff9800;
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.stat-value-compact {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: var(--text-primary, #2d2d2d);
+}
+
+.stat-label-compact {
+    font-size: 0.75em;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-left: 4px solid;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card-total {
+    border-left-color: #3498db;
+}
+
+.stat-card-completed {
+    border-left-color: #4CAF50;
+}
+
+.stat-card-time {
+    border-left-color: #ff9800;
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    flex-shrink: 0;
+}
+
+.stat-card-total .stat-icon {
+    background: rgba(52, 152, 219, 0.1);
+    color: #3498db;
+}
+
+.stat-card-completed .stat-icon {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4CAF50;
+}
+
+.stat-card-time .stat-icon {
+    background: rgba(255, 152, 0, 0.1);
+    color: #ff9800;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-value {
+    font-size: 2em;
+    font-weight: bold;
+    color: var(--text-primary, #2d2d2d);
+    line-height: 1;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.9em;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sessions-page-header h2 {
+    margin: 0 0 10px 0;
+    color: var(--text-primary, #2d2d2d);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.stats-summary {
+    color: #666;
+    font-size: 0.95em;
+    margin: 0;
+}
+
+.stats-summary span {
+    margin-right: 15px;
+}
+
+.sessions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.session-card-large {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-left: 5px solid #ddd;
+}
+
+.session-card-large:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.session-card-large.completed {
+    border-left-color: #4CAF50;
+}
+
+.session-card-large.incomplete {
+    border-left-color: #ff6b6b;
+}
+
+.session-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.status-badge-large {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-badge-large.completed {
+    background: #4CAF50;
+    color: white;
+}
+
+.status-badge-large.incomplete {
+    background: #ff6b6b;
+    color: white;
+}
+
+.session-duration-large {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: var(--primary-color, #0066cc);
+}
+
+.session-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.stat-item i {
+    color: var(--primary-color, #0066cc);
+    width: 20px;
+}
+
+.session-notes-large {
+    margin-top: 10px;
+    padding: 12px;
+    background: #f9f9f9;
+    border-radius: 6px;
+    border-left: 3px solid var(--primary-color, #0066cc);
+}
+
+.session-notes-large i {
+    color: var(--primary-color, #0066cc);
+    margin-right: 8px;
+}
+
+.session-notes-large p {
+    margin: 5px 0 0 0;
+    color: #555;
+    font-size: 0.9em;
+    line-height: 1.5;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.empty-state i {
+    font-size: 4em;
+    color: #ddd;
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    color: var(--text-primary, #2d2d2d);
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    color: #666;
+    margin-bottom: 25px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .sessions-page-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+    
+    .stats-cards-compact {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .stat-card-compact {
+        flex: 1;
+        min-width: 120px;
+    }
+    
+    .stats-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .sessions-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-summary span {
+        display: block;
+        margin: 5px 0;
+    }
+}
+/* Session Card Footer with Delete Button */
+.session-card-footer {
+    padding-top: 12px;
+    margin-top: 12px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-delete-session {
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85em;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.btn-delete-session:hover {
+    background: #ff5252;
+    transform: translateY(-1px);
+}
+
+.btn-delete-session:active {
+    transform: translateY(0);
+}
+
+/* Pagination Styles */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin: 30px 0;
+    padding: 20px;
+}
+
+.pagination-btn {
+    padding: 10px 20px;
+    background: white;
+    color: var(--primary-color, #0066cc);
+    border: 2px solid var(--primary-color, #0066cc);
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.pagination-btn:hover:not(.disabled) {
+    background: var(--primary-color, #0066cc);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 102, 204, 0.2);
+}
+
+.pagination-btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-color: #ccc;
+    color: #999;
+}
+
+.pagination-info {
+    font-weight: 600;
+    color: var(--text-primary, #2d2d2d);
+    padding: 0 15px;
+}
+
+@media (max-width: 768px) {
+    .pagination {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .pagination-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
