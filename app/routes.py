@@ -485,7 +485,8 @@ def my_pomodoro_sessions():
                          sessions=sessions,
                          total_sessions=total_sessions,
                          completed_sessions=completed_sessions,
-                         total_minutes=total_minutes)
+                         total_minutes=total_minutes,
+                         title="My Pomodoro Sessions")
     
 
 

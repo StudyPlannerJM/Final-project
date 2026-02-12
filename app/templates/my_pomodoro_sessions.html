@@ -1,19 +1,43 @@
-<!doctype html>
+<!DOCTYPE html>
 {% extends "base.html" %}
 
 {% block title %}My Pomodoro Sessions{% endblock %}
 
+{% block page_title %}My Pomodoro Sessions{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pomodoro.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="my-sessions-container">
     <div class="sessions-page-header">
-        <div>
-            <h2><i class="fas fa-clock"></i> My Pomodoro Sessions</h2>
-            <p class="stats-summary">
-                <span><strong>{{ total_sessions }}</strong> total sessions</span> • 
-                <span><strong>{{ completed_sessions }}</strong> completed</span> • 
-                <span><strong>{{ total_minutes }}</strong> minutes studied</span>
-            </p>
+        <div class="stats-cards-compact">
+            <div class="stat-card-compact stat-card-total">
+                <i class="fas fa-list"></i>
+                <div class="stat-info">
+                    <span class="stat-value-compact">{{ total_sessions }}</span>
+                    <span class="stat-label-compact">Total</span>
+                </div>
+            </div>
+            
+            <div class="stat-card-compact stat-card-completed">
+                <i class="fas fa-check-circle"></i>
+                <div class="stat-info">
+                    <span class="stat-value-compact">{{ completed_sessions }}</span>
+                    <span class="stat-label-compact">Completed</span>
+                </div>
+            </div>
+            
+            <div class="stat-card-compact stat-card-time">
+                <i class="fas fa-clock"></i>
+                <div class="stat-info">
+                    <span class="stat-value-compact">{{ total_minutes }}</span>
+                    <span class="stat-label-compact">Minutes</span>
+                </div>
+            </div>
         </div>
+        
         <a href="{{ url_for('main.pomodoro') }}" class="btn btn-primary">
             <i class="fas fa-play"></i> Back to Timer
         </a>
