@@ -17,6 +17,65 @@ document.addEventListener('DOMContentLoaded', () => {
     let sessionCount = 0;
     let isBreak = false;
     let currentSessionDuration = 25; // Track the actual duration for current session in minutes
+    let endTime = null; // Track when timer should end
+
+    // Restore timer state from localStorage
+    function restoreTimerState() {
+        const savedState = localStorage.getItem('pomodoroState');
+        if (savedState) {
+            const state = JSON.parse(savedState);
+            workDuration = state.workDuration;
+            sessionCount = state.sessionCount;
+            isBreak = state.isBreak;
+            currentSessionDuration = state.currentSessionDuration;
+            
+            if (state.isRunning && state.endTime) {
+                // Calculate remaining time based on end timestamp
+                const now = Date.now();
+                const remaining = Math.floor((state.endTime - now) / 1000);
+                
+                if (remaining > 0) {
+                    timeLeft = remaining;
+                    endTime = state.endTime;
+                    startTimer();
+                } else {
+                    // Timer expired while away - handle completion
+                    timeLeft = 0;
+                    handleTimerComplete();
+                }
+            } else {
+                timeLeft = state.timeLeft;
+            }
+            
+            // Update active button state
+            const durationMinutes = workDuration / 60;
+            document.querySelectorAll('.btn-time').forEach(btn => btn.classList.remove('active'));
+            if (durationMinutes === 1) time1Btn.classList.add('active');
+            else if (durationMinutes === 25) time25Btn.classList.add('active');
+            else if (durationMinutes === 45) time45Btn.classList.add('active');
+            else if (durationMinutes === 60) time60Btn.classList.add('active');
+        }
+        
+        if (sessionCountSpan) sessionCountSpan.textContent = sessionCount;
+        updateDisplay();
+    }
+
+    // Save timer state to localStorage
+    function saveTimerState() {
+        const state = {
+            isRunning,
+            workDuration,
+            timeLeft,
+            sessionCount,
+            isBreak,
+            currentSessionDuration,
+            endTime
+        };
+        localStorage.setItem('pomodoroState', JSON.stringify(state));
+        
+        // Trigger event for other pages to update
+        window.dispatchEvent(new Event('pomodoroStateChanged'));
+    }
 
     function updateDisplay() {
         const minutes = Math.floor(timeLeft / 60);
@@ -24,33 +83,52 @@ document.addEventListener('DOMContentLoaded', () => {
         timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }
 
+    function handleTimerComplete() {
+        if (!isBreak) {
+            sessionCount++;
+            if (sessionCountSpan) sessionCountSpan.textContent = sessionCount;
+            
+            // Save Pomodoro session to database with the actual session duration
+            savePomodoroSession(currentSessionDuration);
+            
+            alert('Pomodoro session complete! Time for a break.');
+            timeLeft = 5 * 60; // 5-minute break
+            isBreak = true;
+        } else {
+            alert('Break over! Time to work again.');
+            timeLeft = workDuration; // Return to selected work duration
+            isBreak = false;
+        }
+        if (timerStatusSpan) timerStatusSpan.textContent = 'Ready';
+        endTime = null;
+        saveTimerState();
+        updateDisplay();
+    }
+
     function startTimer() {
         if (isRunning) return;
         isRunning = true;
-        timerStatusSpan.textContent = isBreak ? 'Break' : 'Working';
+        
+        // Set end time based on current timeLeft
+        endTime = Date.now() + (timeLeft * 1000);
+        
+        if (timerStatusSpan) timerStatusSpan.textContent = isBreak ? 'Break' : 'Working';
+        saveTimerState();
+        
         timer = setInterval(() => {
-            timeLeft--;
-            updateDisplay();
-            if (timeLeft <= 0) {
+            // Calculate time left based on end timestamp for accuracy
+            const now = Date.now();
+            const remaining = Math.floor((endTime - now) / 1000);
+            
+            if (remaining <= 0) {
                 clearInterval(timer);
                 isRunning = false;
-                if (!isBreak) {
-                    sessionCount++;
-                    sessionCountSpan.textContent = sessionCount;
-                    
-                    // Save Pomodoro session to database with the actual session duration
-                    savePomodoroSession(currentSessionDuration);
-                    
-                    alert('Pomodoro session complete! Time for a break.');
-                    timeLeft = 5 * 60; // 5-minute break
-                    isBreak = true;
-                } else {
-                    alert('Break over! Time to work again.');
-                    timeLeft = workDuration; // Return to selected work duration
-                    isBreak = false;
-                }
-                timerStatusSpan.textContent = 'Ready';
+                timeLeft = 0;
+                handleTimerComplete();
+            } else {
+                timeLeft = remaining;
                 updateDisplay();
+                saveTimerState();
             }
         }, 1000);
     }
@@ -58,7 +136,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function pauseTimer() {
         clearInterval(timer);
         isRunning = false;
-        timerStatusSpan.textContent = 'Paused';
+        endTime = null;
+        if (timerStatusSpan) timerStatusSpan.textContent = 'Paused';
+        saveTimerState();
     }
 
     function resetTimer() {
@@ -67,8 +147,10 @@ document.addEventListener('DOMContentLoaded', () => {
         timeLeft = workDuration;
         sessionCount = 0;
         isBreak = false;
-        timerStatusSpan.textContent = 'Ready';
-        sessionCountSpan.textContent = sessionCount;
+        endTime = null;
+        if (timerStatusSpan) timerStatusSpan.textContent = 'Ready';
+        if (sessionCountSpan) sessionCountSpan.textContent = sessionCount;
+        saveTimerState();
         updateDisplay();
     }
 
@@ -81,7 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
         timeLeft = workDuration;
         currentSessionDuration = minutes; // Track the duration for this session
         isBreak = false;
-        timerStatusSpan.textContent = 'Ready';
+        if (timerStatusSpan) timerStatusSpan.textContent = 'Ready';
+        saveTimerState();
         updateDisplay();
         
         // Update active button state
@@ -89,15 +172,16 @@ document.addEventListener('DOMContentLoaded', () => {
         event.target.classList.add('active');
     }
 
-    startBtn.addEventListener('click', startTimer);
-    pauseBtn.addEventListener('click', pauseTimer);
-    resetBtn.addEventListener('click', resetTimer);
-    time1Btn.addEventListener('click', () => setWorkDuration(1));
-    time25Btn.addEventListener('click', () => setWorkDuration(25));
-    time45Btn.addEventListener('click', () => setWorkDuration(45));
-    time60Btn.addEventListener('click', () => setWorkDuration(60));
-
-    updateDisplay(); // Initial display
+    // Restore state first
+    restoreTimerState();
+    
+    if (startBtn) startBtn.addEventListener('click', startTimer);
+    if (pauseBtn) pauseBtn.addEventListener('click', pauseTimer);
+    if (resetBtn) resetBtn.addEventListener('click', resetTimer);
+    if (time1Btn) time1Btn.addEventListener('click', () => setWorkDuration(1));
+    if (time25Btn) time25Btn.addEventListener('click', () => setWorkDuration(25));
+    if (time45Btn) time45Btn.addEventListener('click', () => setWorkDuration(45));
+    if (time60Btn) time60Btn.addEventListener('click', () => setWorkDuration(60));
 
     // Function to save completed Pomodoro session to database
     function savePomodoroSession(durationMinutes) {
