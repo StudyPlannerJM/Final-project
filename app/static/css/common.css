@@ -256,3 +256,100 @@ body.dark-theme .btn-secondary:hover {
         margin-bottom: 10px;
     }
 }
+
+/* Floating Pomodoro Timer Widget */
+#floating-pomodoro {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    min-width: 180px;
+    animation: slideIn 0.3s ease-out;
+    font-family: 'Inter', sans-serif;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.floating-timer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.floating-timer-display {
+    font-size: 28px;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 2px;
+}
+
+.floating-timer-status {
+    font-size: 12px;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.floating-timer-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.floating-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+
+.floating-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.floating-btn:active {
+    transform: scale(0.95);
+}
+
+/* Responsive adjustments for floating timer */
+@media (max-width: 768px) {
+    #floating-pomodoro {
+        bottom: 10px;
+        right: 10px;
+        min-width: 150px;
+        padding: 12px 15px;
+    }
+
+    .floating-timer-display {
+        font-size: 24px;
+    }
+
+    .floating-timer-status {
+        font-size: 10px;
+    }
+
+    .floating-btn {
+        padding: 5px 8px;
+        font-size: 14px;
+    }
+}
