@@ -236,4 +236,43 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => notification.remove(), 500);
         }, 3000);
     }
+
+    // Handle delete button clicks for session history
+    function initDeleteButtons() {
+        const deleteButtons = document.querySelectorAll('.btn-delete-session');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const sessionId = this.getAttribute('data-session-id');
+                
+                if (confirm('Are you sure you want to delete this session? This action cannot be undone.')) {
+                    deleteSession(sessionId);
+                }
+            });
+        });
+    }
+
+    function deleteSession(sessionId) {
+        fetch(`/api/pomodoro/delete/${sessionId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Reload the page to show updated list
+                window.location.reload();
+            } else {
+                alert('Error deleting session: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to delete session. Please try again.');
+        });
+    }
+
+    // Initialize delete buttons if they exist on the page
+    initDeleteButtons();
 });
