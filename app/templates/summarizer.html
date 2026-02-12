@@ -1,3 +1,4 @@
+<!doctype html>
 {% extends 'base.html' %}
 
 {% block title %}{{ title }} - Study Planner{% endblock %}
@@ -35,7 +36,7 @@
                         </div>
                         <div class="summary-card-body">
                             <p class="summary-preview">
-                                {{ summary.summary_text[:150] }}{% if summary.summary_text|length > 150 %}...{% endif %}
+                                {{ summary.summary_text[:150] }}{% if summary.summary_text|length &gt; 150 %}...{% endif %}
                             </p>
                             <div class="summary-meta">
                                 <span class="meta-item">
