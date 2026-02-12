@@ -1,0 +1,67 @@
+<!doctype html>
+{% extends "base.html" %}
+
+{% block title %}My Pomodoro Sessions{% endblock %}
+
+{% block content %}
+<div class="my-sessions-container">
+    <div class="sessions-page-header">
+        <div>
+            <h2><i class="fas fa-clock"></i> My Pomodoro Sessions</h2>
+            <p class="stats-summary">
+                <span><strong>{{ total_sessions }}</strong> total sessions</span> • 
+                <span><strong>{{ completed_sessions }}</strong> completed</span> • 
+                <span><strong>{{ total_minutes }}</strong> minutes studied</span>
+            </p>
+        </div>
+        <a href="{{ url_for('main.pomodoro') }}" class="btn btn-primary">
+            <i class="fas fa-play"></i> Back to Timer
+        </a>
+    </div>
+
+    {% if sessions %}
+    <div class="sessions-grid">
+        {% for session in sessions %}
+        <div class="session-card-large {% if session.completed %}completed{% else %}incomplete{% endif %}">
+            <div class="session-card-header">
+                <div class="status-badge-large {% if session.completed %}completed{% else %}incomplete{% endif %}">
+                    {% if session.completed %}
+                    <i class="fas fa-check-circle"></i> Completed
+                    {% else %}
+                    <i class="fas fa-times-circle"></i> Incomplete
+                    {% endif %}
+                </div>
+                <span class="session-duration-large">{{ session.duration_minutes }} min</span>
+            </div>
+            
+            <div class="session-card-body">
+                <div class="stat-item">
+                    <i class="fas fa-calendar"></i>
+                    <span>{{ session.created_at.strftime('%B %d, %Y') }}</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-clock"></i>
+                    <span>{{ session.created_at.strftime('%I:%M %p') }}</span>
+                </div>
+                {% if session.notes %}
+                <div class="session-notes-large">
+                    <i class="fas fa-sticky-note"></i>
+                    <p>{{ session.notes }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-clock"></i>
+        <h3>No Pomodoro Sessions Yet</h3>
+        <p>Start your first study session to track your progress!</p>
+        <a href="{{ url_for('main.pomodoro') }}" class="btn btn-primary">
+            <i class="fas fa-play"></i> Start Timer
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
