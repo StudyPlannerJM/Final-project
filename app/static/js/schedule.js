@@ -200,6 +200,14 @@ function initializeCalendar() {
             mainHeader.textContent = `${monthNames[currentMonth - 1]}, ${currentYear}`;
         }
     }
+    function updateMainHeaderForDayView() {
+        const mainHeader = document.getElementById('mainCalendarHeader');
+        if (mainHeader) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dateStr = currentDate.toLocaleDateString('en-US', options);
+            mainHeader.textContent = dateStr;
+        }
+    }
 
     // =============================================================================
     // WEEK NAVIGATION
@@ -297,6 +305,7 @@ function initializeCalendar() {
                 activeView = 'day';
                 document.getElementById('prevWeek').title = 'Previous Day';
                 document.getElementById('nextWeek').title = 'Next Day';
+                updateMainHeaderForDayView();
                 document.getElementById('weekView').style.display = 'none';
                 document.getElementById('monthView').style.display = 'none';
                 document.getElementById('dayView').style.display = 'block';
@@ -462,6 +471,25 @@ function initializeCalendar() {
 
         const dateStr = dayEventsColumn.getAttribute('data-date');
         if (!dateStr) return;
+
+        // Update the large day header with formatted date and TODAY badge
+        const dayHeader = document.getElementById('dayViewDateHeader');
+        if (dayHeader) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const formattedDate = currentDate.toLocaleDateString('en-US', options);
+            
+            // Check if viewing today
+            const today = new Date();
+            const isToday = currentDate.toDateString() === today.toDateString();
+            
+            if (isToday) {
+                dayHeader.innerHTML = `${formattedDate} <span class="today-badge">TODAY</span>`;
+            } else {
+                dayHeader.textContent = formattedDate;
+            }
+        }
+
+        updateMainHeaderForDayView();
 
         // Clear existing events
         dayEventsColumn.querySelectorAll('.event-block').forEach(el => el.remove());
