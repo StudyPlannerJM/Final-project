@@ -217,6 +217,10 @@ function initializeCalendar() {
             updateMainCalendarHeader();
             renderMiniCalendar();
             renderMonthView();
+        } else if (activeView === 'day') {
+            // Navigate to previous day
+            currentDate.setDate(currentDate.getDate() - 1);
+            navigateToDate(currentDate);
         } else {
             // Navigate to previous week
             currentDate.setDate(currentDate.getDate() - 7);
@@ -236,6 +240,10 @@ function initializeCalendar() {
             updateMainCalendarHeader();
             renderMiniCalendar();
             renderMonthView();
+        } else if (activeView === 'day') {
+            // Navigate to next day
+            currentDate.setDate(currentDate.getDate() + 1);
+            navigateToDate(currentDate);
         } else {
             // Navigate to next week
             currentDate.setDate(currentDate.getDate() + 7);
@@ -286,8 +294,14 @@ function initializeCalendar() {
                 document.querySelector('.week-days-header').style.display = 'none';
                 renderMonthView();
             } else if (view === 'day') {
-                activeView = 'day'
-                alert('Day view coming soon! Week view shows daily time slots.');
+                activeView = 'day';
+                document.getElementById('prevWeek').title = 'Previous Day';
+                document.getElementById('nextWeek').title = 'Next Day';
+                document.getElementById('weekView').style.display = 'none';
+                document.getElementById('monthView').style.display = 'none';
+                document.getElementById('dayView').style.display = 'block';
+                document.querySelector('.week-days-header').style.display = 'none';
+                renderDayView();
             }
         });
     });
@@ -435,6 +449,121 @@ function initializeCalendar() {
                 slot.style.height = `${newHeight}px`;
                 slot.style.minHeight = `${newHeight}px`;
             });
+        });
+    }
+
+        // =============================================================================
+    // RENDER DAY VIEW
+    // =============================================================================
+
+    function renderDayView() {
+        const dayEventsColumn = document.getElementById('dayEventsColumn');
+        if (!dayEventsColumn) return;
+
+        const dateStr = dayEventsColumn.getAttribute('data-date');
+        if (!dateStr) return;
+
+        // Clear existing events
+        dayEventsColumn.querySelectorAll('.event-block').forEach(el => el.remove());
+
+        // Reset all hour slot heights
+        const timeSlots = document.querySelector('.day-grid .time-column').querySelectorAll('.time-slot');
+        dayEventsColumn.querySelectorAll('.hour-slot').forEach(slot => {
+            slot.style.height = '60px';
+            slot.style.minHeight = '60px';
+        });
+
+        // Track events per hour for height adjustment
+        const eventsPerHour = new Array(24).fill(0);
+
+        // Render Google Calendar events
+        weekEvents.forEach(event => {
+            const eventDate = event.start.split('T')[0];
+            if (eventDate !== dateStr) return;
+
+            const startDate = new Date(event.start);
+            const endDate = new Date(event.end);
+            const startHour = startDate.getHours();
+
+            const hourSlot = dayEventsColumn.querySelector(`.hour-slot[data-hour="${startHour}"]`);
+            if (!hourSlot) return;
+
+            eventsPerHour[startHour]++;
+
+            const eventBlock = document.createElement('div');
+            eventBlock.className = 'event-block calendar-event';
+            eventBlock.innerHTML = `
+                <div class="event-time-range">
+                    ${formatTime(startDate)} - ${formatTime(endDate)}
+                </div>
+                <div class="event-title">${event.title}</div>
+            `;
+
+            eventBlock.style.cursor = 'pointer';
+            eventBlock.addEventListener('click', function(e) {
+                e.stopPropagation();
+                showCalendarEventDetails(event);
+            });
+
+            hourSlot.appendChild(eventBlock);
+        });
+
+        // Render local tasks
+        tasks.forEach(task => {
+            if (!task.due_date) return;
+
+            const taskDate = task.due_date.split('T')[0];
+            if (taskDate !== dateStr) return;
+
+            const [datePart, timePart] = task.due_date.split('T');
+            const [year, month, day] = datePart.split('-').map(Number);
+            const [hour, minute] = timePart.split(':').map(Number);
+
+            const hourSlot = dayEventsColumn.querySelector(`.hour-slot[data-hour="${hour}"]`);
+            if (!hourSlot) return;
+
+            eventsPerHour[hour]++;
+
+            const taskBlock = document.createElement('div');
+            taskBlock.className = 'event-block task-block';
+            taskBlock.classList.add(`status-${task.status}`);
+            if (task.synced) taskBlock.classList.add('synced');
+
+            const categoryColor = getCategoryColor(task.category);
+            taskBlock.style.borderLeftColor = categoryColor;
+            taskBlock.style.backgroundColor = categoryColor + '25';
+
+            const taskDateObj = new Date(year, month - 1, day, hour, minute);
+            taskBlock.innerHTML = `
+                <div class="event-time-range">${formatTime(taskDateObj)}</div>
+                <div class="event-title">${task.title}</div>
+            `;
+
+            taskBlock.style.cursor = 'pointer';
+            taskBlock.addEventListener('click', function(e) {
+                e.stopPropagation();
+                showTaskDetails(task);
+            });
+
+            hourSlot.appendChild(taskBlock);
+        });
+
+        // Adjust hour slot heights based on event count
+        eventsPerHour.forEach((count, hour) => {
+            if (count > 1) {
+                const newHeight = count * 60;
+
+                if (timeSlots[hour]) {
+                    timeSlots[hour].style.height = `${newHeight}px`;
+                    timeSlots[hour].style.minHeight = `${newHeight}px`;
+                }
+
+                const hourSlot = dayEventsColumn.querySelector(`.hour-slot[data-hour="${hour}"]`);
+                if (hourSlot) {
+                    hourSlot.style.height = `${newHeight}px`;
+                    hourSlot.style.minHeight = `${newHeight}px`;
+                }
+            }
         });
     }
 
@@ -736,6 +865,7 @@ function initializeCalendar() {
 
     renderMiniCalendar();
     renderWeekEvents();
+    
 
     // =============================================================================
     // MONTH VIEW RENDERING
