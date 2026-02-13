@@ -21,12 +21,31 @@ document.addEventListener('DOMContentLoaded', function() {
     currentYear = calendarData.currentYear || new Date().getFullYear();
     currentDate = new Date(targetDate);
     
-    console.log('Calendar data loaded:', { weekEvents, monthEvents, tasks, targetDate, currentMonth, currentYear });
-    console.log('First task example:', tasks[0]);
-    
     // Initialize calendar after data is loaded
     initializeCalendar();
 });
+
+// =============================================================================
+// HELPER FUNCTIONS (Global Scope)
+// =============================================================================
+
+function updateMainCalendarHeader() {
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                       'July', 'August', 'September', 'October', 'November', 'December'];
+    const mainHeader = document.getElementById('mainCalendarHeader');
+    if (mainHeader) {
+        mainHeader.textContent = `${monthNames[currentMonth - 1]}, ${currentYear}`;
+    }
+}
+
+function updateMainHeaderForDayView() {
+    const mainHeader = document.getElementById('mainCalendarHeader');
+    if (mainHeader) {
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const dateStr = currentDate.toLocaleDateString('en-US', options);
+        mainHeader.textContent = dateStr;
+    }
+}
 
 function initializeCalendar() {
     // =============================================================================
@@ -192,22 +211,6 @@ function initializeCalendar() {
         document.getElementById('currentMonthYear').textContent = `${monthNames[currentMonth - 1]} ${currentYear}`;
     }
 
-    function updateMainCalendarHeader() {
-        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                           'July', 'August', 'September', 'October', 'November', 'December'];
-        const mainHeader = document.getElementById('mainCalendarHeader');
-        if (mainHeader) {
-            mainHeader.textContent = `${monthNames[currentMonth - 1]}, ${currentYear}`;
-        }
-    }
-    function updateMainHeaderForDayView() {
-        const mainHeader = document.getElementById('mainCalendarHeader');
-        if (mainHeader) {
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const dateStr = currentDate.toLocaleDateString('en-US', options);
-            mainHeader.textContent = dateStr;
-        }
-    }
     function updateDayViewDate() {
     // Update the data-date attribute on the day events column
         const dayEventsColumn = document.getElementById('dayEventsColumn');
@@ -236,8 +239,7 @@ function initializeCalendar() {
         } else if (activeView === 'day') {
             // Navigate to previous day
             currentDate.setDate(currentDate.getDate() - 1);
-            updateDayViewDate();
-            renderDayView();
+            navigateToDate(currentDate, 'day');
         } else {
             // Navigate to previous week
             currentDate.setDate(currentDate.getDate() - 7);
@@ -260,8 +262,7 @@ function initializeCalendar() {
         } else if (activeView === 'day') {
             // Navigate to next day
             currentDate.setDate(currentDate.getDate() + 1);
-            updateDayViewDate();
-            renderDayView();
+            navigateToDate(currentDate, 'day');
         } else {
             // Navigate to next week
             currentDate.setDate(currentDate.getDate() + 7);
@@ -273,9 +274,16 @@ function initializeCalendar() {
         navigateToDate(new Date());
     });
 
-    function navigateToDate(date) {
+    function navigateToDate(date, view = null) {
         const dateStr = date.toISOString().split('T')[0];
-        window.location.href = `/schedule?date=${dateStr}`;
+        const viewParam = view || activeView;
+        
+        // Only add view parameter if not week (week is default)
+        if (viewParam && viewParam !== 'week') {
+            window.location.href = `/schedule?date=${dateStr}&view=${viewParam}`;
+        } else {
+            window.location.href = `/schedule?date=${dateStr}`;
+        }
     }
 
     // =============================================================================
@@ -301,6 +309,7 @@ function initializeCalendar() {
                 document.getElementById('nextWeek').title = 'Next Week';
                 document.getElementById('weekView').style.display = 'grid';
                 document.getElementById('monthView').style.display = 'none';
+                document.getElementById('dayView').style.display = 'none';
                 document.querySelector('.week-days-header').style.display = 'grid';
             } else if (view === 'month') {
                 activeView = 'month';
@@ -309,6 +318,7 @@ function initializeCalendar() {
                 updateMainCalendarHeader();
                 document.getElementById('weekView').style.display = 'none';
                 document.getElementById('monthView').style.display = 'block';
+                document.getElementById('dayView').style.display = 'none';
                 document.querySelector('.week-days-header').style.display = 'none';
                 renderMonthView();
             } else if (view === 'day') {
@@ -385,8 +395,6 @@ function initializeCalendar() {
             const taskDate = new Date(year, month - 1, day, hour, minute);
             const dateStr = datePart;
             
-            console.log(`Task: ${task.title}, Hour: ${hour}, Minute: ${minute}, Date: ${dateStr}`);
-            
             const dayColumn = document.querySelector(`.day-column[data-date="${dateStr}"]`);
             if (!dayColumn) {
                 console.warn(`No day column found for date: ${dateStr}`);
@@ -428,7 +436,6 @@ function initializeCalendar() {
             });
 
             hourSlot.appendChild(taskBlock);
-            console.log(`Task appended to hour slot ${hour}`);
         });
         
         // Adjust hour slot heights based on number of tasks
@@ -443,9 +450,6 @@ function initializeCalendar() {
             dayColumn.querySelectorAll('.hour-slot').forEach(hourSlot => {
                 const hour = parseInt(hourSlot.getAttribute('data-hour'));
                 const tasksInSlot = hourSlot.querySelectorAll('.event-block').length;
-                if (tasksInSlot > 0) {
-                    console.log(`Hour ${hour}: ${tasksInSlot} tasks`);
-                }
                 maxTasksPerHour[hour] = Math.max(maxTasksPerHour[hour], tasksInSlot);
             });
         });
@@ -458,9 +462,6 @@ function initializeCalendar() {
             if (timeSlots[hour]) {
                 timeSlots[hour].style.height = `${newHeight}px`;
                 timeSlots[hour].style.minHeight = `${newHeight}px`;
-                if (taskCount > 1) {
-                    console.log(`Setting hour ${hour} height to ${newHeight}px for ${taskCount} tasks`);
-                }
             }
             
             // Update all day column hour slots for this hour
@@ -471,16 +472,22 @@ function initializeCalendar() {
         });
     }
 
-        // =============================================================================
+    // =============================================================================
     // RENDER DAY VIEW
     // =============================================================================
 
     function renderDayView() {
         const dayEventsColumn = document.getElementById('dayEventsColumn');
-        if (!dayEventsColumn) return;
+        if (!dayEventsColumn) {
+            console.error('dayEventsColumn not found!');
+            return;
+        }
 
         const dateStr = dayEventsColumn.getAttribute('data-date');
-        if (!dateStr) return;
+        if (!dateStr) {
+            console.error('No data-date attribute found!');
+            return;
+        }
 
         // Update the large day header with formatted date and TODAY badge
         const dayHeader = document.getElementById('dayViewDateHeader');
@@ -902,8 +909,65 @@ function initializeCalendar() {
     // =============================================================================
 
     renderMiniCalendar();
-    renderWeekEvents();
     
+    // =============================================================================
+    // CHECK URL PARAMETER AND RENDER APPROPRIATE VIEW
+    // =============================================================================
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const viewParam = urlParams.get('view');
+    
+    if (viewParam === 'day') {
+        // Initialize day view
+        activeView = 'day';
+        
+        // Update view buttons
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.getAttribute('data-view') === 'day') {
+                btn.classList.add('active');
+            }
+        });
+        
+        // Update navigation buttons
+        document.getElementById('prevWeek').title = 'Previous Day';
+        document.getElementById('nextWeek').title = 'Next Day';
+        
+        // Show day view
+        updateMainHeaderForDayView();
+        document.getElementById('weekView').style.display = 'none';
+        document.getElementById('monthView').style.display = 'none';
+        document.getElementById('dayView').style.display = 'block';
+        document.querySelector('.week-days-header').style.display = 'none';
+        renderDayView();
+    } else if (viewParam === 'month') {
+        // Initialize month view
+        activeView = 'month';
+        
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.getAttribute('data-view') === 'month') {
+                btn.classList.add('active');
+            }
+        });
+        
+        document.getElementById('prevWeek').title = 'Previous Month';
+        document.getElementById('nextWeek').title = 'Next Month';
+        updateMainCalendarHeader();
+        document.getElementById('weekView').style.display = 'none';
+        document.getElementById('monthView').style.display = 'block';
+        document.getElementById('dayView').style.display = 'none';
+        document.querySelector('.week-days-header').style.display = 'none';
+        renderMonthView();
+    } else {
+        // Default: render week view
+        activeView = 'week';
+        document.getElementById('weekView').style.display = 'grid';
+        document.getElementById('monthView').style.display = 'none';
+        document.getElementById('dayView').style.display = 'none';
+        document.querySelector('.week-days-header').style.display = 'grid';
+        renderWeekEvents();
+    }
 
     // =============================================================================
     // MONTH VIEW RENDERING
@@ -1056,10 +1120,9 @@ function initializeCalendar() {
             // Add click handler for empty space
             cell.addEventListener('click', function() {
                 // Could navigate to day view or show add event dialog
-                console.log('Clicked date:', dateStr);
             });
             
             monthDaysGrid.appendChild(cell);
         }
     }
-}
+} // End of initializeCalendar
