@@ -208,6 +208,14 @@ function initializeCalendar() {
             mainHeader.textContent = dateStr;
         }
     }
+    function updateDayViewDate() {
+    // Update the data-date attribute on the day events column
+        const dayEventsColumn = document.getElementById('dayEventsColumn');
+        if (dayEventsColumn) {
+            const dateFormatted = currentDate.toISOString().split('T')[0];
+            dayEventsColumn.setAttribute('data-date', dateFormatted);
+        }
+    }
 
     // =============================================================================
     // WEEK NAVIGATION
@@ -228,7 +236,8 @@ function initializeCalendar() {
         } else if (activeView === 'day') {
             // Navigate to previous day
             currentDate.setDate(currentDate.getDate() - 1);
-            navigateToDate(currentDate);
+            updateDayViewDate();
+            renderDayView();
         } else {
             // Navigate to previous week
             currentDate.setDate(currentDate.getDate() - 7);
@@ -251,7 +260,8 @@ function initializeCalendar() {
         } else if (activeView === 'day') {
             // Navigate to next day
             currentDate.setDate(currentDate.getDate() + 1);
-            navigateToDate(currentDate);
+            updateDayViewDate();
+            renderDayView();
         } else {
             // Navigate to next week
             currentDate.setDate(currentDate.getDate() + 7);
