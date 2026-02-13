@@ -7,6 +7,7 @@ let tasks = [];
 let currentDate;
 let currentMonth;
 let currentYear;
+let activeView = 'week'  // Track current view: 'week', 'month', or 'day'
 
 document.addEventListener('DOMContentLoaded', function() {
     const calendarDataEl = document.getElementById('calendarData');
@@ -191,18 +192,55 @@ function initializeCalendar() {
         document.getElementById('currentMonthYear').textContent = `${monthNames[currentMonth - 1]} ${currentYear}`;
     }
 
+    function updateMainCalendarHeader() {
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                           'July', 'August', 'September', 'October', 'November', 'December'];
+        const mainHeader = document.getElementById('mainCalendarHeader');
+        if (mainHeader) {
+            mainHeader.textContent = `${monthNames[currentMonth - 1]}, ${currentYear}`;
+        }
+    }
+
     // =============================================================================
     // WEEK NAVIGATION
     // =============================================================================
 
     document.getElementById('prevWeek')?.addEventListener('click', function() {
-        currentDate.setDate(currentDate.getDate() - 7);
-        navigateToDate(currentDate);
+        if (activeView === 'month') {
+            // Navigate to previous month
+            currentMonth--;
+            if (currentMonth < 1) {
+                currentMonth = 12;
+                currentYear--;
+            }
+            updateMiniCalendarHeader();
+            updateMainCalendarHeader();
+            renderMiniCalendar();
+            renderMonthView();
+        } else {
+            // Navigate to previous week
+            currentDate.setDate(currentDate.getDate() - 7);
+            navigateToDate(currentDate);
+        }
     });
 
     document.getElementById('nextWeek')?.addEventListener('click', function() {
-        currentDate.setDate(currentDate.getDate() + 7);
-        navigateToDate(currentDate);
+        if (activeView === 'month') {
+            // Navigate to next month
+            currentMonth++;
+            if (currentMonth > 12) {
+                currentMonth = 1;
+                currentYear++;
+            }
+            updateMiniCalendarHeader();
+            updateMainCalendarHeader();
+            renderMiniCalendar();
+            renderMonthView();
+        } else {
+            // Navigate to next week
+            currentDate.setDate(currentDate.getDate() + 7);
+            navigateToDate(currentDate);
+        }
     });
 
     document.getElementById('todayBtn')?.addEventListener('click', function() {
@@ -232,15 +270,23 @@ function initializeCalendar() {
             
             // Handle different views
             if (view === 'week') {
+                activeView = 'week';
+                document.getElementById('prevWeek').title = 'Previous Week';
+                document.getElementById('nextWeek').title = 'Next Week';
                 document.getElementById('weekView').style.display = 'grid';
                 document.getElementById('monthView').style.display = 'none';
                 document.querySelector('.week-days-header').style.display = 'grid';
             } else if (view === 'month') {
+                activeView = 'month';
+                document.getElementById('prevWeek').title = 'Previous Month';
+                document.getElementById('nextWeek').title = 'Next Month';
+                updateMainCalendarHeader();
                 document.getElementById('weekView').style.display = 'none';
                 document.getElementById('monthView').style.display = 'block';
                 document.querySelector('.week-days-header').style.display = 'none';
                 renderMonthView();
             } else if (view === 'day') {
+                activeView = 'day'
                 alert('Day view coming soon! Week view shows daily time slots.');
             }
         });
