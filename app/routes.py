@@ -868,13 +868,15 @@ def disconnect_google():
 @login_required
 def schedule():
     """
-    Enhanced schedule page with week view calendar.
-    Shows mini calendar, week view, and upcoming events.
+    Simplified schedule page - just renders HTML skeleton.
+    JavaScript will fetch all data via AJAX.
     """
-    from datetime import datetime, timedelta
+    from datetime import datetime
 
-    # Get date parameter (if navigating to specific date)
+    # Get parameters from URL
     date_param = request.args.get('date')
+    view_param = request.args.get('view', 'week')
+    
     if date_param:
         try:
             target_date = datetime.strptime(date_param, '%Y-%m-%d')
@@ -883,124 +885,122 @@ def schedule():
     else:
         target_date = datetime.now()
 
-    # Get all tasks sorted by due date
-    tasks = Task.query.filter_by(user_id=current_user.id).order_by(
-        Task.due_date.asc()
-    ).all()
+    # Check if Google Calendar is connected (just a boolean check)
+    calendar_connected = current_user.calendar_sync_enabled and current_user.google_token is not None
 
-    # Initialize calendar variables
+    # Pass minimal data to template - JavaScript will load the rest
+    return render_template(
+        'schedule.html',
+        title='Schedule',
+        calendar_connected=calendar_connected,
+        target_date=target_date,
+        view=view_param,
+        current_month=target_date.strftime('%B, %Y')
+    )
+
+@main.route('/api/calendar/events')
+@login_required
+def api_calendar_events():
+    """
+    UNIFIED API endpoint to get ALL calendar data for any date range.
+    Returns JSON instead of HTML.
+    """
+    from datetime import datetime, timedelta
+    from calendar import monthrange
+
+    # Parse parameters from URL
+    date_str = request.args.get('date', datetime.now().strftime('%Y-%m-%d'))
+    view = request.args.get('view', 'week')
+    
+    try:
+        target_date = datetime.strptime(date_str, '%Y-%m-%d')
+    except:
+        return {'success': False, 'error': 'Invalid date format'}, 400
+
+    # Calculate date range based on view type
+    if view == 'month':
+        # Get entire month
+        start_date = target_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        last_day = monthrange(target_date.year, target_date.month)[1]
+        end_date = target_date.replace(day=last_day, hour=23, minute=59, second=59)
+    elif view == 'day':
+        # Get single day
+        start_date = target_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_date = target_date.replace(hour=23, minute=59, second=59)
+    else:  # week (default)
+        # Get full week (Monday to Sunday)
+        start_date = target_date - timedelta(days=target_date.weekday())
+        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_date = start_date + timedelta(days=7)
+
+    # Fetch Google Calendar events (if connected)
     calendar_events = []
-    week_events = []
-    month_events = {}
     calendar_connected = False
-    upcoming_events = []
-
-    # Check if Google Calendar is connected
+    
     if current_user.calendar_sync_enabled:
         service = get_calendar_service(current_user)
         if service:
             try:
+                from app.google_calendar import get_events_for_date_range
+                calendar_events = get_events_for_date_range(service, start_date, end_date)
                 calendar_connected = True
-
-                # Get events for the week view
-                week_events = get_week_events(service, target_date)
-
-                # Get events for the mini calendar (current month)
-                month_events = get_events_for_month(
-                    service, 
-                    target_date.year, 
-                    target_date.month
-                )
-
-                # Get upcoming events (within next 7 days from TODAY)
-                upcoming_events = get_upcoming_events(service, max_results=20)
-                print(f"DEBUG: Fetched {len(upcoming_events)} upcoming events from Google Calendar")
-                
-                # Filter out Google Calendar events that match local tasks (to avoid duplicates)
-                synced_event_ids = [task.google_event_id for task in tasks if task.google_event_id]
-                week_events = [e for e in week_events if e.get('id') not in synced_event_ids]
-                upcoming_events = [e for e in upcoming_events if e.get('id') not in synced_event_ids]
-                
-                print(f"DEBUG: Passing {len(week_events)} events to week view")
-                print(f"DEBUG: Google Calendar events for upcoming: {len(upcoming_events)}")
-                
             except Exception as e:
-                # Token expired or other error - disconnect calendar
-                print(f"Calendar error: {e}")
-                current_user.google_token = None
-                current_user.calendar_sync_enabled = False
-                db.session.commit()
-                calendar_connected = False
-                flash('Your Google Calendar connection has expired. Please reconnect.', 'warning')
+                print(f"Error fetching calendar events: {e}")
 
-    # Add local tasks to upcoming events (tasks with due dates in the next 7 days)
-    now = datetime.now()
-    week_from_now = now + timedelta(days=7)
-    upcoming_tasks = [task for task in tasks if task.due_date and now <= task.due_date <= week_from_now]
-    
-    # Convert tasks to event format for display in upcoming section
-    for task in upcoming_tasks:
-        upcoming_events.append({
-            'id': f'task_{task.id}',
-            'title': task.title,
-            'start': task.due_date.isoformat(),
-            'end': task.due_date.isoformat(),
-            'description': task.description or '',
-            'location': '',
-            'color': '#6c757d',  # Gray color for local tasks
-            'color_transparent': 'rgba(108, 117, 125, 0.1)',
-            'htmlLink': '',
-            'isLocalTask': True
-        })
-    
-    # Sort all upcoming events by start time
-    upcoming_events.sort(key=lambda x: x['start'])
-    print(f"DEBUG: Total upcoming events (Google + Local): {len(upcoming_events)}")
+    # Fetch local tasks for the date range
+    tasks = Task.query.filter(
+        Task.user_id == current_user.id,
+        Task.due_date.isnot(None),
+        Task.due_date >= start_date,
+        Task.due_date <= end_date
+    ).order_by(Task.due_date.asc()).all()
 
-    # Prepare week dates for the template
-    start_of_week = target_date - timedelta(days=target_date.weekday())
-    week_dates = []
-    for i in range(7):
-        day = start_of_week + timedelta(days=i)
-        week_dates.append({
-            'date': day,
-            'day_name': day.strftime('%A'),
-            'day_num': day.day,
-            'is_today': day.date() == target_date.date()
-        })
+    # Filter out duplicate Google Calendar events (tasks already synced)
+    synced_event_ids = [task.google_event_id for task in tasks if task.google_event_id]
+    calendar_events = [e for e in calendar_events if e.get('id') not in synced_event_ids]
 
-    # Prepare tasks data for JavaScript
+    # Format tasks as JSON
     tasks_json = []
     for task in tasks:
-        if task.due_date:
-            tasks_json.append({
-                'id': task.id,
-                'title': task.title,
-                'description': task.description,
-                'due_date': task.due_date.isoformat(),
-                'status': task.status,
-                'category': {
-                    'name': task.task_category.name if task.task_category else None,
-                    'color': task.task_category.color if task.task_category else '#3498db',
-                    'icon': task.task_category.icon if task.task_category else None
-                } if task.task_category else None,
-                'synced': task.synced_to_calendar
+        tasks_json.append({
+            'id': task.id,
+            'title': task.title,
+            'description': task.description,
+            'due_date': task.due_date.isoformat(),
+            'status': task.status,
+            'category': {
+                'name': task.task_category.name if task.task_category else None,
+                'color': task.task_category.color if task.task_category else '#3498db',
+                'icon': task.task_category.icon if task.task_category else None
+            } if task.task_category else None,
+            'synced': task.synced_to_calendar
+        })
+
+    # Calculate week dates for week view
+    week_dates = []
+    if view == 'week':
+        start_of_week = target_date - timedelta(days=target_date.weekday())
+        for i in range(7):
+            day = start_of_week + timedelta(days=i)
+            week_dates.append({
+                'date': day.strftime('%Y-%m-%d'),
+                'day_name': day.strftime('%A'),
+                'day_num': day.day,
+                'is_today': day.date() == datetime.now().date()
             })
 
-    return render_template(
-        'schedule.html',
-        title='Schedule',
-        tasks=tasks,
-        tasks_json=tasks_json,
-        calendar_connected=calendar_connected,
-        week_events=week_events,
-        month_events=month_events,
-        upcoming_events=upcoming_events,
-        week_dates=week_dates,
-        target_date=target_date,
-        current_month=target_date.strftime('%B, %Y')
-    )
-    
+    return {
+        'success': True,
+        'calendarConnected': calendar_connected,
+        'calendarEvents': calendar_events,
+        'tasks': tasks_json,
+        'weekDates': week_dates,
+        'targetDate': target_date.strftime('%Y-%m-%d'),
+        'currentMonth': target_date.month,
+        'currentYear': target_date.year,
+        'view': view
+    }
+      
 @main.route('/api/calendar/week')
 @login_required
 def api_week_events():
