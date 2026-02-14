@@ -1,28 +1,62 @@
 // =============================================================================
 // INITIALIZE CALENDAR DATA FROM JSON SCRIPT TAG
 // =============================================================================
-let weekEvents = [];
-let monthEvents = {};
-let tasks = [];
+// Global state
+let calendarEvents = [];  // Google Calendar events
+let tasks = [];           // Local tasks
 let currentDate;
 let currentMonth;
 let currentYear;
-let activeView = 'week'  // Track current view: 'week', 'month', or 'day'
+let activeView = 'week';
+let calendarConnected = false;
 
-document.addEventListener('DOMContentLoaded', function() {
-    const calendarDataEl = document.getElementById('calendarData');
-    const calendarData = calendarDataEl ? JSON.parse(calendarDataEl.textContent) : {};
+//Function to fetch calendar data via AJAX
+async function fetchCalendarData(date, view) {
+    const dateStr = date.toISOString().split('T')[0];
     
-    weekEvents = calendarData.weekEvents || [];
-    monthEvents = calendarData.monthEvents || {};
-    tasks = calendarData.tasks || [];
-    const targetDate = calendarData.targetDate || new Date().toISOString().split('T')[0];
-    currentMonth = calendarData.currentMonth || new Date().getMonth() + 1;
-    currentYear = calendarData.currentYear || new Date().getFullYear();
-    currentDate = new Date(targetDate);
+    try {
+        const response = await fetch(`/api/calendar/events?date=${dateStr}&view=${view}`);
+        const data = await response.json();
+        
+        if (!data.success) {
+            console.error('Failed to fetch calendar data:', data.error);
+            return false;
+        }
+        
+        // Update global state
+        calendarEvents = data.calendarEvents || [];
+        tasks = data.tasks || [];
+        calendarConnected = data.calendarConnected;
+        currentMonth = data.currentMonth;
+        currentYear = data.currentYear;
+        
+        return data;
+    } catch (error) {
+        console.error('Error fetching calendar data:', error);
+        return false;
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', async function() {
+    // Get initial date from page or use today
+    const urlParams = new URLSearchParams(window.location.search);
+    const dateParam = urlParams.get('date') || new Date().toISOString().split('T')[0];
+    const viewParam = urlParams.get('view') || 'week';
     
-    // Initialize calendar after data is loaded
-    initializeCalendar();
+    currentDate = new Date(dateParam);
+    activeView = viewParam;
+    
+    // Fetch initial data
+    const data = await fetchCalendarData(currentDate, activeView);
+    
+    if (data) {
+        // Initialize calendar with fetched data
+        initializeCalendar();
+        
+        // Render appropriate view
+        renderCurrentView();
+    }
 });
 
 // =============================================================================
@@ -274,17 +308,29 @@ function initializeCalendar() {
         navigateToDate(new Date());
     });
 
-    function navigateToDate(date, view = null) {
+    async function navigateToDate(date, view = null) {
+    const viewParam = view || activeView;
+    
+    // Update current date
+    currentDate = date;
+    currentMonth = date.getMonth() + 1;
+    currentYear = date.getFullYear();
+    
+    // Fetch new data via AJAX (NO PAGE RELOAD!)
+    const data = await fetchCalendarData(date, viewParam);
+    
+    if (data) {
+        // Update URL without reloading page
         const dateStr = date.toISOString().split('T')[0];
-        const viewParam = view || activeView;
+        const newUrl = `/schedule?date=${dateStr}&view=${viewParam}`;
+        window.history.pushState({date: dateStr, view: viewParam}, '', newUrl);
         
-        // Only add view parameter if not week (week is default)
-        if (viewParam && viewParam !== 'week') {
-            window.location.href = `/schedule?date=${dateStr}&view=${viewParam}`;
-        } else {
-            window.location.href = `/schedule?date=${dateStr}`;
-        }
+        // Re-render the calendar with new data
+        renderCurrentView();
+        renderMiniCalendar();
+        updateMainCalendarHeader();
     }
+}
 
     // =============================================================================
     // VIEW SWITCHER (Month/Week/Day)
