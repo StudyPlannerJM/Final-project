@@ -332,7 +332,7 @@ function initializeCalendar() {
         }
 
     }
-    //Single function to render whichever view is active
+    // NEW: Single function to render whichever view is active
     function renderCurrentView() {
         // Hide all views first
         document.getElementById('weekView').style.display = 'none';
@@ -367,47 +367,28 @@ function initializeCalendar() {
     // =============================================================================
 
     document.querySelectorAll('.view-btn').forEach(button => {
-        button.addEventListener('click', function () {
+        button.addEventListener('click', async function () {
             const view = this.getAttribute('data-view');
+            activeView = view;
 
-            // Remove active class from all buttons
-            document.querySelectorAll('.view-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            // Fetch data for the new view
+            await fetchCalendarData(currentDate, view);
 
-            // Add active class to clicked button
-            this.classList.add('active');
-
-            // Handle different views
-            if (view === 'week') {
-                activeView = 'week';
-                document.getElementById('prevWeek').title = 'Previous Week';
-                document.getElementById('nextWeek').title = 'Next Week';
-                document.getElementById('weekView').style.display = 'grid';
-                document.getElementById('monthView').style.display = 'none';
-                document.getElementById('dayView').style.display = 'none';
-                document.querySelector('.week-days-header').style.display = 'grid';
-            } else if (view === 'month') {
-                activeView = 'month';
+            // Update button text for navigation
+            if (view === 'month') {
                 document.getElementById('prevWeek').title = 'Previous Month';
                 document.getElementById('nextWeek').title = 'Next Month';
-                updateMainCalendarHeader();
-                document.getElementById('weekView').style.display = 'none';
-                document.getElementById('monthView').style.display = 'block';
-                document.getElementById('dayView').style.display = 'none';
-                document.querySelector('.week-days-header').style.display = 'none';
-                renderMonthView();
             } else if (view === 'day') {
-                activeView = 'day';
                 document.getElementById('prevWeek').title = 'Previous Day';
                 document.getElementById('nextWeek').title = 'Next Day';
-                updateMainHeaderForDayView();
-                document.getElementById('weekView').style.display = 'none';
-                document.getElementById('monthView').style.display = 'none';
-                document.getElementById('dayView').style.display = 'block';
-                document.querySelector('.week-days-header').style.display = 'none';
-                renderDayView();
+            } else {
+                document.getElementById('prevWeek').title = 'Previous Week';
+                document.getElementById('nextWeek').title = 'Next Week';
             }
+
+            // Render the view
+            renderCurrentView();
+            updateMainCalendarHeader();
         });
     });
 
@@ -415,12 +396,12 @@ function initializeCalendar() {
     // RENDER WEEK EVENTS ON CALENDAR GRID
     // =============================================================================
 
-    function renderWeekEvents() {
+    function renderWeekView() {
         // Clear existing events
         document.querySelectorAll('.event-block').forEach(el => el.remove());
 
         // Render Google Calendar events
-        weekEvents.forEach(event => {
+        calendarEvents.forEach(event => {
             // Parse dates properly to avoid timezone issues
             const startDate = new Date(event.start);
             const endDate = new Date(event.end);
@@ -598,7 +579,7 @@ function initializeCalendar() {
         const eventsPerHour = new Array(24).fill(0);
 
         // Render Google Calendar events
-        weekEvents.forEach(event => {
+        calendarEvents.forEach(event => {
             const eventDate = event.start.split('T')[0];
             if (eventDate !== dateStr) return;
 
@@ -959,7 +940,7 @@ function initializeCalendar() {
     editTaskBtn.addEventListener('click', function () {
         if (isGoogleCalendarEvent && currentEventId) {
             // Try to use the htmlLink from the event, otherwise construct URL
-            const currentEvent = weekEvents.find(e => e.id === currentEventId);
+            const currentEvent = calendarEvents.find(e => e.id === currentEventId);
             if (currentEvent && currentEvent.htmlLink) {
                 window.open(currentEvent.htmlLink, '_blank');
             } else {
@@ -1042,7 +1023,7 @@ function initializeCalendar() {
         document.getElementById('monthView').style.display = 'none';
         document.getElementById('dayView').style.display = 'none';
         document.querySelector('.week-days-header').style.display = 'grid';
-        renderWeekEvents();
+        renderWeekView();
     }
 
     // =============================================================================
@@ -1079,7 +1060,7 @@ function initializeCalendar() {
         const eventsByDate = {};
 
         // Add calendar events (Google Calendar events for the FULL MONTH)
-        calendarEvents.forEach(event => {  // ✅ Now uses full month data!
+        calendarEvents.forEach(event => {
             const eventDate = event.start.split('T')[0];
             if (!eventsByDate[eventDate]) {
                 eventsByDate[eventDate] = [];
