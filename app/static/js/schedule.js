@@ -397,6 +397,93 @@ function initializeCalendar() {
     // =============================================================================
 
     function renderWeekView() {
+        // ====================================================================
+        // STEP 1: Build the week grid structure (headers, time column, day columns)
+        // ====================================================================
+        
+        // Build week day headers
+        const weekHeader = document.getElementById('weekDaysHeader');
+        // Clear existing headers except the time column header
+        while (weekHeader.children.length > 1) {
+            weekHeader.removeChild(weekHeader.lastChild);
+        }
+        
+        // Calculate the start of the week (Monday)
+        const startOfWeek = new Date(currentDate);
+        const dayOfWeek = startOfWeek.getDay();
+        const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Adjust to Monday
+        startOfWeek.setDate(startOfWeek.getDate() + diff);
+        
+        // Generate 7 day headers (Monday to Sunday)
+        for (let i = 0; i < 7; i++) {
+            const day = new Date(startOfWeek);
+            day.setDate(startOfWeek.getDate() + i);
+            
+            const isToday = day.toDateString() === new Date().toDateString();
+            
+            const dayHeader = document.createElement('div');
+            dayHeader.className = 'day-header' + (isToday ? ' today' : '');
+            dayHeader.innerHTML = `
+                <span class="day-name">${day.toLocaleDateString('en-US', {weekday: 'long'})}</span>
+                <span class="day-number">${day.getDate()}</span>
+                <span class="day-date">${day.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</span>
+            `;
+            weekHeader.appendChild(dayHeader);
+        }
+        
+        // Build time column (00:00 to 23:00)
+        const timeColumn = document.getElementById('weekTimeColumn');
+        timeColumn.innerHTML = ''; // Clear existing
+        for (let hour = 0; hour < 24; hour++) {
+            const timeSlot = document.createElement('div');
+            timeSlot.className = 'time-slot';
+            timeSlot.textContent = `${String(hour).padStart(2, '0')}:00`;
+            timeColumn.appendChild(timeSlot);
+        }
+        
+        // Build day columns with hour slots
+        const weekGrid = document.getElementById('weekView');
+        // Remove old day columns (keep only time column)
+        const existingDayColumns = weekGrid.querySelectorAll('.day-column');
+        existingDayColumns.forEach(col => col.remove());
+        
+        // Create 7 day columns
+        for (let i = 0; i < 7; i++) {
+            const day = new Date(startOfWeek);
+            day.setDate(startOfWeek.getDate() + i);
+            const dateStr = day.toISOString().split('T')[0];
+            
+            const dayColumn = document.createElement('div');
+            dayColumn.className = 'day-column';
+            dayColumn.setAttribute('data-date', dateStr);
+            
+            // Add 24 hour slots to this day
+            for (let hour = 0; hour < 24; hour++) {
+                const hourSlot = document.createElement('div');
+                hourSlot.className = 'hour-slot';
+                hourSlot.setAttribute('data-hour', hour);
+                
+                // Add click handler for adding events
+                hourSlot.addEventListener('click', function() {
+                    const eventModal = document.getElementById('eventModal');
+                    if (eventModal) {
+                        eventModal.classList.add('active');
+                        document.getElementById('eventDate').value = dateStr;
+                        document.getElementById('eventStartTime').value = `${String(hour).padStart(2, '0')}:00`;
+                        document.getElementById('eventEndTime').value = `${String(hour + 1).padStart(2, '0')}:00`;
+                    }
+                });
+                
+                dayColumn.appendChild(hourSlot);
+            }
+            
+            weekGrid.appendChild(dayColumn);
+        }
+        
+        // ====================================================================
+        // STEP 2: Now render events on the grid that we just built
+        // ====================================================================
+        
         // Clear existing events
         document.querySelectorAll('.event-block').forEach(el => el.remove());
 
@@ -497,8 +584,8 @@ function initializeCalendar() {
 
         // Adjust hour slot heights based on number of tasks
         const grid = document.querySelector('.week-calendar-grid');
-        const timeColumn = grid.querySelector('.time-column');
-        const timeSlots = Array.from(timeColumn.querySelectorAll('.time-slot'));
+        const gridTimeColumn = grid.querySelector('.time-column');
+        const timeSlots = Array.from(gridTimeColumn.querySelectorAll('.time-slot'));
 
         // Track max tasks per hour across all days
         const maxTasksPerHour = new Array(24).fill(0);
@@ -769,24 +856,6 @@ function initializeCalendar() {
                 console.error('Error:', error);
                 alert('Failed to create event');
             });
-    });
-
-    // =============================================================================
-    // HOUR SLOT CLICK TO ADD EVENT
-    // =============================================================================
-
-    document.querySelectorAll('.hour-slot').forEach(slot => {
-        slot.addEventListener('click', function () {
-            const dayColumn = this.closest('.day-column');
-            const date = dayColumn.getAttribute('data-date');
-            const hour = this.getAttribute('data-hour');
-
-            // Open modal with pre-filled date and time
-            eventModal.classList.add('active');
-            document.getElementById('eventDate').value = date;
-            document.getElementById('eventStartTime').value = `${String(hour).padStart(2, '0')}:00`;
-            document.getElementById('eventEndTime').value = `${String(parseInt(hour) + 1).padStart(2, '0')}:00`;
-        });
     });
 
     // =============================================================================
