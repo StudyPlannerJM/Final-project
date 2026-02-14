@@ -4,6 +4,9 @@
 // Global state
 let calendarEvents = [];  // Google Calendar events
 let tasks = [];           // Local tasks
+let upcomingCalendarEvents = [];  // Always fetched from TODAY for upcoming section
+let upcomingTasks = [];           // Always fetched from TODAY for upcoming section
+let monthEvents = {};     // Event counts by date for mini-calendar
 let currentDate;
 let currentMonth;
 let currentYear;
@@ -16,39 +19,92 @@ async function fetchCalendarData(date, view) {
 
     try {
         const response = await fetch(`/api/calendar/events?date=${dateStr}&view=${view}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
 
         if (!data.success) {
             console.error('Failed to fetch calendar data:', data.error);
+            alert('Failed to load calendar data: ' + (data.error || 'Unknown error'));
             return false;
         }
 
         // Update global state
         calendarEvents = data.calendarEvents || [];
         tasks = data.tasks || [];
-        calendarConnected = data.calendarConnected;
-        currentMonth = data.currentMonth;
-        currentYear = data.currentYear;
+        calendarConnected = data.calendarConnected || false;
+        currentMonth = data.currentMonth || date.getMonth() + 1;
+        currentYear = data.currentYear || date.getFullYear();
 
         return data;
     } catch (error) {
         console.error('Error fetching calendar data:', error);
+        alert('Error loading calendar. Please refresh the page.');
         return false;
+    }
+}
+
+// Function to fetch upcoming events (always from TODAY, regardless of viewed date)
+async function fetchUpcomingEvents() {
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+
+    try {
+        const response = await fetch(`/api/calendar/events?date=${todayStr}&view=week`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+
+        if (data.success) {
+            // Store upcoming events separately
+            upcomingCalendarEvents = data.calendarEvents || [];
+            upcomingTasks = data.tasks || [];
+        }
+    } catch (error) {
+        console.error('Error fetching upcoming events:', error);
+        // Don't show alert for upcoming events failure, just log it
     }
 }
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', async function () {
-    // Get initial date from page or use today
+    // Get initial date and view from JSON script tag
+    const initialDataElement = document.getElementById('initialData');
+    let initialDate, initialView, initialCalendarConnected;
+    
+    if (initialDataElement) {
+        try {
+            const initialData = JSON.parse(initialDataElement.textContent);
+            initialDate = initialData.initialDate;
+            initialView = initialData.initialView;
+            initialCalendarConnected = initialData.calendarConnected;
+        } catch (e) {
+            console.error('Failed to parse initial data:', e);
+        }
+    }
+    
+    // Fall back to URL params or defaults
     const urlParams = new URLSearchParams(window.location.search);
-    const dateParam = urlParams.get('date') || new Date().toISOString().split('T')[0];
-    const viewParam = urlParams.get('view') || 'week';
+    const dateParam = initialDate || urlParams.get('date') || new Date().toISOString().split('T')[0];
+    const viewParam = initialView || urlParams.get('view') || 'week';
 
     currentDate = new Date(dateParam);
     activeView = viewParam;
+    currentMonth = currentDate.getMonth() + 1;
+    currentYear = currentDate.getFullYear();
+    calendarConnected = initialCalendarConnected || false;
 
-    // Fetch initial data
-    const data = await fetchCalendarData(currentDate, activeView);
+    // Fetch initial data and upcoming events in parallel
+    const [data, _] = await Promise.all([
+        fetchCalendarData(currentDate, activeView),
+        fetchUpcomingEvents()
+    ]);
 
     if (data) {
         // Initialize calendar with fetched data
@@ -56,6 +112,17 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         // Render appropriate view
         renderCurrentView();
+        renderMiniCalendar();
+        updateMiniCalendarHeader();
+    } else {
+        // Even if fetch fails, initialize calendar with empty data
+        console.warn('Failed to fetch initial data, initializing with empty state');
+        calendarEvents = [];
+        tasks = [];
+        initializeCalendar();
+        renderCurrentView();
+        renderMiniCalendar();
+        updateMiniCalendarHeader();
     }
 });
 
@@ -159,6 +226,21 @@ function initializeCalendar() {
         const prevLastDayDate = prevLastDay.getDate();
 
         const today = new Date();
+        
+        // Calculate event counts for this month from current data
+        monthEvents = {};
+        calendarEvents.forEach(event => {
+            const eventDate = event.start.split('T')[0];
+            if (!monthEvents[eventDate]) monthEvents[eventDate] = 0;
+            monthEvents[eventDate]++;
+        });
+        tasks.forEach(task => {
+            if (task.due_date) {
+                const taskDate = task.due_date.split('T')[0];
+                if (!monthEvents[taskDate]) monthEvents[taskDate] = 0;
+                monthEvents[taskDate]++;
+            }
+        });
 
         // Check if we're viewing the same month as the selected date
         const viewingSelectedMonth = currentDate.getMonth() + 1 === currentMonth && currentDate.getFullYear() === currentYear;
@@ -199,43 +281,64 @@ function initializeCalendar() {
 
         // Add click handlers for date selection
         calendarDays.querySelectorAll('.calendar-day:not(.other-month)').forEach(dayEl => {
-            dayEl.addEventListener('click', function () {
+            dayEl.addEventListener('click', async function () {
                 const selectedDate = this.getAttribute('data-date');
-                window.location.href = `/schedule?date=${selectedDate}`;
+                if (selectedDate) {
+                    const newDate = new Date(selectedDate);
+                    await navigateToDate(newDate, activeView);
+                }
             });
         });
     }
 
     // Month navigation
-    document.getElementById('prevMonth')?.addEventListener('click', function () {
+    document.getElementById('prevMonth')?.addEventListener('click', async function () {
         currentMonth--;
         if (currentMonth < 1) {
             currentMonth = 12;
             currentYear--;
         }
+        
+        // Update currentDate to match the new month (but keep the day if possible)
+        const maxDayInMonth = new Date(currentYear, currentMonth, 0).getDate();
+        const newDay = Math.min(currentDate.getDate(), maxDayInMonth);
+        currentDate = new Date(currentYear, currentMonth - 1, newDay);
+        
         updateMiniCalendarHeader();
         renderMiniCalendar();
-
-        // If month view is active, update it too
-        const monthView = document.getElementById('monthView');
-        if (monthView && monthView.style.display !== 'none') {
-            renderMonthView();
+        
+        // ONLY fetch new data if we're in month view
+        if (activeView === 'month') {
+            const data = await fetchCalendarData(currentDate, 'month');
+            if (data) {
+                renderMonthView();
+                updateMainCalendarHeader();
+            }
         }
     });
 
-    document.getElementById('nextMonth')?.addEventListener('click', function () {
+    document.getElementById('nextMonth')?.addEventListener('click', async function () {
         currentMonth++;
         if (currentMonth > 12) {
             currentMonth = 1;
             currentYear++;
         }
+        
+        // Update currentDate to match the new month (but keep the day if possible)
+        const maxDayInMonth = new Date(currentYear, currentMonth, 0).getDate();
+        const newDay = Math.min(currentDate.getDate(), maxDayInMonth);
+        currentDate = new Date(currentYear, currentMonth - 1, newDay);
+        
         updateMiniCalendarHeader();
         renderMiniCalendar();
-
-        // If month view is active, update it too
-        const monthView = document.getElementById('monthView');
-        if (monthView && monthView.style.display !== 'none') {
-            renderMonthView();
+        
+        // ONLY fetch new data if we're in month view
+        if (activeView === 'month') {
+            const data = await fetchCalendarData(currentDate, 'month');
+            if (data) {
+                renderMonthView();
+                updateMainCalendarHeader();
+            }
         }
     });
 
@@ -258,7 +361,7 @@ function initializeCalendar() {
     // WEEK NAVIGATION
     // =============================================================================
 
-    document.getElementById('prevWeek')?.addEventListener('click', function () {
+    document.getElementById('prevWeek')?.addEventListener('click', async function () {
         if (activeView === 'month') {
             // Navigate to previous month
             currentMonth--;
@@ -266,22 +369,34 @@ function initializeCalendar() {
                 currentMonth = 12;
                 currentYear--;
             }
-            updateMiniCalendarHeader();
-            updateMainCalendarHeader();
-            renderMiniCalendar();
-            renderMonthView();
+            const maxDayInMonth = new Date(currentYear, currentMonth, 0).getDate();
+            const newDay = Math.min(currentDate.getDate(), maxDayInMonth);
+            currentDate = new Date(currentYear, currentMonth - 1, newDay);
+            
+            const [data, _] = await Promise.all([
+                fetchCalendarData(currentDate, 'month'),
+                fetchUpcomingEvents()
+            ]);
+            
+            if (data) {
+                updateMiniCalendarHeader();
+                updateMainCalendarHeader();
+                renderMonthView();
+                renderMiniCalendar();
+                renderUpcomingEvents();
+            }
         } else if (activeView === 'day') {
             // Navigate to previous day
             currentDate.setDate(currentDate.getDate() - 1);
-            navigateToDate(currentDate, 'day');
+            await navigateToDate(currentDate, 'day');
         } else {
             // Navigate to previous week
             currentDate.setDate(currentDate.getDate() - 7);
-            navigateToDate(currentDate);
+            await navigateToDate(currentDate);
         }
     });
 
-    document.getElementById('nextWeek')?.addEventListener('click', function () {
+    document.getElementById('nextWeek')?.addEventListener('click', async function () {
         if (activeView === 'month') {
             // Navigate to next month
             currentMonth++;
@@ -289,49 +404,186 @@ function initializeCalendar() {
                 currentMonth = 1;
                 currentYear++;
             }
-            updateMiniCalendarHeader();
-            updateMainCalendarHeader();
-            renderMiniCalendar();
-            renderMonthView();
+            const maxDayInMonth = new Date(currentYear, currentMonth, 0).getDate();
+            const newDay = Math.min(currentDate.getDate(), maxDayInMonth);
+            currentDate = new Date(currentYear, currentMonth - 1, newDay);
+            
+            const [data, _] = await Promise.all([
+                fetchCalendarData(currentDate, 'month'),
+                fetchUpcomingEvents()
+            ]);
+            
+            if (data) {
+                updateMiniCalendarHeader();
+                updateMainCalendarHeader();
+                renderMonthView();
+                renderMiniCalendar();
+                renderUpcomingEvents();
+            }
         } else if (activeView === 'day') {
             // Navigate to next day
             currentDate.setDate(currentDate.getDate() + 1);
-            navigateToDate(currentDate, 'day');
+            await navigateToDate(currentDate, 'day');
         } else {
             // Navigate to next week
             currentDate.setDate(currentDate.getDate() + 7);
-            navigateToDate(currentDate);
+            await navigateToDate(currentDate);
         }
     });
 
-    document.getElementById('todayBtn')?.addEventListener('click', function () {
-        navigateToDate(new Date());
+    document.getElementById('todayBtn')?.addEventListener('click', async function () {
+        await navigateToDate(new Date());
     });
 
     async function navigateToDate(date, view = null) {
         const viewParam = view || activeView;
 
         // Update current date
-        currentDate = date;
-        currentMonth = date.getMonth() + 1;
-        currentYear = date.getFullYear();
+        currentDate = new Date(date);
+        currentMonth = currentDate.getMonth() + 1;
+        currentYear = currentDate.getFullYear();
 
         // Fetch new data via AJAX (NO PAGE RELOAD!)
-        const data = await fetchCalendarData(date, viewParam);
+        // Also fetch upcoming events to keep them fresh
+        const [data, _] = await Promise.all([
+            fetchCalendarData(currentDate, viewParam),
+            fetchUpcomingEvents()
+        ]);
 
         if (data) {
             // Update URL without reloading page
-            const dateStr = date.toISOString().split('T')[0];
+            const dateStr = currentDate.toISOString().split('T')[0];
             const newUrl = `/schedule?date=${dateStr}&view=${viewParam}`;
             window.history.pushState({ date: dateStr, view: viewParam }, '', newUrl);
 
             // Re-render the calendar with new data
             renderCurrentView();
             renderMiniCalendar();
+            updateMiniCalendarHeader();
             updateMainCalendarHeader();
+        } else {
+            console.error('Failed to navigate to date:', date);
+        }
+    }
+
+    // =============================================================================
+    // RENDER UPCOMING EVENTS
+    // =============================================================================
+    
+    function renderUpcomingEvents() {
+        const upcomingContainer = document.getElementById('upcomingEventsList');
+        if (!upcomingContainer) return;
+
+        // Get current date (start of today) and 7 days from now (end of day)
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        const weekFromNow = new Date();
+        weekFromNow.setDate(weekFromNow.getDate() + 7);
+        weekFromNow.setHours(23, 59, 59, 999);
+
+        // Collect all events (calendar + tasks) in the next 7 days
+        const upcomingEvents = [];
+
+        // Add Google Calendar events from the UPCOMING events array (always from today)
+        if (Array.isArray(upcomingCalendarEvents)) {
+            upcomingCalendarEvents.forEach(event => {
+                if (event.start) {
+                    const eventDate = new Date(event.start);
+                    if (eventDate >= now && eventDate <= weekFromNow) {
+                        upcomingEvents.push({
+                            title: event.title || 'Untitled Event',
+                            start: event.start,
+                            end: event.end,
+                            location: event.location || '',
+                            type: 'calendar',
+                            date: eventDate
+                        });
+                    }
+                }
+            });
         }
 
+        // Add local tasks from the UPCOMING tasks array (always from today)
+        if (Array.isArray(upcomingTasks)) {
+            upcomingTasks.forEach(task => {
+                if (task.due_date) {
+                    const taskDate = new Date(task.due_date);
+                    if (taskDate >= now && taskDate <= weekFromNow) {
+                        upcomingEvents.push({
+                            title: task.title || 'Untitled Task',
+                            start: task.due_date,
+                            end: null,
+                            location: '',
+                            type: 'task',
+                            status: task.status,
+                            category: task.category,
+                            date: taskDate
+                        });
+                    }
+                }
+            });
+        }
+
+        // Sort by start time
+        upcomingEvents.sort((a, b) => a.date - b.date);
+
+        // Render events
+        if (upcomingEvents.length === 0) {
+            upcomingContainer.innerHTML = `
+                <p class="no-events-message">
+                    <i class="fas fa-calendar-check"></i>
+                    No upcoming events in the next 7 days
+                </p>
+            `;
+        } else {
+            upcomingContainer.innerHTML = upcomingEvents.map(event => {
+                const eventDate = event.date;
+                const dateOptions = { weekday: 'short', month: 'short', day: 'numeric' };
+                const dateStr = eventDate.toLocaleDateString('en-US', dateOptions);
+                
+                let timeStr = 'All Day';
+                if (event.start.includes('T')) {
+                    const timeOptions = { hour: '2-digit', minute: '2-digit' };
+                    timeStr = eventDate.toLocaleTimeString('en-US', timeOptions);
+                }
+                
+                const typeClass = event.type === 'task' ? 'task-event' : 'calendar-event';
+                const categoryColor = event.category ? getCategoryColor(event.category) : '#3498db';
+                
+                return `
+                    <div class="upcoming-event-card ${typeClass}" style="border-left-color: ${categoryColor};">
+                        <div class="event-time">
+                            <span class="event-date">${dateStr}</span>
+                            <span class="event-hour">${timeStr}</span>
+                        </div>
+                        <div class="event-details">
+                            <h4>${escapeHtml(event.title)}</h4>
+                            ${event.location ? `
+                                <p class="event-location">
+                                    <i class="fas fa-map-marker-alt"></i> ${escapeHtml(event.location)}
+                                </p>
+                            ` : ''}
+                            ${event.type === 'task' && event.status ? `
+                                <span class="event-status status-${event.status}">${event.status}</span>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
     }
+    
+    // Helper function to escape HTML and prevent XSS
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // =============================================================================
+    // RENDER CURRENT VIEW
+    // =============================================================================
+    
     // NEW: Single function to render whichever view is active
     function renderCurrentView() {
         // Hide all views first
@@ -360,6 +612,9 @@ function initializeCalendar() {
             document.getElementById('dayView').style.display = 'block';
             renderDayView();
         }
+
+        // Always render upcoming events
+        renderUpcomingEvents();
     }
 
     // =============================================================================
@@ -371,8 +626,13 @@ function initializeCalendar() {
             const view = this.getAttribute('data-view');
             activeView = view;
 
-            // Fetch data for the new view
-            await fetchCalendarData(currentDate, view);
+            // Fetch data for the new view and upcoming events
+            const [data, _] = await Promise.all([
+                fetchCalendarData(currentDate, view),
+                fetchUpcomingEvents()
+            ]);
+
+            if (!data) return;
 
             // Update button text for navigation
             if (view === 'month') {
@@ -420,9 +680,13 @@ function initializeCalendar() {
             day.setDate(startOfWeek.getDate() + i);
             
             const isToday = day.toDateString() === new Date().toDateString();
+            const isSelected = day.toDateString() === currentDate.toDateString();
             
             const dayHeader = document.createElement('div');
-            dayHeader.className = 'day-header' + (isToday ? ' today' : '');
+            dayHeader.className = 'day-header';
+            if (isToday) dayHeader.classList.add('today');
+            if (isSelected) dayHeader.classList.add('selected');
+            
             dayHeader.innerHTML = `
                 <span class="day-name">${day.toLocaleDateString('en-US', {weekday: 'long'})}</span>
                 <span class="day-number">${day.getDate()}</span>
@@ -627,11 +891,11 @@ function initializeCalendar() {
             return;
         }
 
-        const dateStr = dayEventsColumn.getAttribute('data-date');
-        if (!dateStr) {
-            console.error('No data-date attribute found!');
-            return;
-        }
+        // Use currentDate to get the date string, not stale HTML attribute
+        const dateStr = currentDate.toISOString().split('T')[0];
+        
+        // Update the data-date attribute to match current date
+        dayEventsColumn.setAttribute('data-date', dateStr);
 
         // Update the large day header with formatted date and TODAY badge
         const dayHeader = document.getElementById('dayViewDateHeader');
@@ -1034,6 +1298,7 @@ function initializeCalendar() {
     // INITIALIZE
     // =============================================================================
 
+    // Render mini calendar with the fetched data
     renderMiniCalendar();
 
     // =============================================================================

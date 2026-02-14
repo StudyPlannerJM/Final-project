@@ -914,8 +914,8 @@ def api_calendar_events():
     
     try:
         target_date = datetime.strptime(date_str, '%Y-%m-%d')
-    except:
-        return {'success': False, 'error': 'Invalid date format'}, 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': 'Invalid date format'}), 400
 
     # Calculate date range based on view type
     if view == 'month':
@@ -937,7 +937,7 @@ def api_calendar_events():
     calendar_events = []
     calendar_connected = False
     
-    if current_user.calendar_sync_enabled:
+    if current_user.calendar_sync_enabled and current_user.google_token:
         service = get_calendar_service(current_user)
         if service:
             try:
@@ -946,6 +946,7 @@ def api_calendar_events():
                 calendar_connected = True
             except Exception as e:
                 print(f"Error fetching calendar events: {e}")
+                calendar_connected = False
 
     # Fetch local tasks for the date range
     tasks = Task.query.filter(
@@ -989,7 +990,7 @@ def api_calendar_events():
                 'is_today': day.date() == datetime.now().date()
             })
 
-    return {
+    return jsonify({
         'success': True,
         'calendarConnected': calendar_connected,
         'calendarEvents': calendar_events,
@@ -999,7 +1000,7 @@ def api_calendar_events():
         'currentMonth': target_date.month,
         'currentYear': target_date.year,
         'view': view
-    }
+    })
       
 @main.route('/api/calendar/week')
 @login_required

@@ -181,32 +181,9 @@
         <!-- Upcoming Events Section (Below Calendar) -->
         <div class="upcoming-section">
             <h3><i class="fas fa-clock"></i> Upcoming Events This Week</h3>
-
-            {% if upcoming_events %}
-            <div class="upcoming-events-list">
-                {% for event in upcoming_events %}
-                <div class="upcoming-event-card">
-                    <div class="event-time">
-                        <span class="event-date">{{ event.start[:10] }}</span>
-                        <span class="event-hour">{{ event.start[11:16] if 'T' in event.start else 'All Day' }}</span>
-                    </div>
-                    <div class="event-details">
-                        <h4>{{ event.title }}</h4>
-                        {% if event.location %}
-                        <p class="event-location">
-                            <i class="fas fa-map-marker-alt"></i> {{ event.location }}
-                        </p>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
+            <div class="upcoming-events-list" id="upcomingEventsList">
+                <!-- JavaScript will populate upcoming events here -->
             </div>
-            {% else %}
-            <p class="no-events-message">
-                <i class="fas fa-calendar-check"></i>
-                No upcoming events this week
-            </p>
-            {% endif %}
         </div>
     </main>
 </div>
