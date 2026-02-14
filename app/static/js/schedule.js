@@ -13,23 +13,23 @@ let calendarConnected = false;
 //Function to fetch calendar data via AJAX
 async function fetchCalendarData(date, view) {
     const dateStr = date.toISOString().split('T')[0];
-    
+
     try {
         const response = await fetch(`/api/calendar/events?date=${dateStr}&view=${view}`);
         const data = await response.json();
-        
+
         if (!data.success) {
             console.error('Failed to fetch calendar data:', data.error);
             return false;
         }
-        
+
         // Update global state
         calendarEvents = data.calendarEvents || [];
         tasks = data.tasks || [];
         calendarConnected = data.calendarConnected;
         currentMonth = data.currentMonth;
         currentYear = data.currentYear;
-        
+
         return data;
     } catch (error) {
         console.error('Error fetching calendar data:', error);
@@ -38,22 +38,22 @@ async function fetchCalendarData(date, view) {
 }
 
 // Initialize on page load
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', async function () {
     // Get initial date from page or use today
     const urlParams = new URLSearchParams(window.location.search);
     const dateParam = urlParams.get('date') || new Date().toISOString().split('T')[0];
     const viewParam = urlParams.get('view') || 'week';
-    
+
     currentDate = new Date(dateParam);
     activeView = viewParam;
-    
+
     // Fetch initial data
     const data = await fetchCalendarData(currentDate, activeView);
-    
+
     if (data) {
         // Initialize calendar with fetched data
         initializeCalendar();
-        
+
         // Render appropriate view
         renderCurrentView();
     }
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 function updateMainCalendarHeader() {
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                       'July', 'August', 'September', 'October', 'November', 'December'];
+        'July', 'August', 'September', 'October', 'November', 'December'];
     const mainHeader = document.getElementById('mainCalendarHeader');
     if (mainHeader) {
         mainHeader.textContent = `${monthNames[currentMonth - 1]}, ${currentYear}`;
@@ -88,7 +88,7 @@ function initializeCalendar() {
 
     // Handle sync to calendar
     document.querySelectorAll('.sync-task').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const taskId = this.getAttribute('data-task-id');
 
             fetch(`/sync_task_to_calendar/${taskId}`, {
@@ -97,25 +97,25 @@ function initializeCalendar() {
                     'Content-Type': 'application/json',
                 }
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    location.reload();
-                } else {
-                    alert('Error: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while syncing the task.');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while syncing the task.');
+                });
         });
     });
 
     // Handle remove from calendar
     document.querySelectorAll('.remove-task').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             if (!confirm('Remove this task from Google Calendar?')) return;
 
             const taskId = this.getAttribute('data-task-id');
@@ -126,19 +126,19 @@ function initializeCalendar() {
                     'Content-Type': 'application/json',
                 }
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    location.reload();
-                } else {
-                    alert('Error: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred.');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred.');
+                });
         });
     });
 
@@ -159,7 +159,7 @@ function initializeCalendar() {
         const prevLastDayDate = prevLastDay.getDate();
 
         const today = new Date();
-        
+
         // Check if we're viewing the same month as the selected date
         const viewingSelectedMonth = currentDate.getMonth() + 1 === currentMonth && currentDate.getFullYear() === currentYear;
 
@@ -177,12 +177,12 @@ function initializeCalendar() {
             const hasEvents = monthEvents[dateStr] && monthEvents[dateStr] > 0;
 
             const classes = ['calendar-day'];
-            
+
             // Only highlight the selected date
             if (isSelected) {
                 classes.push('selected');
             }
-            
+
             if (hasEvents) classes.push('has-events');
 
             daysHTML += `<div class="${classes.join(' ')}" data-date="${dateStr}">${day}</div>`;
@@ -199,7 +199,7 @@ function initializeCalendar() {
 
         // Add click handlers for date selection
         calendarDays.querySelectorAll('.calendar-day:not(.other-month)').forEach(dayEl => {
-            dayEl.addEventListener('click', function() {
+            dayEl.addEventListener('click', function () {
                 const selectedDate = this.getAttribute('data-date');
                 window.location.href = `/schedule?date=${selectedDate}`;
             });
@@ -207,7 +207,7 @@ function initializeCalendar() {
     }
 
     // Month navigation
-    document.getElementById('prevMonth')?.addEventListener('click', function() {
+    document.getElementById('prevMonth')?.addEventListener('click', function () {
         currentMonth--;
         if (currentMonth < 1) {
             currentMonth = 12;
@@ -215,7 +215,7 @@ function initializeCalendar() {
         }
         updateMiniCalendarHeader();
         renderMiniCalendar();
-        
+
         // If month view is active, update it too
         const monthView = document.getElementById('monthView');
         if (monthView && monthView.style.display !== 'none') {
@@ -223,7 +223,7 @@ function initializeCalendar() {
         }
     });
 
-    document.getElementById('nextMonth')?.addEventListener('click', function() {
+    document.getElementById('nextMonth')?.addEventListener('click', function () {
         currentMonth++;
         if (currentMonth > 12) {
             currentMonth = 1;
@@ -231,7 +231,7 @@ function initializeCalendar() {
         }
         updateMiniCalendarHeader();
         renderMiniCalendar();
-        
+
         // If month view is active, update it too
         const monthView = document.getElementById('monthView');
         if (monthView && monthView.style.display !== 'none') {
@@ -241,12 +241,12 @@ function initializeCalendar() {
 
     function updateMiniCalendarHeader() {
         const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                           'July', 'August', 'September', 'October', 'November', 'December'];
+            'July', 'August', 'September', 'October', 'November', 'December'];
         document.getElementById('currentMonthYear').textContent = `${monthNames[currentMonth - 1]} ${currentYear}`;
     }
 
     function updateDayViewDate() {
-    // Update the data-date attribute on the day events column
+        // Update the data-date attribute on the day events column
         const dayEventsColumn = document.getElementById('dayEventsColumn');
         if (dayEventsColumn) {
             const dateFormatted = currentDate.toISOString().split('T')[0];
@@ -258,7 +258,7 @@ function initializeCalendar() {
     // WEEK NAVIGATION
     // =============================================================================
 
-    document.getElementById('prevWeek')?.addEventListener('click', function() {
+    document.getElementById('prevWeek')?.addEventListener('click', function () {
         if (activeView === 'month') {
             // Navigate to previous month
             currentMonth--;
@@ -281,7 +281,7 @@ function initializeCalendar() {
         }
     });
 
-    document.getElementById('nextWeek')?.addEventListener('click', function() {
+    document.getElementById('nextWeek')?.addEventListener('click', function () {
         if (activeView === 'month') {
             // Navigate to next month
             currentMonth++;
@@ -304,50 +304,80 @@ function initializeCalendar() {
         }
     });
 
-    document.getElementById('todayBtn')?.addEventListener('click', function() {
+    document.getElementById('todayBtn')?.addEventListener('click', function () {
         navigateToDate(new Date());
     });
 
     async function navigateToDate(date, view = null) {
-    const viewParam = view || activeView;
-    
-    // Update current date
-    currentDate = date;
-    currentMonth = date.getMonth() + 1;
-    currentYear = date.getFullYear();
-    
-    // Fetch new data via AJAX (NO PAGE RELOAD!)
-    const data = await fetchCalendarData(date, viewParam);
-    
-    if (data) {
-        // Update URL without reloading page
-        const dateStr = date.toISOString().split('T')[0];
-        const newUrl = `/schedule?date=${dateStr}&view=${viewParam}`;
-        window.history.pushState({date: dateStr, view: viewParam}, '', newUrl);
-        
-        // Re-render the calendar with new data
-        renderCurrentView();
-        renderMiniCalendar();
-        updateMainCalendarHeader();
+        const viewParam = view || activeView;
+
+        // Update current date
+        currentDate = date;
+        currentMonth = date.getMonth() + 1;
+        currentYear = date.getFullYear();
+
+        // Fetch new data via AJAX (NO PAGE RELOAD!)
+        const data = await fetchCalendarData(date, viewParam);
+
+        if (data) {
+            // Update URL without reloading page
+            const dateStr = date.toISOString().split('T')[0];
+            const newUrl = `/schedule?date=${dateStr}&view=${viewParam}`;
+            window.history.pushState({ date: dateStr, view: viewParam }, '', newUrl);
+
+            // Re-render the calendar with new data
+            renderCurrentView();
+            renderMiniCalendar();
+            updateMainCalendarHeader();
+        }
+
     }
-}
+    //Single function to render whichever view is active
+    function renderCurrentView() {
+        // Hide all views first
+        document.getElementById('weekView').style.display = 'none';
+        document.getElementById('monthView').style.display = 'none';
+        document.getElementById('dayView').style.display = 'none';
+        document.querySelector('.week-days-header').style.display = 'none';
+
+        // Update view buttons
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.getAttribute('data-view') === activeView) {
+                btn.classList.add('active');
+            }
+        });
+
+        // Render the active view
+        if (activeView === 'week') {
+            document.getElementById('weekView').style.display = 'grid';
+            document.querySelector('.week-days-header').style.display = 'grid';
+            renderWeekView();
+        } else if (activeView === 'month') {
+            document.getElementById('monthView').style.display = 'block';
+            renderMonthView();
+        } else if (activeView === 'day') {
+            document.getElementById('dayView').style.display = 'block';
+            renderDayView();
+        }
+    }
 
     // =============================================================================
     // VIEW SWITCHER (Month/Week/Day)
     // =============================================================================
 
     document.querySelectorAll('.view-btn').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const view = this.getAttribute('data-view');
-            
+
             // Remove active class from all buttons
             document.querySelectorAll('.view-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            
+
             // Add active class to clicked button
             this.classList.add('active');
-            
+
             // Handle different views
             if (view === 'week') {
                 activeView = 'week';
@@ -421,7 +451,7 @@ function initializeCalendar() {
             `;
 
             eventBlock.style.cursor = 'pointer';
-            eventBlock.addEventListener('click', function(e) {
+            eventBlock.addEventListener('click', function (e) {
                 e.stopPropagation();
                 showCalendarEventDetails(event);
             });
@@ -437,10 +467,10 @@ function initializeCalendar() {
             const [datePart, timePart] = task.due_date.split('T');
             const [year, month, day] = datePart.split('-').map(Number);
             const [hour, minute] = timePart.split(':').map(Number);
-            
+
             const taskDate = new Date(year, month - 1, day, hour, minute);
             const dateStr = datePart;
-            
+
             const dayColumn = document.querySelector(`.day-column[data-date="${dateStr}"]`);
             if (!dayColumn) {
                 console.warn(`No day column found for date: ${dateStr}`);
@@ -458,7 +488,7 @@ function initializeCalendar() {
             taskBlock.className = 'event-block task-block';
             taskBlock.classList.add(`status-${task.status}`);
             if (task.synced) taskBlock.classList.add('synced');
-            
+
             // Set border color based on category
             const categoryColor = getCategoryColor(task.category);
             taskBlock.style.borderLeftColor = categoryColor;
@@ -467,31 +497,31 @@ function initializeCalendar() {
             const timeDiv = document.createElement('div');
             timeDiv.className = 'event-time-range';
             timeDiv.textContent = formatTime(taskDate);
-            
+
             const titleDiv = document.createElement('div');
             titleDiv.className = 'event-title';
             titleDiv.textContent = task.title;
-            
+
             taskBlock.appendChild(timeDiv);
             taskBlock.appendChild(titleDiv);
 
             taskBlock.style.cursor = 'pointer';
-            taskBlock.addEventListener('click', function(e) {
+            taskBlock.addEventListener('click', function (e) {
                 e.stopPropagation();
                 showTaskDetails(task);
             });
 
             hourSlot.appendChild(taskBlock);
         });
-        
+
         // Adjust hour slot heights based on number of tasks
         const grid = document.querySelector('.week-calendar-grid');
         const timeColumn = grid.querySelector('.time-column');
         const timeSlots = Array.from(timeColumn.querySelectorAll('.time-slot'));
-        
+
         // Track max tasks per hour across all days
         const maxTasksPerHour = new Array(24).fill(0);
-        
+
         document.querySelectorAll('.day-column').forEach(dayColumn => {
             dayColumn.querySelectorAll('.hour-slot').forEach(hourSlot => {
                 const hour = parseInt(hourSlot.getAttribute('data-hour'));
@@ -499,17 +529,17 @@ function initializeCalendar() {
                 maxTasksPerHour[hour] = Math.max(maxTasksPerHour[hour], tasksInSlot);
             });
         });
-        
+
         // Apply heights to all columns uniformly
         maxTasksPerHour.forEach((taskCount, hour) => {
             const newHeight = taskCount > 1 ? (taskCount * 60) : 60;
-            
+
             // Update time slot
             if (timeSlots[hour]) {
                 timeSlots[hour].style.height = `${newHeight}px`;
                 timeSlots[hour].style.minHeight = `${newHeight}px`;
             }
-            
+
             // Update all day column hour slots for this hour
             document.querySelectorAll(`.hour-slot[data-hour="${hour}"]`).forEach(slot => {
                 slot.style.height = `${newHeight}px`;
@@ -540,11 +570,11 @@ function initializeCalendar() {
         if (dayHeader) {
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             const formattedDate = currentDate.toLocaleDateString('en-US', options);
-            
+
             // Check if viewing today
             const today = new Date();
             const isToday = currentDate.toDateString() === today.toDateString();
-            
+
             if (isToday) {
                 dayHeader.innerHTML = `${formattedDate} <span class="today-badge">TODAY</span>`;
             } else {
@@ -591,7 +621,7 @@ function initializeCalendar() {
             `;
 
             eventBlock.style.cursor = 'pointer';
-            eventBlock.addEventListener('click', function(e) {
+            eventBlock.addEventListener('click', function (e) {
                 e.stopPropagation();
                 showCalendarEventDetails(event);
             });
@@ -631,7 +661,7 @@ function initializeCalendar() {
             `;
 
             taskBlock.style.cursor = 'pointer';
-            taskBlock.addEventListener('click', function(e) {
+            taskBlock.addEventListener('click', function (e) {
                 e.stopPropagation();
                 showTaskDetails(task);
             });
@@ -663,7 +693,7 @@ function initializeCalendar() {
         if (category && typeof category === 'object' && category.color) {
             return category.color;
         }
-        
+
         // Fallback for old string format or default
         const colors = {
             'Work': '#4285f4',
@@ -694,7 +724,7 @@ function initializeCalendar() {
     const eventForm = document.getElementById('eventForm');
 
     // Open modal
-    addEventBtn?.addEventListener('click', function() {
+    addEventBtn?.addEventListener('click', function () {
         eventModal.classList.add('active');
         // Set default date to today
         const today = new Date().toISOString().split('T')[0];
@@ -702,18 +732,18 @@ function initializeCalendar() {
     });
 
     // Close modal
-    closeModal?.addEventListener('click', function() {
+    closeModal?.addEventListener('click', function () {
         eventModal.classList.remove('active');
         eventForm.reset();
     });
 
-    cancelBtn?.addEventListener('click', function() {
+    cancelBtn?.addEventListener('click', function () {
         eventModal.classList.remove('active');
         eventForm.reset();
     });
 
     // Close on overlay click
-    eventModal?.addEventListener('click', function(e) {
+    eventModal?.addEventListener('click', function (e) {
         if (e.target === eventModal) {
             eventModal.classList.remove('active');
             eventForm.reset();
@@ -721,7 +751,7 @@ function initializeCalendar() {
     });
 
     // Submit event form
-    eventForm?.addEventListener('submit', function(e) {
+    eventForm?.addEventListener('submit', function (e) {
         e.preventDefault();
 
         const formData = new FormData(eventForm);
@@ -741,23 +771,23 @@ function initializeCalendar() {
             },
             body: JSON.stringify(eventData)
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Show success message
-                alert('Event created successfully!');
-                eventModal.classList.remove('active');
-                eventForm.reset();
-                // Reload page to show new event
-                location.reload();
-            } else {
-                alert('Error creating event: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Failed to create event');
-        });
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    alert('Event created successfully!');
+                    eventModal.classList.remove('active');
+                    eventForm.reset();
+                    // Reload page to show new event
+                    location.reload();
+                } else {
+                    alert('Error creating event: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to create event');
+            });
     });
 
     // =============================================================================
@@ -765,7 +795,7 @@ function initializeCalendar() {
     // =============================================================================
 
     document.querySelectorAll('.hour-slot').forEach(slot => {
-        slot.addEventListener('click', function() {
+        slot.addEventListener('click', function () {
             const dayColumn = this.closest('.day-column');
             const date = dayColumn.getAttribute('data-date');
             const hour = this.getAttribute('data-hour');
@@ -794,13 +824,13 @@ function initializeCalendar() {
         isGoogleCalendarEvent = true;
         currentEventId = event.id;
         currentTaskId = null;
-        
+
         // Update modal title
         document.getElementById('taskDetailsTitle').textContent = 'Google Calendar Event';
-        
+
         // Populate modal with event details
         document.getElementById('detailTitle').textContent = event.title || 'No title';
-        
+
         const descEl = document.getElementById('detailDescription');
         if (event.description) {
             descEl.textContent = event.description;
@@ -809,7 +839,7 @@ function initializeCalendar() {
             descEl.textContent = 'No description provided';
             descEl.classList.add('empty');
         }
-        
+
         // Format dates
         const startDate = new Date(event.start);
         const endDate = new Date(event.end);
@@ -824,11 +854,11 @@ function initializeCalendar() {
             hour: '2-digit',
             minute: '2-digit'
         });
-        
+
         // Hide category and status for calendar events
         document.getElementById('detailCategory').parentElement.style.display = 'none';
         document.getElementById('detailStatus').parentElement.style.display = 'none';
-        
+
         // Show location if available
         if (event.location) {
             const categoryEl = document.getElementById('detailCategory').parentElement;
@@ -836,29 +866,29 @@ function initializeCalendar() {
             categoryEl.querySelector('.detail-label').innerHTML = '<i class="fas fa-map-marker-alt"></i> Location:';
             document.getElementById('detailCategory').textContent = event.location;
         }
-        
+
         // Hide synced status
         document.getElementById('detailSyncedRow').style.display = 'none';
-        
+
         // Update button text
         editTaskBtn.textContent = 'Edit in Google Calendar';
-        
+
         // Show modal
         taskDetailsModal.classList.add('active');
     }
 
     function showTaskDetails(task) {
-                
+
         isGoogleCalendarEvent = false;
         currentTaskId = task.id;
         currentEventId = null;
-        
+
         // Reset modal title
         document.getElementById('taskDetailsTitle').textContent = 'Task Details';
-        
+
         // Populate modal with task details
         document.getElementById('detailTitle').textContent = task.title || 'No title';
-        
+
         const descEl = document.getElementById('detailDescription');
         if (task.description) {
             descEl.textContent = task.description;
@@ -867,7 +897,7 @@ function initializeCalendar() {
             descEl.textContent = 'No description provided';
             descEl.classList.add('empty');
         }
-        
+
         // Format due date
         if (task.due_date) {
             const dueDate = new Date(task.due_date.replace(' ', 'T'));
@@ -882,10 +912,10 @@ function initializeCalendar() {
         } else {
             document.getElementById('detailDueDate').textContent = 'No due date';
         }
-        
+
         document.getElementById('detailCategory').parentElement.style.display = 'flex';
         document.getElementById('detailCategory').parentElement.querySelector('.detail-label').innerHTML = '<i class="fas fa-folder"></i> Category:';
-        
+
         // Display category with color and icon if available
         const categoryEl = document.getElementById('detailCategory');
         if (task.category && task.category.name) {
@@ -897,13 +927,13 @@ function initializeCalendar() {
             // Show a muted badge for uncategorized tasks
             categoryEl.innerHTML = '<span style="background-color: #95a5a6; color: white; padding: 4px 8px; border-radius: 4px; display: inline-block; font-style: italic;">Uncategorized</span>';
         }
-        
+
         document.getElementById('detailStatus').parentElement.style.display = 'flex';
         document.getElementById('detailStatus').textContent = task.status || 'pending';
-        
+
         // Update button text
         editTaskBtn.textContent = 'Edit Task';
-        
+
         // Show synced status if applicable
         if (task.synced) {
             document.getElementById('detailSyncedRow').style.display = 'flex';
@@ -911,7 +941,7 @@ function initializeCalendar() {
         } else {
             document.getElementById('detailSyncedRow').style.display = 'none';
         }
-        
+
         // Show modal
         taskDetailsModal.classList.add('active');
     }
@@ -925,8 +955,8 @@ function initializeCalendar() {
 
     closeTaskDetails.addEventListener('click', closeTaskDetailsModal);
     closeTaskDetailsBtn.addEventListener('click', closeTaskDetailsModal);
-    
-    editTaskBtn.addEventListener('click', function() {
+
+    editTaskBtn.addEventListener('click', function () {
         if (isGoogleCalendarEvent && currentEventId) {
             // Try to use the htmlLink from the event, otherwise construct URL
             const currentEvent = weekEvents.find(e => e.id === currentEventId);
@@ -944,7 +974,7 @@ function initializeCalendar() {
     });
 
     // Close modal when clicking outside
-    taskDetailsModal.addEventListener('click', function(e) {
+    taskDetailsModal.addEventListener('click', function (e) {
         if (e.target === taskDetailsModal) {
             closeTaskDetailsModal();
         }
@@ -955,18 +985,18 @@ function initializeCalendar() {
     // =============================================================================
 
     renderMiniCalendar();
-    
+
     // =============================================================================
     // CHECK URL PARAMETER AND RENDER APPROPRIATE VIEW
     // =============================================================================
-    
+
     const urlParams = new URLSearchParams(window.location.search);
     const viewParam = urlParams.get('view');
-    
+
     if (viewParam === 'day') {
         // Initialize day view
         activeView = 'day';
-        
+
         // Update view buttons
         document.querySelectorAll('.view-btn').forEach(btn => {
             btn.classList.remove('active');
@@ -974,11 +1004,11 @@ function initializeCalendar() {
                 btn.classList.add('active');
             }
         });
-        
+
         // Update navigation buttons
         document.getElementById('prevWeek').title = 'Previous Day';
         document.getElementById('nextWeek').title = 'Next Day';
-        
+
         // Show day view
         updateMainHeaderForDayView();
         document.getElementById('weekView').style.display = 'none';
@@ -989,14 +1019,14 @@ function initializeCalendar() {
     } else if (viewParam === 'month') {
         // Initialize month view
         activeView = 'month';
-        
+
         document.querySelectorAll('.view-btn').forEach(btn => {
             btn.classList.remove('active');
             if (btn.getAttribute('data-view') === 'month') {
                 btn.classList.add('active');
             }
         });
-        
+
         document.getElementById('prevWeek').title = 'Previous Month';
         document.getElementById('nextWeek').title = 'Next Month';
         updateMainCalendarHeader();
@@ -1026,30 +1056,30 @@ function initializeCalendar() {
         // Get first day of the month
         const firstDay = new Date(currentYear, currentMonth - 1, 1);
         const lastDay = new Date(currentYear, currentMonth, 0);
-        
+
         // Get the day of week (0 = Sunday, 1 = Monday, etc.)
         // Adjust so Monday is first day (0 = Monday, 6 = Sunday)
         let firstDayOfWeek = firstDay.getDay();
         firstDayOfWeek = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
-        
+
         const daysInMonth = lastDay.getDate();
         const prevMonth = currentMonth === 1 ? 12 : currentMonth - 1;
         const prevMonthYear = currentMonth === 1 ? currentYear - 1 : currentYear;
         const daysInPrevMonth = new Date(prevMonthYear, prevMonth, 0).getDate();
-        
+
         // Calculate total cells needed
         const totalCells = Math.ceil((firstDayOfWeek + daysInMonth) / 7) * 7;
-        
+
         // Get today's date
         const today = new Date();
         const isCurrentMonth = today.getMonth() === currentMonth - 1 && today.getFullYear() === currentYear;
         const todayDate = today.getDate();
-        
+
         // Create array of all events by date
         const eventsByDate = {};
-        
-        // Add week events (Google Calendar events)
-        weekEvents.forEach(event => {
+
+        // Add calendar events (Google Calendar events for the FULL MONTH)
+        calendarEvents.forEach(event => {  // ✅ Now uses full month data!
             const eventDate = event.start.split('T')[0];
             if (!eventsByDate[eventDate]) {
                 eventsByDate[eventDate] = [];
@@ -1059,7 +1089,7 @@ function initializeCalendar() {
                 type: 'calendar'
             });
         });
-        
+
         // Add tasks
         tasks.forEach(task => {
             if (task.due_date) {
@@ -1074,14 +1104,14 @@ function initializeCalendar() {
                 });
             }
         });
-        
+
         // Render calendar cells
         for (let i = 0; i < totalCells; i++) {
             const cell = document.createElement('div');
             cell.className = 'month-day-cell';
-            
+
             let day, month, year, isOtherMonth = false;
-            
+
             // Previous month days
             if (i < firstDayOfWeek) {
                 day = daysInPrevMonth - firstDayOfWeek + i + 1;
@@ -1102,40 +1132,40 @@ function initializeCalendar() {
                 year = currentMonth === 12 ? currentYear + 1 : currentYear;
                 isOtherMonth = true;
             }
-            
+
             if (isOtherMonth) {
                 cell.classList.add('other-month');
             }
-            
+
             if (isCurrentMonth && day === todayDate && !isOtherMonth) {
                 cell.classList.add('today');
             }
-            
+
             // Create date string
             const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             cell.dataset.date = dateStr;
-            
+
             // Add day number
             const dayNumber = document.createElement('div');
             dayNumber.className = 'month-day-number';
             dayNumber.textContent = day;
             cell.appendChild(dayNumber);
-            
+
             // Add events for this day
             const eventsContainer = document.createElement('div');
             eventsContainer.className = 'month-events';
-            
+
             if (eventsByDate[dateStr]) {
                 const dayEvents = eventsByDate[dateStr];
                 const maxDisplay = 3;
-                
+
                 dayEvents.slice(0, maxDisplay).forEach(event => {
                     const eventItem = document.createElement('div');
                     eventItem.className = `month-event-item ${event.type}-event`;
                     eventItem.textContent = event.title;
-                    
+
                     // Add click handler
-                    eventItem.addEventListener('click', function(e) {
+                    eventItem.addEventListener('click', function (e) {
                         e.stopPropagation();
                         if (event.type === 'calendar') {
                             showCalendarEventDetails(event);
@@ -1143,16 +1173,16 @@ function initializeCalendar() {
                             showTaskDetails(event);
                         }
                     });
-                    
+
                     eventsContainer.appendChild(eventItem);
                 });
-                
+
                 // Show "more" indicator if there are more events
                 if (dayEvents.length > maxDisplay) {
                     const moreItem = document.createElement('div');
                     moreItem.className = 'month-event-more';
                     moreItem.textContent = `+${dayEvents.length - maxDisplay} more`;
-                    moreItem.addEventListener('click', function(e) {
+                    moreItem.addEventListener('click', function (e) {
                         e.stopPropagation();
                         // Could show a modal with all events for this day
                         alert(`${dayEvents.length} events on this day. Click individual events to view details.`);
@@ -1160,14 +1190,14 @@ function initializeCalendar() {
                     eventsContainer.appendChild(moreItem);
                 }
             }
-            
+
             cell.appendChild(eventsContainer);
-            
+
             // Add click handler for empty space
-            cell.addEventListener('click', function() {
+            cell.addEventListener('click', function () {
                 // Could navigate to day view or show add event dialog
             });
-            
+
             monthDaysGrid.appendChild(cell);
         }
     }
