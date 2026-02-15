@@ -17,14 +17,14 @@ def configure_gemini_api():
     return client
 
 
-def generate_study_plan(subject, days_until_exam, hours_per_day, knowledge_level):
+def generate_study_plan(subject, time_value, time_unit, knowledge_level):
     """
     Generate a personalized study plan using Google Gemini AI
     
     Args:
         subject (str): The subject or topic to study
-        days_until_exam (int): Number of days until the exam
-        hours_per_day (float): Hours available per day for studying
+        time_value (int): Number of time units
+        time_unit (str): Unit of time ('days', 'weeks', or 'months')
         knowledge_level (str): Current knowledge level (beginner, intermediate, advanced)
     
     Returns:
@@ -34,17 +34,27 @@ def generate_study_plan(subject, days_until_exam, hours_per_day, knowledge_level
         # Configure the API
         client = configure_gemini_api()
         
-        # Calculate total study hours
-        total_hours = days_until_exam * hours_per_day
+        # Convert time to days for calculations
+        if time_unit == 'days':
+            total_days = time_value
+            time_display = f"{time_value} {'day' if time_value == 1 else 'days'}"
+        elif time_unit == 'weeks':
+            total_days = time_value * 7
+            time_display = f"{time_value} {'week' if time_value == 1 else 'weeks'}"
+        elif time_unit == 'months':
+            total_days = time_value * 30  # Approximate
+            time_display = f"{time_value} {'month' if time_value == 1 else 'months'}"
+        else:
+            total_days = time_value
+            time_display = f"{time_value} days"
         
         # Create the prompt for the AI
         prompt = f"""
 You are an expert educational advisor. Create a concise, actionable study plan based on the following:
 
 **Subject:** {subject}
-**Timeline:** {days_until_exam} days
-**Daily Time:** {hours_per_day} hours/day ({total_hours} total hours)
-**Level:** {knowledge_level}
+**Available Time:** {time_display} ({total_days} days)
+**Knowledge Level:** {knowledge_level}
 
 Generate a CONCISE study plan with clear structure:
 
@@ -53,11 +63,11 @@ Generate a CONCISE study plan with clear structure:
 - Expected outcome
 
 # 📅 Study Schedule
-Divide the {days_until_exam} days into phases (e.g., Week 1, Week 2, or Phase 1-3):
+Divide the {time_display} into phases (e.g., Week 1, Week 2, or Phase 1-3):
 - **Phase [X]:** Topics to cover, time allocation, key milestone
 
 # 📖 Daily Routine
-- Morning/Afternoon/Evening study blocks
+- Suggested daily study blocks
 - Include breaks (e.g., 25-min Pomodoro sessions)
 
 # 🎯 Study Methods

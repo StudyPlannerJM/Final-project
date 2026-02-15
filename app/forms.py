@@ -85,18 +85,22 @@ class StudyPlanForm(FlaskForm):
         validators=[DataRequired()],
         render_kw={"placeholder": "e.g., Calculus, Biology"}
     )
-    days_until_exam = IntegerField(
-        'Days Until Exam',
+    time_value = IntegerField(
+        'Time for the Task',
         validators=[DataRequired(), NumberRange(min=1, max=365)],
         render_kw={"placeholder": "e.g., 14"}
     )
-    hours_per_day = FloatField(
-        'Hours Available/Day',
-        validators=[DataRequired(), NumberRange(min=0.5, max=24)],
-        render_kw={"placeholder": "e.g., 3"}
+    time_unit = SelectField(
+        'Time Unit',
+        choices=[
+            ('days', 'Days'),
+            ('weeks', 'Weeks'),
+            ('months', 'Months')
+        ],
+        validators=[DataRequired()]
     )
     knowledge_level = SelectField(
-        'Current Knowledge Level',
+        'Knowledge Level',
         choices=[
             ('beginner', 'Beginner'),
             ('intermediate', 'Intermediate'),

@@ -36,20 +36,11 @@
     <div class="plan-parameters">
         <div class="param-card">
             <div class="param-icon">
-                <i class="fas fa-calendar-day"></i>
-            </div>
-            <div class="param-info">
-                <span class="param-label">Days Until Exam</span>
-                <span class="param-value">{{ plan.days_until_exam }} days</span>
-            </div>
-        </div>
-        <div class="param-card">
-            <div class="param-icon">
                 <i class="fas fa-clock"></i>
             </div>
             <div class="param-info">
-                <span class="param-label">Study Time/Day</span>
-                <span class="param-value">{{ plan.hours_per_day }} hours</span>
+                <span class="param-label">Time for the Task</span>
+                <span class="param-value">{{ plan.time_value }} {{ plan.time_unit }}</span>
             </div>
         </div>
         <div class="param-card">
@@ -59,15 +50,6 @@
             <div class="param-info">
                 <span class="param-label">Knowledge Level</span>
                 <span class="param-value">{{ plan.knowledge_level.capitalize() }}</span>
-            </div>
-        </div>
-        <div class="param-card">
-            <div class="param-icon">
-                <i class="fas fa-hourglass-half"></i>
-            </div>
-            <div class="param-info">
-                <span class="param-label">Total Study Hours</span>
-                <span class="param-value">{{ plan.days_until_exam * plan.hours_per_day }} hours</span>
             </div>
         </div>
     </div>

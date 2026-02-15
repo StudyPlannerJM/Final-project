@@ -113,6 +113,20 @@
     margin-top: 5px;
 }
 
+/* Time Input Group */
+.time-input-wrapper {
+    display: flex;
+    gap: 10px;
+}
+
+.time-input-wrapper .time-number {
+    flex: 2;
+}
+
+.time-input-wrapper .time-unit {
+    flex: 1;
+}
+
 /* Generate Button */
 .form-actions {
     text-align: center;
