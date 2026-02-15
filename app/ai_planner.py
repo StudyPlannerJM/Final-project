@@ -110,8 +110,9 @@ FORMATTING RULES:
 """
         
         # Generate the study plan using the new API
+        # Using gemini-flash-latest for better availability
         response = client.models.generate_content(
-            model='gemini-2.0-flash-exp',
+            model='gemini-flash-latest',
             contents=prompt
         )
         
