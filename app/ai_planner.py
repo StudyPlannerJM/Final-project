@@ -50,46 +50,74 @@ def generate_study_plan(subject, time_value, time_unit, knowledge_level):
         
         # Create the prompt for the AI
         prompt = f"""
-You are an expert educational advisor. Create a concise, actionable study plan based on the following:
+You are an expert educational advisor. Create a personalized study plan.
 
 **Subject:** {subject}
 **Available Time:** {time_display} ({total_days} days)
 **Knowledge Level:** {knowledge_level}
 
-Generate a CONCISE study plan with clear structure:
+IMPORTANT: Follow this EXACT structure and formatting:
 
 # 📋 Overview
-- Learning goals (2-3 key objectives)
-- Expected outcome
+- Clear learning goal 1
+- Clear learning goal 2
+- Expected outcome after completion
 
 # 📅 Study Schedule
-Divide the {time_display} into phases (e.g., Week 1, Week 2, or Phase 1-3):
-- **Phase [X]:** Topics to cover, time allocation, key milestone
+Break down the {time_display} into clear phases:
 
-# 📖 Daily Routine
-- Suggested daily study blocks
-- Include breaks (e.g., 25-min Pomodoro sessions)
+## Phase 1: Foundation ({knowledge_level} level)
+- Topics to cover
+- Key concepts to master
+- Time allocation
 
-# 🎯 Study Methods
-- 3-4 most effective techniques for {knowledge_level} level
-- Recommended resources (be specific)
+## Phase 2: Practice & Application
+- Hands-on exercises
+- Practice problems
+- Projects or assignments
 
-# ✅ Assessment Points
-- When to self-test (e.g., end of each phase)
-- Practice problem schedule
-- Mock exam timing
+## Phase 3: Review & Mastery
+- Review key concepts
+- Take practice tests
+- Final preparations
+
+# 📖 Study Methods
+Effective techniques for {knowledge_level} learners:
+- Active recall and spaced repetition
+- Practice with real problems
+- Teach concepts to others
+- Use {subject}-specific resources
+
+# ✅ Milestones & Assessment
+- Week 1: Complete foundation topics
+- Week 2: Finish practice exercises
+- Regular: Self-test every 3 days
+- Final: Complete mock assessment
 
 # 💡 Success Tips
-3-5 actionable tips for {subject} mastery
+- Tip 1: Stay consistent with daily study schedule
+- Tip 2: Focus on understanding, not memorization
+- Tip 3: Use active learning techniques
+- Tip 4: Take breaks using Pomodoro technique
+- Tip 5: Track your progress regularly
 
-Keep it CONCISE and ACTIONABLE. Use markdown formatting: # for main headers, ## for subheaders, - for bullets, **bold** for emphasis.
+FORMATTING RULES:
+- Use # for main sections (ONLY 5 sections as shown)
+- Use ## for subsections within Study Schedule
+- Use - for all bullet points
+- Use **bold** for emphasis on key terms
+- Keep content concise and actionable
+- Maintain consistent spacing
 """
         
         # Generate the study plan using the new API
-        # Using gemini-flash-latest which typically has better quota availability
         response = client.models.generate_content(
-            model='gemini-flash-latest',
-            contents=prompt
+            model='gemini-1.5-flash',
+            contents=prompt,
+            config=GenerateContentConfig(
+                temperature=0.7,
+                top_p=0.9,
+            )
         )
         
         # Return the generated text
@@ -102,7 +130,8 @@ Keep it CONCISE and ACTIONABLE. Use markdown formatting: # for main headers, ## 
 
 def format_plan_for_display(plan_content):
     """
-    Format the AI-generated plan for better HTML display with proper markdown conversion
+    Format the AI-generated plan for better HTML display
+    with proper markdown conversion
     
     Args:
         plan_content (str): Raw plan content from AI with markdown
@@ -116,40 +145,81 @@ def format_plan_for_display(plan_content):
     lines = plan_content.split('\n')
     formatted_lines = []
     in_list = False
+    in_numbered_list = False
     
     for line in lines:
         stripped = line.strip()
         
-        # Skip empty lines (we'll add spacing with CSS)
+        # Skip empty lines and add spacing
         if not stripped:
             if in_list:
                 formatted_lines.append('</ul>')
                 in_list = False
+            if in_numbered_list:
+                formatted_lines.append('</ol>')
+                in_numbered_list = False
             formatted_lines.append('<div class="section-spacing"></div>')
             continue
         
-        # Main headers (# Header with emoji)
-        if stripped.startswith('# '):
+        # Main headers (# Header)
+        if stripped.startswith('# ') and not stripped.startswith('## '):
             if in_list:
                 formatted_lines.append('</ul>')
                 in_list = False
+            if in_numbered_list:
+                formatted_lines.append('</ol>')
+                in_numbered_list = False
             header_text = stripped[2:].strip()
-            formatted_lines.append(f'<h2 class="plan-section-header">{header_text}</h2>')
+            formatted_lines.append(
+                f'<h2 class="plan-section-header">{header_text}</h2>'
+            )
         
         # Subheaders (## Subheader)
         elif stripped.startswith('## '):
             if in_list:
                 formatted_lines.append('</ul>')
                 in_list = False
+            if in_numbered_list:
+                formatted_lines.append('</ol>')
+                in_numbered_list = False
             header_text = stripped[3:].strip()
-            formatted_lines.append(f'<h3 class="plan-subsection-header">{header_text}</h3>')
+            formatted_lines.append(
+                f'<h3 class="plan-subsection-header">{header_text}</h3>'
+            )
+        
+        # Numbered list items (1. , 2. , etc.)
+        elif re.match(r'^\d+\.\s+', stripped):
+            item_text = re.sub(r'^\d+\.\s+', '', stripped)
+            # Format **bold** and *italic*
+            item_text = re.sub(
+                r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', item_text
+            )
+            item_text = re.sub(
+                r'(?<!\*)\*(?!\*)([^*]+)\*(?!\*)', r'<em>\1</em>', item_text
+            )
+            
+            if not in_numbered_list:
+                if in_list:
+                    formatted_lines.append('</ul>')
+                    in_list = False
+                formatted_lines.append('<ol class="plan-numbered-list">')
+                in_numbered_list = True
+            formatted_lines.append(f'<li>{item_text}</li>')
         
         # Bullet points (- item or * item)
         elif stripped.startswith('- ') or stripped.startswith('* '):
+            if in_numbered_list:
+                formatted_lines.append('</ol>')
+                in_numbered_list = False
+            
             item_text = stripped[2:].strip()
             # Format **bold** and *italic*
-            item_text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', item_text)
-            item_text = re.sub(r'\*(.+?)\*', r'<em>\1</em>', item_text)
+            item_text = re.sub(
+                r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', item_text
+            )
+            item_text = re.sub(
+                r'(?<!\*)\*(?!\*)([^*]+)\*(?!\*)', r'<em>\1</em>', item_text
+            )
             
             if not in_list:
                 formatted_lines.append('<ul class="plan-list">')
@@ -161,14 +231,23 @@ def format_plan_for_display(plan_content):
             if in_list:
                 formatted_lines.append('</ul>')
                 in_list = False
+            if in_numbered_list:
+                formatted_lines.append('</ol>')
+                in_numbered_list = False
             
             # Format **bold** and *italic*
-            text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', stripped)
-            text = re.sub(r'\*(.+?)\*', r'<em>\1</em>', text)
+            text = re.sub(
+                r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', stripped
+            )
+            text = re.sub(
+                r'(?<!\*)\*(?!\*)([^*]+)\*(?!\*)', r'<em>\1</em>', text
+            )
             formatted_lines.append(f'<p class="plan-paragraph">{text}</p>')
     
-    # Close any open list
+    # Close any open lists
     if in_list:
         formatted_lines.append('</ul>')
+    if in_numbered_list:
+        formatted_lines.append('</ol>')
     
     return '\n'.join(formatted_lines)

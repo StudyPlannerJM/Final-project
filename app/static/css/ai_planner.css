@@ -57,7 +57,7 @@
 
 .form-grid {
     display: grid;
-    grid-template-columns: 0.8fr 1.2fr;
+    grid-template-columns: 1.2fr 0.8fr;
     gap: 25px;
     margin-bottom: 30px;
 }
@@ -105,6 +105,11 @@
 
 .form-control::placeholder {
     color: var(--text-color-tertiary);
+}
+
+/* Subject field width restriction */
+#subject {
+    max-width: 85%;
 }
 
 .error-message {
@@ -528,9 +533,10 @@
     font-size: 1.2em;
     font-weight: 600;
     color: var(--accent-color);
-    margin: 20px 0 10px 0;
-    padding-left: 10px;
+    margin: 25px 0 12px 0;
+    padding-left: 15px;
     border-left: 4px solid var(--accent-color);
+    line-height: 1.4;
 }
 
 .plan-list {
@@ -546,6 +552,7 @@
     border-left: 4px solid var(--primary-color);
     border-radius: 4px;
     transition: all 0.2s ease;
+    line-height: 1.6;
 }
 
 .plan-list li:hover {
@@ -559,13 +566,47 @@
     font-weight: 700;
 }
 
+/* Numbered Lists */
+.plan-numbered-list {
+    padding-left: 25px;
+    margin: 15px 0;
+    counter-reset: item;
+}
+
+.plan-numbered-list li {
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    background-color: var(--bg-color-tertiary);
+    border-left: 4px solid var(--accent-color);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    line-height: 1.6;
+    list-style-position: inside;
+}
+
+.plan-numbered-list li:hover {
+    background-color: var(--bg-color-primary);
+    border-left-color: var(--primary-color);
+    transform: translateX(5px);
+}
+
+.plan-numbered-list li strong {
+    color: var(--accent-color);
+    font-weight: 700;
+}
+
 .plan-paragraph {
     margin: 12px 0;
     line-height: 1.8;
+    color: var(--text-color-secondary);
+}
+
+.plan-paragraph strong {
+    color: var(--primary-color);
 }
 
 .section-spacing {
-    height: 15px;
+    height: 20px;
 }
 
 .plan-actions {
