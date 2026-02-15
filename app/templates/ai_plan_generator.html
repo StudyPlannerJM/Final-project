@@ -40,34 +40,6 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="days_until_exam">
-                            <i class="fas fa-calendar-day"></i> {{ form.days_until_exam.label.text }}
-                        </label>
-                        {{ form.days_until_exam(class="form-control") }}
-                        {% if form.days_until_exam.errors %}
-                            <div class="error-message">
-                                {% for error in form.days_until_exam.errors %}
-                                    <span>{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="hours_per_day">
-                            <i class="fas fa-clock"></i> {{ form.hours_per_day.label.text }}
-                        </label>
-                        {{ form.hours_per_day(class="form-control", step="0.5") }}
-                        {% if form.hours_per_day.errors %}
-                            <div class="error-message">
-                                {% for error in form.hours_per_day.errors %}
-                                    <span>{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group">
                         <label for="knowledge_level">
                             <i class="fas fa-chart-line"></i> {{ form.knowledge_level.label.text }}
                         </label>
@@ -80,12 +52,41 @@
                             </div>
                         {% endif %}
                     </div>
+
+                    <div class="form-group time-input-group">
+                        <label for="time_value">
+                            <i class="fas fa-clock"></i> {{ form.time_value.label.text }}
+                        </label>
+                        <div class="time-input-wrapper">
+                            {{ form.time_value(class="form-control time-number") }}
+                            {{ form.time_unit(class="form-control time-unit") }}
+                        </div>
+                        {% if form.time_value.errors %}
+                            <div class="error-message">
+                                {% for error in form.time_value.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div id="loading-indicator" class="loading-indicator" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Generating your personalized study plan with AI...</p>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill"></div>
+                    </div>
                 </div>
 
                 <div class="form-actions">
                     <button type="submit" class="btn-generate">
                         <i class="fas fa-magic"></i> {{ form.submit.label.text }}
                     </button>
+                    <a href="{{ url_for('main.my_study_plans') }}" class="btn-view-all">
+                        <i class="fas fa-folder-open"></i> View All Plans
+                    </a>
                 </div>
             </form>
         </div>
@@ -102,8 +103,7 @@
                     </div>
                     <div class="plan-card-body">
                         <div class="plan-info">
-                            <span><i class="fas fa-calendar"></i> {{ plan.days_until_exam }} days</span>
-                            <span><i class="fas fa-clock"></i> {{ plan.hours_per_day }} hrs/day</span>
+                            <span><i class="fas fa-clock"></i> {{ plan.time_value }} {{ plan.time_unit }}</span>
                             <span><i class="fas fa-signal"></i> {{ plan.knowledge_level.capitalize() }}</span>
                         </div>
                     </div>
@@ -129,4 +129,25 @@
         {% endif %}
     </div>
 </div>
+
+<script>
+    // Show loading indicator when form is submitted
+    document.querySelector('.plan-form').addEventListener('submit', function() {
+        document.getElementById('loading-indicator').style.display = 'block';
+        document.querySelector('.form-section').style.opacity = '0.5';
+        document.querySelector('.btn-generate').disabled = true;
+        
+        // Animate progress bar
+        const progressFill = document.querySelector('.progress-bar-fill');
+        let width = 0;
+        const interval = setInterval(() => {
+            if (width >= 90) {
+                clearInterval(interval);
+            } else {
+                width += 1;
+                progressFill.style.width = width + '%';
+            }
+        }, 100);
+    });
+</script>
 {% endblock %}

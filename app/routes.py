@@ -1373,8 +1373,8 @@ def ai_plan_generator():
             # Generate the study plan using AI
             plan_content = generate_study_plan(
                 subject=form.subject.data,
-                days_until_exam=form.days_until_exam.data,
-                hours_per_day=form.hours_per_day.data,
+                time_value=form.time_value.data,
+                time_unit=form.time_unit.data,
                 knowledge_level=form.knowledge_level.data
             )
             
@@ -1382,8 +1382,8 @@ def ai_plan_generator():
             study_plan = StudyPlan(
                 user_id=current_user.id,
                 subject=form.subject.data,
-                days_until_exam=form.days_until_exam.data,
-                hours_per_day=form.hours_per_day.data,
+                time_value=form.time_value.data,
+                time_unit=form.time_unit.data,
                 knowledge_level=form.knowledge_level.data,
                 plan_content=plan_content
             )

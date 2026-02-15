@@ -132,8 +132,8 @@ class StudyPlan(db.Model):
     
     # Input parameters
     subject = db.Column(db.String(200), nullable=False)
-    days_until_exam = db.Column(db.Integer, nullable=False)
-    hours_per_day = db.Column(db.Float, nullable=False)
+    time_value = db.Column(db.Integer, nullable=False)
+    time_unit = db.Column(db.String(20), nullable=False)  # 'days', 'weeks', or 'months'
     knowledge_level = db.Column(db.String(50), nullable=False)
     
     # Generated plan content

@@ -29,16 +29,8 @@
             <div class="plan-card-body">
                 <div class="plan-stats">
                     <div class="stat-item">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span>{{ plan.days_until_exam }} days</span>
-                    </div>
-                    <div class="stat-item">
                         <i class="fas fa-clock"></i>
-                        <span>{{ plan.hours_per_day }} hrs/day</span>
-                    </div>
-                    <div class="stat-item">
-                        <i class="fas fa-hourglass-half"></i>
-                        <span>{{ plan.days_until_exam * plan.hours_per_day }} total hrs</span>
+                        <span>{{ plan.time_value }} {{ plan.time_unit }}</span>
                     </div>
                 </div>
                 <div class="plan-date">

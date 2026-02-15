@@ -57,7 +57,7 @@
 
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1.2fr 0.8fr;
     gap: 25px;
     margin-bottom: 30px;
 }
@@ -107,15 +107,42 @@
     color: var(--text-color-tertiary);
 }
 
+/* Subject field width restriction */
+#subject {
+    max-width: 85%;
+}
+
 .error-message {
     color: #e74c3c;
     font-size: 0.85em;
     margin-top: 5px;
 }
 
+/* Time Input Group */
+.time-input-group {
+    grid-column: 1 / -1; /* Span full width */
+}
+
+.time-input-wrapper {
+    display: flex;
+    gap: 10px;
+}
+
+.time-input-wrapper .time-number {
+    flex: 2;
+}
+
+.time-input-wrapper .time-unit {
+    flex: 1;
+}
+
 /* Generate Button */
 .form-actions {
     text-align: center;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
 }
 
 .btn-generate {
@@ -141,6 +168,98 @@
 
 .btn-generate i {
     font-size: 1.2em;
+}
+
+.btn-generate:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* View All Plans Button */
+.btn-view-all {
+    background: transparent;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+    padding: 15px 40px;
+    font-size: 1.1em;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+}
+
+.btn-view-all:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);
+    text-decoration: none;
+}
+
+.btn-view-all i {
+    font-size: 1.1em;
+}
+
+/* Loading Indicator */
+.loading-indicator {
+    text-align: center;
+    padding: 30px;
+    background: var(--bg-color-secondary);
+    border-radius: 12px;
+    margin: 20px 0;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.loading-indicator p {
+    color: var(--text-color-primary);
+    font-size: 1.1em;
+    margin: 15px 0;
+    font-weight: 500;
+}
+
+/* Spinner */
+.spinner {
+    margin: 0 auto 20px;
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--border-color);
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Progress Bar */
+.progress-bar {
+    width: 100%;
+    max-width: 400px;
+    height: 8px;
+    background-color: var(--border-color);
+    border-radius: 10px;
+    margin: 20px auto 0;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    transition: width 0.1s ease;
 }
 
 /* Previous Plans Section */
@@ -414,9 +533,10 @@
     font-size: 1.2em;
     font-weight: 600;
     color: var(--accent-color);
-    margin: 20px 0 10px 0;
-    padding-left: 10px;
+    margin: 25px 0 12px 0;
+    padding-left: 15px;
     border-left: 4px solid var(--accent-color);
+    line-height: 1.4;
 }
 
 .plan-list {
@@ -432,6 +552,7 @@
     border-left: 4px solid var(--primary-color);
     border-radius: 4px;
     transition: all 0.2s ease;
+    line-height: 1.6;
 }
 
 .plan-list li:hover {
@@ -445,13 +566,47 @@
     font-weight: 700;
 }
 
+/* Numbered Lists */
+.plan-numbered-list {
+    padding-left: 25px;
+    margin: 15px 0;
+    counter-reset: item;
+}
+
+.plan-numbered-list li {
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    background-color: var(--bg-color-tertiary);
+    border-left: 4px solid var(--accent-color);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    line-height: 1.6;
+    list-style-position: inside;
+}
+
+.plan-numbered-list li:hover {
+    background-color: var(--bg-color-primary);
+    border-left-color: var(--primary-color);
+    transform: translateX(5px);
+}
+
+.plan-numbered-list li strong {
+    color: var(--accent-color);
+    font-weight: 700;
+}
+
 .plan-paragraph {
     margin: 12px 0;
     line-height: 1.8;
+    color: var(--text-color-secondary);
+}
+
+.plan-paragraph strong {
+    color: var(--primary-color);
 }
 
 .section-spacing {
-    height: 15px;
+    height: 20px;
 }
 
 .plan-actions {
