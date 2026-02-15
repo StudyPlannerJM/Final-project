@@ -5,7 +5,6 @@
 
 import os
 from google import genai
-from google.genai.types import GenerateContentConfig
 from flask import current_app
 
 
@@ -112,12 +111,8 @@ FORMATTING RULES:
         
         # Generate the study plan using the new API
         response = client.models.generate_content(
-            model='gemini-1.5-flash',
-            contents=prompt,
-            config=GenerateContentConfig(
-                temperature=0.7,
-                top_p=0.9,
-            )
+            model='gemini-2.0-flash-exp',
+            contents=prompt
         )
         
         # Return the generated text
