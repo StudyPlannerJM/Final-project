@@ -126,38 +126,18 @@
         </div>
 
         <!-- Week Day Headers -->
-        <div class="week-days-header">
+        <div class="week-days-header" id="weekDaysHeader">
             <div class="time-column-header"></div>
-            {% for day in week_dates %}
-            <div class="day-header {{ 'today' if day.is_today else '' }}">
-                <span class="day-name">{{ day.day_name }}</span>
-                <span class="day-number">{{ day.day_num }}</span>
-                <span class="day-date">{{ day.date.strftime('%b %d') }}</span>
-            </div>
-            {% endfor %}
+            <!-- JavaScript will populate day headers here -->
         </div>
 
         <!-- Week Calendar Grid -->
         <div class="week-calendar-grid" id="weekView">
             <!-- Time Column -->
-            <div class="time-column">
-                {% for hour in range(0, 24) %}
-                <div class="time-slot">
-                    {{ '%02d:00' % hour }}
-                </div>
-                {% endfor %}
+            <div class="time-column" id="weekTimeColumn">
+                <!-- JavaScript will populate time slots here -->
             </div>
-
-            <!-- Days Columns -->
-            {% for day in week_dates %}
-            <div class="day-column" data-date="{{ day.date.strftime('%Y-%m-%d') }}">
-                {% for hour in range(0, 24) %}
-                <div class="hour-slot" data-hour="{{ hour }}">
-                    <!-- Events will be positioned here -->
-                </div>
-                {% endfor %}
-            </div>
-            {% endfor %}
+            <!-- JavaScript will populate day columns here -->
         </div>
 
         <!-- Month Calendar Grid -->
@@ -201,32 +181,9 @@
         <!-- Upcoming Events Section (Below Calendar) -->
         <div class="upcoming-section">
             <h3><i class="fas fa-clock"></i> Upcoming Events This Week</h3>
-
-            {% if upcoming_events %}
-            <div class="upcoming-events-list">
-                {% for event in upcoming_events %}
-                <div class="upcoming-event-card">
-                    <div class="event-time">
-                        <span class="event-date">{{ event.start[:10] }}</span>
-                        <span class="event-hour">{{ event.start[11:16] if 'T' in event.start else 'All Day' }}</span>
-                    </div>
-                    <div class="event-details">
-                        <h4>{{ event.title }}</h4>
-                        {% if event.location %}
-                        <p class="event-location">
-                            <i class="fas fa-map-marker-alt"></i> {{ event.location }}
-                        </p>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
+            <div class="upcoming-events-list" id="upcomingEventsList">
+                <!-- JavaScript will populate upcoming events here -->
             </div>
-            {% else %}
-            <p class="no-events-message">
-                <i class="fas fa-calendar-check"></i>
-                No upcoming events this week
-            </p>
-            {% endif %}
         </div>
     </main>
 </div>
@@ -336,15 +293,12 @@
     </div>
 </div>
 
-<script type="application/json" id="calendarData">
-{{ {
-    'weekEvents': week_events,
-    'monthEvents': month_events,
-    'tasks': tasks_json,
-    'targetDate': target_date.strftime('%Y-%m-%d'),
-    'currentMonth': target_date.month,
-    'currentYear': target_date.year
-} | tojson | safe }}
+<script type="application/json" id="initialData">
+{
+    "initialDate": "{{ target_date.strftime('%Y-%m-%d') }}",
+    "initialView": "{{ view }}",
+    "calendarConnected": {{ calendar_connected|tojson }}
+}
 </script>
 
 <script src="{{ url_for('static', filename='js/schedule.js') }}"></script>
