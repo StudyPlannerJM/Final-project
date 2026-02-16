@@ -11,6 +11,7 @@ import { renderMiniCalendar, updateMiniCalendarHeader } from './calendar/mini-ca
 import { renderUpcomingEvents } from './calendar/upcoming-events.js';
 import { showCalendarEventDetails, showTaskDetails, closeTaskDetailsModal } from './calendar/event-modals.js';
 import { getMonthNames } from './calendar/utils.js';
+import { MONTHS_PER_YEAR, DAYS_PER_WEEK } from './calendar/constants.js';
 
 // =============================================================================
 // GLOBAL STATE
@@ -46,7 +47,7 @@ async function fetchCalendarData(date, view) {
 
         if (!data.success) {
             console.error('Failed to fetch calendar data:', data.error);
-            alert('Failed to load calendar data: ' + (data.error || 'Unknown error'));
+            showNotification('Failed to load calendar data: ' + (data.error || 'Unknown error'), 'error');
             return false;
         }
 
@@ -59,7 +60,7 @@ async function fetchCalendarData(date, view) {
         return data;
     } catch (error) {
         console.error('Error fetching calendar data:', error);
-        alert('Error loading calendar. Please refresh the page.');
+        showNotification('Error loading calendar. Please refresh the page.', 'error');
         return false;
     }
 }
@@ -83,6 +84,70 @@ async function fetchUpcomingEvents() {
         }
     } catch (error) {
         console.error('Error fetching upcoming events:', error);
+    }
+}
+
+// =============================================================================
+// HELPER FUNCTIONS
+// =============================================================================
+
+/**
+ * Show a notification message to the user
+ * @param {string} message - Message to display
+ * @param {string} type - Type: 'success', 'error', 'info'
+ */
+function showNotification(message, type = 'info') {
+    // TODO: Replace with a proper toast notification system
+    // For now, using alert for user feedback
+    alert(message);
+}
+
+/**
+ * Refresh calendar view after data changes
+ */
+async function refreshCalendarView() {
+    const [data, _] = await Promise.all([
+        fetchCalendarData(currentDate, activeView),
+        fetchUpcomingEvents()
+    ]);
+    
+    if (data) {
+        renderCurrentView();
+        renderMiniCalendar(currentMonth, currentYear, currentDate, calendarEvents, tasks, navigateToDate);
+        updateMiniCalendarHeader(currentMonth, currentYear);
+        updateMainCalendarHeader();
+    }
+}
+
+/**
+ * Change the current month by delta
+ * @param {number} delta - Number of months to change (+1 or -1)
+ * @param {boolean} updateMainView - Whether to update main calendar view
+ */
+async function changeMonth(delta, updateMainView = false) {
+    currentMonth += delta;
+    
+    if (currentMonth < 1) {
+        currentMonth = MONTHS_PER_YEAR;
+        currentYear--;
+    } else if (currentMonth > MONTHS_PER_YEAR) {
+        currentMonth = 1;
+        currentYear++;
+    }
+    
+    const maxDayInMonth = new Date(currentYear, currentMonth, 0).getDate();
+    const newDay = Math.min(currentDate.getDate(), maxDayInMonth);
+    currentDate = new Date(currentYear, currentMonth - 1, newDay);
+    
+    updateMiniCalendarHeader(currentMonth, currentYear);
+    renderMiniCalendar(currentMonth, currentYear, currentDate, calendarEvents, tasks, navigateToDate);
+    
+    if (updateMainView) {
+        const data = await fetchCalendarData(currentDate, 'month');
+        if (data) {
+            renderMonthView(currentMonth, currentYear, currentDate, calendarEvents, tasks);
+            updateMainCalendarHeader();
+        }
     }
 }
 
@@ -203,68 +268,32 @@ function initializeEventHandlers() {
     // Navigation buttons
     document.getElementById('prevWeek')?.addEventListener('click', async function () {
         if (activeView === 'month') {
-            currentMonth--;
-            if (currentMonth < 1) {
-                currentMonth = 12;
-                currentYear--;
-            }
-            const maxDayInMonth = new Date(currentYear, currentMonth, 0).getDate();
-            const newDay = Math.min(currentDate.getDate(), maxDayInMonth);
-            currentDate = new Date(currentYear, currentMonth - 1, newDay);
-
-            const [data, _] = await Promise.all([
-                fetchCalendarData(currentDate, 'month'),
-                fetchUpcomingEvents()
-            ]);
-
-            if (data) {
-                updateMiniCalendarHeader(currentMonth, currentYear);
-                updateMainCalendarHeader();
-                renderMonthView(currentMonth, currentYear, currentDate, calendarEvents, tasks);
-                renderMiniCalendar(currentMonth, currentYear, currentDate, calendarEvents, tasks, navigateToDate);
-                renderUpcomingEvents(upcomingCalendarEvents, upcomingTasks);
-            }
+            await changeMonth(-1, true);
+            await fetchUpcomingEvents();
+            renderUpcomingEvents(upcomingCalendarEvents, upcomingTasks);
         } else if (activeView === 'day') {
             const newDate = new Date(currentDate);
             newDate.setDate(newDate.getDate() - 1);
             await navigateToDate(newDate, 'day');
         } else {
             const newDate = new Date(currentDate);
-            newDate.setDate(newDate.getDate() - 7);
+            newDate.setDate(newDate.getDate() - DAYS_PER_WEEK);
             await navigateToDate(newDate);
         }
     });
 
     document.getElementById('nextWeek')?.addEventListener('click', async function () {
         if (activeView === 'month') {
-            currentMonth++;
-            if (currentMonth > 12) {
-                currentMonth = 1;
-                currentYear++;
-            }
-            const maxDayInMonth = new Date(currentYear, currentMonth, 0).getDate();
-            const newDay = Math.min(currentDate.getDate(), maxDayInMonth);
-            currentDate = new Date(currentYear, currentMonth - 1, newDay);
-
-            const [data, _] = await Promise.all([
-                fetchCalendarData(currentDate, 'month'),
-                fetchUpcomingEvents()
-            ]);
-
-            if (data) {
-                updateMiniCalendarHeader(currentMonth, currentYear);
-                updateMainCalendarHeader();
-                renderMonthView(currentMonth, currentYear, currentDate, calendarEvents, tasks);
-                renderMiniCalendar(currentMonth, currentYear, currentDate, calendarEvents, tasks, navigateToDate);
-                renderUpcomingEvents(upcomingCalendarEvents, upcomingTasks);
-            }
+            await changeMonth(1, true);
+            await fetchUpcomingEvents();
+            renderUpcomingEvents(upcomingCalendarEvents, upcomingTasks);
         } else if (activeView === 'day') {
             const newDate = new Date(currentDate);
             newDate.setDate(newDate.getDate() + 1);
             await navigateToDate(newDate, 'day');
         } else {
             const newDate = new Date(currentDate);
-            newDate.setDate(newDate.getDate() + 7);
+            newDate.setDate(newDate.getDate() + DAYS_PER_WEEK);
             await navigateToDate(newDate);
         }
     });
@@ -275,49 +304,11 @@ function initializeEventHandlers() {
 
     // Mini calendar month navigation
     document.getElementById('prevMonth')?.addEventListener('click', async function () {
-        currentMonth--;
-        if (currentMonth < 1) {
-            currentMonth = 12;
-            currentYear--;
-        }
-
-        const maxDayInMonth = new Date(currentYear, currentMonth, 0).getDate();
-        const newDay = Math.min(currentDate.getDate(), maxDayInMonth);
-        currentDate = new Date(currentYear, currentMonth - 1, newDay);
-
-        updateMiniCalendarHeader(currentMonth, currentYear);
-        renderMiniCalendar(currentMonth, currentYear, currentDate, calendarEvents, tasks, navigateToDate);
-
-        if (activeView === 'month') {
-            const data = await fetchCalendarData(currentDate, 'month');
-            if (data) {
-                renderMonthView(currentMonth, currentYear, currentDate, calendarEvents, tasks);
-                updateMainCalendarHeader();
-            }
-        }
+        await changeMonth(-1, activeView === 'month');
     });
 
     document.getElementById('nextMonth')?.addEventListener('click', async function () {
-        currentMonth++;
-        if (currentMonth > 12) {
-            currentMonth = 1;
-            currentYear++;
-        }
-
-        const maxDayInMonth = new Date(currentYear, currentMonth, 0).getDate();
-        const newDay = Math.min(currentDate.getDate(), maxDayInMonth);
-        currentDate = new Date(currentYear, currentMonth - 1, newDay);
-
-        updateMiniCalendarHeader(currentMonth, currentYear);
-        renderMiniCalendar(currentMonth, currentYear, currentDate, calendarEvents, tasks, navigateToDate);
-
-        if (activeView === 'month') {
-            const data = await fetchCalendarData(currentDate, 'month');
-            if (data) {
-                renderMonthView(currentMonth, currentYear, currentDate, calendarEvents, tasks);
-                updateMainCalendarHeader();
-            }
-        }
+        await changeMonth(1, activeView === 'month');
     });
 
     // Event modal handlers
@@ -370,19 +361,19 @@ function initializeEventHandlers() {
             body: JSON.stringify(eventData)
         })
             .then(response => response.json())
-            .then(data => {
+            .then(async data => {
                 if (data.success) {
-                    alert('Event created successfully!');
+                    showNotification('Event created successfully!', 'success');
                     eventModal.classList.remove('active');
                     eventForm.reset();
-                    location.reload();
+                    await refreshCalendarView();
                 } else {
-                    alert('Error creating event: ' + data.error);
+                    showNotification('Error creating event: ' + data.error, 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Failed to create event');
+                showNotification('Failed to create event', 'error');
             });
     });
 
@@ -428,17 +419,17 @@ function initializeEventHandlers() {
                 }
             })
                 .then(response => response.json())
-                .then(data => {
+                .then(async data => {
                     if (data.success) {
-                        alert(data.message);
-                        location.reload();
+                        showNotification(data.message, 'success');
+                        await refreshCalendarView();
                     } else {
-                        alert('Error: ' + data.error);
+                        showNotification('Error: ' + data.error, 'error');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('An error occurred while syncing the task.');
+                    showNotification('An error occurred while syncing the task.', 'error');
                 });
         });
     });
@@ -456,17 +447,17 @@ function initializeEventHandlers() {
                 }
             })
                 .then(response => response.json())
-                .then(data => {
+                .then(async data => {
                     if (data.success) {
-                        alert(data.message);
-                        location.reload();
+                        showNotification(data.message, 'success');
+                        await refreshCalendarView();
                     } else {
-                        alert('Error: ' + data.error);
+                        showNotification('Error: ' + data.error, 'error');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('An error occurred.');
+                    showNotification('An error occurred.', 'error');
                 });
         });
     });

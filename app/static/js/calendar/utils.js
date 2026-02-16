@@ -3,6 +3,8 @@
 // Shared helper functions used across calendar modules
 // =============================================================================
 
+import { HOURS_FOR_12H_FORMAT } from './constants.js';
+
 /**
  * Format a Date object as 12-hour time string
  * @param {Date} date - The date to format
@@ -11,8 +13,8 @@
 export function formatTime(date) {
     const hours = date.getHours();
     const minutes = date.getMinutes();
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    const displayHours = hours % 12 || 12;
+    const ampm = hours >= HOURS_FOR_12H_FORMAT ? 'PM' : 'AM';
+    const displayHours = hours % HOURS_FOR_12H_FORMAT || HOURS_FOR_12H_FORMAT;
     return `${displayHours}:${String(minutes).padStart(2, '0')} ${ampm}`;
 }
 

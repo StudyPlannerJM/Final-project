@@ -4,6 +4,7 @@
 // =============================================================================
 
 import { showCalendarEventDetails, showTaskDetails } from './event-modals.js';
+import { MAX_EVENTS_IN_MONTH_VIEW, DAYS_PER_WEEK } from './constants.js';
 
 /**
  * Render month view calendar
@@ -82,7 +83,7 @@ export function renderMonthView(month, year, currentDate, calendarEvents, tasks)
 
         if (eventsByDate[dateStr]) {
             const dayEvents = eventsByDate[dateStr];
-            const maxDisplay = 3;
+            const maxDisplay = MAX_EVENTS_IN_MONTH_VIEW;
 
             dayEvents.slice(0, maxDisplay).forEach(event => {
                 const eventItem = document.createElement('div');
@@ -122,7 +123,7 @@ export function renderMonthView(month, year, currentDate, calendarEvents, tasks)
     }
 
     // Next month days
-    const totalCells = Math.ceil((firstDayOfWeek + daysInMonth) / 7) * 7;
+    const totalCells = Math.ceil((firstDayOfWeek + daysInMonth) / DAYS_PER_WEEK) * DAYS_PER_WEEK;
     const nextDays = totalCells - (firstDayOfWeek + daysInMonth);
     for (let day = 1; day <= nextDays; day++) {
         const cell = document.createElement('div');

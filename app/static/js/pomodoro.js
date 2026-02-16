@@ -202,9 +202,6 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                console.log('Pomodoro saved successfully!');
-                console.log(`Total study time today: ${data.total_minutes_today} minutes`);
-                
                 // Optional: Show success notification
                 showNotification(`Great job! You've studied ${data.total_minutes_today} minutes today!`);
             } else {
@@ -247,13 +244,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function initDeleteButtons() {
         const deleteButtons = document.querySelectorAll('.btn-delete-session');
-        console.log('Found delete buttons:', deleteButtons.length);
         
         deleteButtons.forEach(button => {
             button.addEventListener('click', function(e) {
                 e.preventDefault();
                 sessionToDelete = this.getAttribute('data-session-id');
-                console.log('Delete clicked for session:', sessionToDelete);
                 showDeleteModal();
             });
         });
@@ -301,20 +296,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function deleteSession(sessionId) {
-        console.log('Deleting session:', sessionId);
-        
         fetch(`/api/pomodoro/delete/${sessionId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
             }
         })
-        .then(response => {
-            console.log('Response status:', response.status);
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
-            console.log('Response data:', data);
             if (data.success) {
                 // Close modal and reload the page to show updated list
                 closeDeleteModal();
