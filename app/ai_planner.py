@@ -10,8 +10,9 @@ from flask import current_app
 
 def configure_gemini_api():
     """Configure the Google Gemini API with the API key"""
-    # Try to get from environment variable first, fallback to hardcoded key
-    api_key = os.getenv('GEMINI_API_KEY', 'AIzaSyCbDUdL0WUWP20lS4rZM4bqGBSmUqoj54o')
+    api_key = current_app.config.get('GEMINI_API_KEY')
+    if not api_key:
+        raise ValueError("GEMINI_API_KEY is not configured")
     client = genai.Client(api_key=api_key)
     return client
 

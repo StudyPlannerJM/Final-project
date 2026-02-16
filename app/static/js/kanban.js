@@ -92,8 +92,6 @@ function updateTaskStatus(taskId, newStatus, taskCard) {
 
             // Update task counts
             updateTaskCounts();
-
-            console.log(`Task ${taskId} moved to ${newStatus}`);
         } else {
             // Handle error
             console.error('Error:', data.error);
