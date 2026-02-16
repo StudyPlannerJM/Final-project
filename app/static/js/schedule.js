@@ -98,7 +98,7 @@ async function fetchUpcomingEvents() {
  */
 function showNotification(message, type = 'info') {
     // TODO: Replace with a proper toast notification system
-    console.log(`[${type.toUpperCase()}]`, message);
+    // For now, using alert for user feedback
     alert(message);
 }
 

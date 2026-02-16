@@ -3,10 +3,14 @@
 // Renders the single day calendar view with hourly events
 // =============================================================================
 
-import { formatTime } from './utils.js';
+import { formatTime, escapeHtml } from './utils.js';
 import { showCalendarEventDetails, showTaskDetails } from './event-modals.js';
 import { getCategoryColor } from './utils.js';
 import { HOURS_PER_DAY } from './constants.js';
+
+// Store events and tasks data for event delegation
+let dayEventsDataMap = new Map();
+let dayTasksDataMap = new Map();
 
 /**
  * Render day view calendar
@@ -17,6 +21,10 @@ import { HOURS_PER_DAY } from './constants.js';
 export function renderDayView(currentDate, calendarEvents, tasks) {
     const dayEventsColumn = document.getElementById('dayEventsColumn');
     if (!dayEventsColumn) return;
+    
+    // Clear previous data maps
+    dayEventsDataMap.clear();
+    dayTasksDataMap.clear();
 
     const dateStr = currentDate.toISOString().split('T')[0];
     dayEventsColumn.setAttribute('data-date', dateStr);
@@ -54,19 +62,14 @@ export function renderDayView(currentDate, calendarEvents, tasks) {
         const hourSlot = document.createElement('div');
         hourSlot.className = 'hour-slot';
         hourSlot.setAttribute('data-hour', hour);
-
-        hourSlot.addEventListener('click', function () {
-            const eventModal = document.getElementById('eventModal');
-            if (eventModal) {
-                eventModal.classList.add('active');
-                document.getElementById('eventDate').value = dateStr;
-                document.getElementById('eventStartTime').value = `${String(hour).padStart(2, '0')}:00`;
-                document.getElementById('eventEndTime').value = `${String(hour + 1).padStart(2, '0')}:00`;
-            }
-        });
+        hourSlot.setAttribute('data-date', dateStr);
+        hourSlot.setAttribute('data-clickable', 'hour-slot');
 
         dayEventsColumn.appendChild(hourSlot);
     }
+    
+    // Set up event delegation (only once per container)
+    setupDayViewEventDelegation(dayEventsColumn);
 
     // Render calendar events for this day
     calendarEvents.forEach(event => {
@@ -82,19 +85,20 @@ export function renderDayView(currentDate, calendarEvents, tasks) {
 
         const eventBlock = document.createElement('div');
         eventBlock.className = 'event-block calendar-event';
+        eventBlock.setAttribute('data-event-id', event.id || Math.random());
+        eventBlock.setAttribute('data-clickable', 'event');
 
         eventBlock.innerHTML = `
             <div class="event-time-range">
                 ${formatTime(startDate)} - ${formatTime(endDate)}
             </div>
-            <div class="event-title">${event.title}</div>
+            <div class="event-title">${escapeHtml(event.title)}</div>
         `;
 
         eventBlock.style.cursor = 'pointer';
-        eventBlock.addEventListener('click', function (e) {
-            e.stopPropagation();
-            showCalendarEventDetails(event);
-        });
+        
+        // Store event data in map for later retrieval
+        dayEventsDataMap.set(eventBlock.getAttribute('data-event-id'), event);
 
         hourSlot.appendChild(eventBlock);
     });
@@ -117,6 +121,8 @@ export function renderDayView(currentDate, calendarEvents, tasks) {
         taskBlock.className = 'event-block task-block';
         taskBlock.classList.add(`status-${task.status}`);
         if (task.synced) taskBlock.classList.add('synced');
+        taskBlock.setAttribute('data-task-id', task.id || Math.random());
+        taskBlock.setAttribute('data-clickable', 'task');
 
         const categoryColor = getCategoryColor(task.category);
         taskBlock.style.borderLeftColor = categoryColor;
@@ -124,14 +130,13 @@ export function renderDayView(currentDate, calendarEvents, tasks) {
 
         taskBlock.innerHTML = `
             <div class="event-time-range">${formatTime(taskDate)}</div>
-            <div class="event-title">${task.title}</div>
+            <div class="event-title">${escapeHtml(task.title)}</div>
         `;
 
         taskBlock.style.cursor = 'pointer';
-        taskBlock.addEventListener('click', function (e) {
-            e.stopPropagation();
-            showTaskDetails(task);
-        });
+        
+        // Store task data in map for later retrieval
+        dayTasksDataMap.set(taskBlock.getAttribute('data-task-id'), task);
 
         hourSlot.appendChild(taskBlock);
     });
@@ -150,6 +155,59 @@ export function renderDayView(currentDate, calendarEvents, tasks) {
                 timeSlot.style.height = `${newHeight}px`;
                 timeSlot.style.minHeight = `${newHeight}px`;
             }
+        }
+    });
+}
+
+/**
+ * Setup event delegation for day view interactions
+ * Prevents memory leaks from repeated event listener creation
+ * @param {HTMLElement} dayEventsColumn - The day events container
+ */
+let dayViewDelegationSetup = false;
+function setupDayViewEventDelegation(dayEventsColumn) {
+    // Only set up once to avoid duplicate listeners
+    if (dayViewDelegationSetup) return;
+    dayViewDelegationSetup = true;
+    
+    dayEventsColumn.addEventListener('click', function(e) {
+        // Handle hour slot clicks (for adding events)
+        const hourSlot = e.target.closest('[data-clickable="hour-slot"]');
+        if (hourSlot && !e.target.closest('.event-block')) {
+            const dateStr = hourSlot.getAttribute('data-date');
+            const hour = parseInt(hourSlot.getAttribute('data-hour'));
+            const eventModal = document.getElementById('eventModal');
+            if (eventModal) {
+                eventModal.classList.add('active');
+                document.getElementById('eventDate').value = dateStr;
+                document.getElementById('eventStartTime').value = `${String(hour).padStart(2, '0')}:00`;
+                document.getElementById('eventEndTime').value = `${String(hour + 1).padStart(2, '0')}:00`;
+            }
+            return;
+        }
+        
+        // Handle event block clicks
+        const eventBlock = e.target.closest('[data-clickable="event"]');
+        if (eventBlock) {
+            e.stopPropagation();
+            const eventId = eventBlock.getAttribute('data-event-id');
+            const event = dayEventsDataMap.get(eventId);
+            if (event) {
+                showCalendarEventDetails(event);
+            }
+            return;
+        }
+        
+        // Handle task block clicks
+        const taskBlock = e.target.closest('[data-clickable="task"]');
+        if (taskBlock) {
+            e.stopPropagation();
+            const taskId = taskBlock.getAttribute('data-task-id');
+            const task = dayTasksDataMap.get(taskId);
+            if (task) {
+                showTaskDetails(task);
+            }
+            return;
         }
     });
 }
