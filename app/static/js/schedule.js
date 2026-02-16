@@ -1447,68 +1447,8 @@ function initializeCalendar() {
     });
 
     // =============================================================================
-    // INITIALIZE
+    // INITIALIZATION COMPLETE
     // =============================================================================
-
-    // Render mini calendar with the fetched data
-    renderMiniCalendar();
-
-    // =============================================================================
-    // CHECK URL PARAMETER AND RENDER APPROPRIATE VIEW
-    // =============================================================================
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const viewParam = urlParams.get('view');
-
-    if (viewParam === 'day') {
-        // Initialize day view
-        activeView = 'day';
-
-        // Update view buttons
-        document.querySelectorAll('.view-btn').forEach(btn => {
-            btn.classList.remove('active');
-            if (btn.getAttribute('data-view') === 'day') {
-                btn.classList.add('active');
-            }
-        });
-
-        // Update navigation buttons
-        document.getElementById('prevWeek').title = 'Previous Day';
-        document.getElementById('nextWeek').title = 'Next Day';
-
-        // Show day view
-        updateMainHeaderForDayView();
-        document.getElementById('weekView').style.display = 'none';
-        document.getElementById('monthView').style.display = 'none';
-        document.getElementById('dayView').style.display = 'block';
-        document.querySelector('.week-days-header').style.display = 'none';
-        renderDayView();
-    } else if (viewParam === 'month') {
-        // Initialize month view
-        activeView = 'month';
-
-        document.querySelectorAll('.view-btn').forEach(btn => {
-            btn.classList.remove('active');
-            if (btn.getAttribute('data-view') === 'month') {
-                btn.classList.add('active');
-            }
-        });
-
-        document.getElementById('prevWeek').title = 'Previous Month';
-        document.getElementById('nextWeek').title = 'Next Month';
-        updateMainCalendarHeader();
-        document.getElementById('weekView').style.display = 'none';
-        document.getElementById('monthView').style.display = 'block';
-        document.getElementById('dayView').style.display = 'none';
-        document.querySelector('.week-days-header').style.display = 'none';
-        renderMonthView();
-    } else {
-        // Default: render week view
-        activeView = 'week';
-        document.getElementById('weekView').style.display = 'grid';
-        document.getElementById('monthView').style.display = 'none';
-        document.getElementById('dayView').style.display = 'none';
-        document.querySelector('.week-days-header').style.display = 'grid';
-        renderWeekView();
-    }
+    // Note: View rendering is handled by DOMContentLoaded after data fetch
+    // to avoid duplicate initialization
 } // End of initializeCalendar
