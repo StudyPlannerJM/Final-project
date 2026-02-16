@@ -4,6 +4,7 @@
 
 import requests
 import os
+from flask import current_app
 
 
 def extract_text_from_response(data):
@@ -50,7 +51,6 @@ def extract_text_from_response(data):
 
 
 # ApyHub API Configuration
-APYHUB_API_KEY = "APY0xmuNMuMOM6C4fpyELD2neLTEJZHWBZ9X80HYRJTenbR6kpg3iXnbS7d15xYPPlviZ0d"
 APYHUB_WORD_URL = "https://api.apyhub.com/extract/text/word-file"
 APYHUB_PDF_URL = "https://api.apyhub.com/extract/text/pdf-file"
 APYHUB_OCR_URL = "https://api.apyhub.com/ai/document/extract/read/file"
@@ -67,8 +67,9 @@ def extract_text_from_word(file_path):
         tuple: (success: bool, text_or_error: str)
     """
     try:
+        api_key = current_app.config['APYHUB_API_KEY']
         headers = {
-            'apy-token': APYHUB_API_KEY,
+            'apy-token': api_key,
         }
         
         with open(file_path, 'rb') as f:
@@ -105,8 +106,9 @@ def extract_text_from_pdf(file_path):
         tuple: (success: bool, text_or_error: str)
     """
     try:
+        api_key = current_app.config['APYHUB_API_KEY']
         headers = {
-            'apy-token': APYHUB_API_KEY,
+            'apy-token': api_key,
         }
         
         with open(file_path, 'rb') as f:
@@ -142,8 +144,9 @@ def extract_text_from_image_ocr(file_path):
         tuple: (success: bool, text_or_error: str)
     """
     try:
+        api_key = current_app.config['APYHUB_API_KEY']
         headers = {
-            'apy-token': APYHUB_API_KEY,
+            'apy-token': api_key,
         }
         
         # Determine content type based on file extension

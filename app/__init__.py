@@ -1,38 +1,24 @@
 import os
 from flask import Flask
-from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
+from app.config import config
 
-
-# Load environment variables from .env file
-load_dotenv()
-
-# Initialize SQLAlchemy without binding to an app yet
 db = SQLAlchemy()
-
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'  # type: ignore[attr-defined]
-
 migrate = Migrate()
 
 
-def create_app():
+def create_app(config_name=None):
     app = Flask(__name__)
 
-    # Configuration
-    secret_key = os.environ.get('SECRET_KEY', 'a_very_secret_key_for_dev')
-    app.config['SECRET_KEY'] = secret_key
-    app.config['SQLALCHEMY_DATABASE_URI'] = (
-        "sqlite:///complete_study_planner.db"
-    )
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    
-    # Session configuration for OAuth
-    app.config['SESSION_COOKIE_NAME'] = 'study_planner_session'
-    app.config['SESSION_COOKIE_HTTPONLY'] = True
-    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+    # Load configuration
+    if config_name is None:
+        config_name = os.getenv('FLASK_ENV', 'development')
+
+    app.config.from_object(config[config_name])
 
     # Initialize extensions with the app
     db.init_app(app)
