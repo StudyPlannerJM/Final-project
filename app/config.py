@@ -1,0 +1,47 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+class Config:
+    """Base configuration"""
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+    if not SECRET_KEY:
+        raise ValueError("SECRET_KEY environment variable is not set!")
+
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # API Keys
+    APYHUB_API_KEY = os.environ.get('APYHUB_API_KEY')
+    GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
+
+    # Database
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        'DATABASE_URL',
+        'sqlite:///complete_study_planner.db'
+    )
+
+    # Session
+    SESSION_COOKIE_NAME = 'study_planner_session'
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+    SQLALCHEMY_ECHO = False  # Set to True to see SQL queries
+
+class ProductionConfig(Config):
+    DEBUG = False
+    TESTING = False
+
+class TestingConfig(Config):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    WTF_CSRF_ENABLED = False
+
+config = {
+    'development': DevelopmentConfig,
+    'production': ProductionConfig,
+    'testing': TestingConfig,
+    'default': DevelopmentConfig
+}
