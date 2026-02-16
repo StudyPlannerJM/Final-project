@@ -4,9 +4,10 @@
 // =============================================================================
 
 import { escapeHtml, getCategoryColor } from './utils.js';
+import { UPCOMING_EVENTS_DAYS_AHEAD } from './constants.js';
 
 /**
- * Render upcoming events for the next 7 days
+ * Render upcoming events for the next few days
  * @param {Object[]} upcomingCalendarEvents - Calendar events starting from today
  * @param {Object[]} upcomingTasks - Tasks starting from today
  */
@@ -14,14 +15,14 @@ export function renderUpcomingEvents(upcomingCalendarEvents, upcomingTasks) {
     const upcomingContainer = document.getElementById('upcomingEventsList');
     if (!upcomingContainer) return;
 
-    // Get current date (start of today) and 7 days from now (end of day)
+    // Get current date (start of today) and upcoming days from now (end of day)
     const now = new Date();
     now.setHours(0, 0, 0, 0);
     const weekFromNow = new Date(now);
-    weekFromNow.setDate(weekFromNow.getDate() + 7);
+    weekFromNow.setDate(weekFromNow.getDate() + UPCOMING_EVENTS_DAYS_AHEAD);
     weekFromNow.setHours(23, 59, 59, 999);
 
-    // Collect all events (calendar + tasks) in the next 7 days
+    // Collect all events (calendar + tasks) in the upcoming days
     const upcomingEvents = [];
 
     // Add Google Calendar events
@@ -72,7 +73,7 @@ export function renderUpcomingEvents(upcomingCalendarEvents, upcomingTasks) {
         upcomingContainer.innerHTML = `
             <p class="no-events-message">
                 <i class="fas fa-calendar-check"></i>
-                No upcoming events in the next 7 days
+                No upcoming events in the next ${UPCOMING_EVENTS_DAYS_AHEAD} days
             </p>
         `;
     } else {

@@ -6,6 +6,7 @@
 import { formatTime } from './utils.js';
 import { showCalendarEventDetails, showTaskDetails } from './event-modals.js';
 import { getCategoryColor } from './utils.js';
+import { HOURS_PER_DAY } from './constants.js';
 
 /**
  * Render day view calendar
@@ -39,7 +40,7 @@ export function renderDayView(currentDate, calendarEvents, tasks) {
     const timeColumn = document.getElementById('dayTimeColumn');
     if (timeColumn) {
         timeColumn.innerHTML = '';
-        for (let hour = 0; hour < 24; hour++) {
+        for (let hour = 0; hour < HOURS_PER_DAY; hour++) {
             const timeSlot = document.createElement('div');
             timeSlot.className = 'time-slot';
             timeSlot.textContent = `${String(hour).padStart(2, '0')}:00`;

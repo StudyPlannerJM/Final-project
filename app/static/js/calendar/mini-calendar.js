@@ -4,6 +4,7 @@
 // =============================================================================
 
 import { getMonthNames } from './utils.js';
+import { DAYS_PER_WEEK } from './constants.js';
 
 /**
  * Update mini calendar header with current month/year
@@ -78,7 +79,7 @@ export function renderMiniCalendar(month, year, currentDate, calendarEvents, tas
     }
 
     // Next month days
-    const totalCells = Math.ceil((firstDayIndex + lastDayDate) / 7) * 7;
+    const totalCells = Math.ceil((firstDayIndex + lastDayDate) / DAYS_PER_WEEK) * DAYS_PER_WEEK;
     const nextDays = totalCells - (firstDayIndex + lastDayDate);
     for (let day = 1; day <= nextDays; day++) {
         daysHTML += `<div class="calendar-day other-month">${day}</div>`;

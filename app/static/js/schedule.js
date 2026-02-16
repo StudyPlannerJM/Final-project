@@ -11,6 +11,7 @@ import { renderMiniCalendar, updateMiniCalendarHeader } from './calendar/mini-ca
 import { renderUpcomingEvents } from './calendar/upcoming-events.js';
 import { showCalendarEventDetails, showTaskDetails, closeTaskDetailsModal } from './calendar/event-modals.js';
 import { getMonthNames } from './calendar/utils.js';
+import { MONTHS_PER_YEAR, DAYS_PER_WEEK } from './calendar/constants.js';
 
 // =============================================================================
 // GLOBAL STATE
@@ -205,7 +206,7 @@ function initializeEventHandlers() {
         if (activeView === 'month') {
             currentMonth--;
             if (currentMonth < 1) {
-                currentMonth = 12;
+                currentMonth = MONTHS_PER_YEAR;
                 currentYear--;
             }
             const maxDayInMonth = new Date(currentYear, currentMonth, 0).getDate();
@@ -230,7 +231,7 @@ function initializeEventHandlers() {
             await navigateToDate(newDate, 'day');
         } else {
             const newDate = new Date(currentDate);
-            newDate.setDate(newDate.getDate() - 7);
+            newDate.setDate(newDate.getDate() - DAYS_PER_WEEK);
             await navigateToDate(newDate);
         }
     });
@@ -238,7 +239,7 @@ function initializeEventHandlers() {
     document.getElementById('nextWeek')?.addEventListener('click', async function () {
         if (activeView === 'month') {
             currentMonth++;
-            if (currentMonth > 12) {
+            if (currentMonth > MONTHS_PER_YEAR) {
                 currentMonth = 1;
                 currentYear++;
             }
@@ -264,7 +265,7 @@ function initializeEventHandlers() {
             await navigateToDate(newDate, 'day');
         } else {
             const newDate = new Date(currentDate);
-            newDate.setDate(newDate.getDate() + 7);
+            newDate.setDate(newDate.getDate() + DAYS_PER_WEEK);
             await navigateToDate(newDate);
         }
     });
@@ -277,7 +278,7 @@ function initializeEventHandlers() {
     document.getElementById('prevMonth')?.addEventListener('click', async function () {
         currentMonth--;
         if (currentMonth < 1) {
-            currentMonth = 12;
+            currentMonth = MONTHS_PER_YEAR;
             currentYear--;
         }
 
@@ -299,7 +300,7 @@ function initializeEventHandlers() {
 
     document.getElementById('nextMonth')?.addEventListener('click', async function () {
         currentMonth++;
-        if (currentMonth > 12) {
+        if (currentMonth > MONTHS_PER_YEAR) {
             currentMonth = 1;
             currentYear++;
         }

@@ -6,6 +6,7 @@
 import { formatTime, getDayNames } from './utils.js';
 import { showCalendarEventDetails, showTaskDetails } from './event-modals.js';
 import { getCategoryColor } from './utils.js';
+import { DAYS_PER_WEEK, HOURS_PER_DAY, HOUR_SLOT_HEIGHT } from './constants.js';
 
 /**
  * Render week view calendar
@@ -27,8 +28,8 @@ export function renderWeekView(currentDate, calendarEvents, tasks) {
     const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Adjust to Monday
     startOfWeek.setDate(startOfWeek.getDate() + diff);
 
-    // Generate 7 day headers (Monday to Sunday)
-    for (let i = 0; i < 7; i++) {
+    // Generate day headers (Monday to Sunday)
+    for (let i = 0; i < DAYS_PER_WEEK; i++) {
         const day = new Date(startOfWeek);
         day.setDate(startOfWeek.getDate() + i);
 
@@ -64,8 +65,8 @@ export function renderWeekView(currentDate, calendarEvents, tasks) {
     const existingDayColumns = weekGrid.querySelectorAll('.day-column');
     existingDayColumns.forEach(col => col.remove());
 
-    // Create 7 day columns
-    for (let i = 0; i < 7; i++) {
+    // Create day columns
+    for (let i = 0; i < DAYS_PER_WEEK; i++) {
         const day = new Date(startOfWeek);
         day.setDate(startOfWeek.getDate() + i);
         const dateStr = day.toISOString().split('T')[0];
@@ -74,8 +75,8 @@ export function renderWeekView(currentDate, calendarEvents, tasks) {
         dayColumn.className = 'day-column';
         dayColumn.setAttribute('data-date', dateStr);
 
-        // Add 24 hour slots to this day
-        for (let hour = 0; hour < 24; hour++) {
+        // Add hour slots to this day
+        for (let hour = 0; hour < HOURS_PER_DAY; hour++) {
             const hourSlot = document.createElement('div');
             hourSlot.className = 'hour-slot';
             hourSlot.setAttribute('data-hour', hour);
@@ -184,7 +185,7 @@ export function renderWeekView(currentDate, calendarEvents, tasks) {
     const gridTimeColumn = grid.querySelector('.time-column');
     const timeSlots = Array.from(gridTimeColumn.querySelectorAll('.time-slot'));
 
-    const maxTasksPerHour = new Array(24).fill(0);
+    const maxTasksPerHour = new Array(HOURS_PER_DAY).fill(0);
 
     document.querySelectorAll('.day-column').forEach(dayColumn => {
         dayColumn.querySelectorAll('.hour-slot').forEach(hourSlot => {
@@ -195,7 +196,7 @@ export function renderWeekView(currentDate, calendarEvents, tasks) {
     });
 
     maxTasksPerHour.forEach((taskCount, hour) => {
-        const newHeight = taskCount > 1 ? (taskCount * 60) : 60;
+        const newHeight = taskCount > 1 ? (taskCount * HOUR_SLOT_HEIGHT) : HOUR_SLOT_HEIGHT;
 
         if (timeSlots[hour]) {
             timeSlots[hour].style.height = `${newHeight}px`;
