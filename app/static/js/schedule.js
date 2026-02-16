@@ -387,11 +387,15 @@ function initializeCalendar() {
             }
         } else if (activeView === 'day') {
             // Navigate to previous day
-            currentDate.setDate(currentDate.getDate() - 1);
+            const newDate = new Date(currentDate);
+            newDate.setDate(newDate.getDate() - 1);
+            currentDate = newDate;
             await navigateToDate(currentDate, 'day');
         } else {
             // Navigate to previous week
-            currentDate.setDate(currentDate.getDate() - 7);
+            const newDate = new Date(currentDate);
+            newDate.setDate(newDate.getDate() - 7);
+            currentDate = newDate;
             await navigateToDate(currentDate);
         }
     });
@@ -422,11 +426,15 @@ function initializeCalendar() {
             }
         } else if (activeView === 'day') {
             // Navigate to next day
-            currentDate.setDate(currentDate.getDate() + 1);
+            const newDate = new Date(currentDate);
+            newDate.setDate(newDate.getDate() + 1);
+            currentDate = newDate;
             await navigateToDate(currentDate, 'day');
         } else {
             // Navigate to next week
-            currentDate.setDate(currentDate.getDate() + 7);
+            const newDate = new Date(currentDate);
+            newDate.setDate(newDate.getDate() + 7);
+            currentDate = newDate;
             await navigateToDate(currentDate);
         }
     });
@@ -477,7 +485,7 @@ function initializeCalendar() {
         // Get current date (start of today) and 7 days from now (end of day)
         const now = new Date();
         now.setHours(0, 0, 0, 0);
-        const weekFromNow = new Date();
+        const weekFromNow = new Date(now);
         weekFromNow.setDate(weekFromNow.getDate() + 7);
         weekFromNow.setHours(23, 59, 59, 999);
 
