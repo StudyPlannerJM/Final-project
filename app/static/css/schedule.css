@@ -557,7 +557,7 @@
     padding: 20px 30px;
     text-align: center;
     border-bottom: 2px solid var(--border-color);
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    background: linear-gradient(135deg, #3367d6, #2952a3);
     border-radius: 8px 8px 0 0;
 }
 
@@ -566,16 +566,18 @@
     font-weight: 700;
     margin: 0;
     color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .day-header-large .today-badge {
     display: inline-block;
-    background-color: rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.25);
     padding: 4px 12px;
     border-radius: 20px;
     font-size: 0.85rem;
     margin-left: 10px;
     font-weight: 600;
+    color: white;
 }
 
 .day-grid {
