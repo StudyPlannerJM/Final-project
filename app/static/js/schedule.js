@@ -30,6 +30,51 @@ let currentEventId = null;
 let isGoogleCalendarEvent = false;
 
 // =============================================================================
+// DOM CACHE
+// Cache frequently accessed DOM elements for better performance
+// =============================================================================
+const domCache = {};
+
+/**
+ * Initialize DOM element cache
+ * Call once during page load to store references to frequently accessed elements
+ */
+function initializeDOMCache() {
+    // View containers
+    domCache.weekView = document.getElementById('weekView');
+    domCache.monthView = document.getElementById('monthView');
+    domCache.dayView = document.getElementById('dayView');
+    domCache.weekDaysHeader = document.querySelector('.week-days-header');
+    
+    // Navigation buttons
+    domCache.prevWeek = document.getElementById('prevWeek');
+    domCache.nextWeek = document.getElementById('nextWeek');
+    domCache.todayBtn = document.getElementById('todayBtn');
+    domCache.prevMonth = document.getElementById('prevMonth');
+    domCache.nextMonth = document.getElementById('nextMonth');
+    
+    // Headers
+    domCache.mainCalendarHeader = document.getElementById('mainCalendarHeader');
+    
+    // Event modal elements
+    domCache.eventModal = document.getElementById('eventModal');
+    domCache.addEventBtn = document.getElementById('addEventBtn');
+    domCache.closeModal = document.getElementById('closeModal');
+    domCache.cancelBtn = document.getElementById('cancelBtn');
+    domCache.eventForm = document.getElementById('eventForm');
+    domCache.eventDate = document.getElementById('eventDate');
+    
+    // Task details modal elements
+    domCache.taskDetailsModal = document.getElementById('taskDetailsModal');
+    domCache.closeTaskDetails = document.getElementById('closeTaskDetails');
+    domCache.closeTaskDetailsBtn = document.getElementById('closeTaskDetailsBtn');
+    domCache.editTaskBtn = document.getElementById('editTaskBtn');
+    
+    // Initial data
+    domCache.initialDataElement = document.getElementById('initialData');
+}
+
+// =============================================================================
 // DATA FETCHING
 // =============================================================================
 
@@ -185,10 +230,10 @@ async function navigateToDate(date, view = null) {
 
 function renderCurrentView() {
     // Hide all views
-    document.getElementById('weekView').style.display = 'none';
-    document.getElementById('monthView').style.display = 'none';
-    document.getElementById('dayView').style.display = 'none';
-    document.querySelector('.week-days-header').style.display = 'none';
+    domCache.weekView.style.display = 'none';
+    domCache.monthView.style.display = 'none';
+    domCache.dayView.style.display = 'none';
+    domCache.weekDaysHeader.style.display = 'none';
 
     // Update view buttons
     document.querySelectorAll('.view-btn').forEach(btn => {
@@ -200,14 +245,14 @@ function renderCurrentView() {
 
     // Render active view
     if (activeView === 'week') {
-        document.getElementById('weekView').style.display = 'grid';
-        document.querySelector('.week-days-header').style.display = 'grid';
+        domCache.weekView.style.display = 'grid';
+        domCache.weekDaysHeader.style.display = 'grid';
         renderWeekView(currentDate, calendarEvents, tasks);
     } else if (activeView === 'month') {
-        document.getElementById('monthView').style.display = 'block';
+        domCache.monthView.style.display = 'block';
         renderMonthView(currentMonth, currentYear, currentDate, calendarEvents, tasks);
     } else if (activeView === 'day') {
-        document.getElementById('dayView').style.display = 'block';
+        domCache.dayView.style.display = 'block';
         renderDayView(currentDate, calendarEvents, tasks);
     }
 
@@ -216,18 +261,16 @@ function renderCurrentView() {
 
 function updateMainCalendarHeader() {
     const monthNames = getMonthNames();
-    const mainHeader = document.getElementById('mainCalendarHeader');
-    if (mainHeader) {
-        mainHeader.textContent = `${monthNames[currentMonth - 1]}, ${currentYear}`;
+    if (domCache.mainCalendarHeader) {
+        domCache.mainCalendarHeader.textContent = `${monthNames[currentMonth - 1]}, ${currentYear}`;
     }
 }
 
 function updateMainHeaderForDayView() {
-    const mainHeader = document.getElementById('mainCalendarHeader');
-    if (mainHeader) {
+    if (domCache.mainCalendarHeader) {
         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         const dateStr = currentDate.toLocaleDateString('en-US', options);
-        mainHeader.textContent = dateStr;
+        domCache.mainCalendarHeader.textContent = dateStr;
     }
 }
 
@@ -250,14 +293,14 @@ function initializeEventHandlers() {
             if (!data) return;
 
             if (view === 'month') {
-                document.getElementById('prevWeek').title = 'Previous Month';
-                document.getElementById('nextWeek').title = 'Next Month';
+                domCache.prevWeek.title = 'Previous Month';
+                domCache.nextWeek.title = 'Next Month';
             } else if (view === 'day') {
-                document.getElementById('prevWeek').title = 'Previous Day';
-                document.getElementById('nextWeek').title = 'Next Day';
+                domCache.prevWeek.title = 'Previous Day';
+                domCache.nextWeek.title = 'Next Day';
             } else {
-                document.getElementById('prevWeek').title = 'Previous Week';
-                document.getElementById('nextWeek').title = 'Next Week';
+                domCache.prevWeek.title = 'Previous Week';
+                domCache.nextWeek.title = 'Next Week';
             }
 
             renderCurrentView();
@@ -266,7 +309,7 @@ function initializeEventHandlers() {
     });
 
     // Navigation buttons
-    document.getElementById('prevWeek')?.addEventListener('click', async function () {
+    domCache.prevWeek?.addEventListener('click', async function () {
         if (activeView === 'month') {
             await changeMonth(-1, true);
             await fetchUpcomingEvents();
@@ -282,7 +325,7 @@ function initializeEventHandlers() {
         }
     });
 
-    document.getElementById('nextWeek')?.addEventListener('click', async function () {
+    domCache.nextWeek?.addEventListener('click', async function () {
         if (activeView === 'month') {
             await changeMonth(1, true);
             await fetchUpcomingEvents();
@@ -298,53 +341,47 @@ function initializeEventHandlers() {
         }
     });
 
-    document.getElementById('todayBtn')?.addEventListener('click', async function () {
+    domCache.todayBtn?.addEventListener('click', async function () {
         await navigateToDate(new Date());
     });
 
     // Mini calendar month navigation
-    document.getElementById('prevMonth')?.addEventListener('click', async function () {
+    domCache.prevMonth?.addEventListener('click', async function () {
         await changeMonth(-1, activeView === 'month');
     });
 
-    document.getElementById('nextMonth')?.addEventListener('click', async function () {
+    domCache.nextMonth?.addEventListener('click', async function () {
         await changeMonth(1, activeView === 'month');
     });
 
     // Event modal handlers
-    const eventModal = document.getElementById('eventModal');
-    const addEventBtn = document.getElementById('addEventBtn');
-    const closeModal = document.getElementById('closeModal');
-    const cancelBtn = document.getElementById('cancelBtn');
-    const eventForm = document.getElementById('eventForm');
-
-    addEventBtn?.addEventListener('click', function () {
-        eventModal.classList.add('active');
+    domCache.addEventBtn?.addEventListener('click', function () {
+        domCache.eventModal.classList.add('active');
         const today = new Date().toISOString().split('T')[0];
-        document.getElementById('eventDate').value = today;
+        domCache.eventDate.value = today;
     });
 
-    closeModal?.addEventListener('click', function () {
-        eventModal.classList.remove('active');
-        eventForm.reset();
+    domCache.closeModal?.addEventListener('click', function () {
+        domCache.eventModal.classList.remove('active');
+        domCache.eventForm.reset();
     });
 
-    cancelBtn?.addEventListener('click', function () {
-        eventModal.classList.remove('active');
-        eventForm.reset();
+    domCache.cancelBtn?.addEventListener('click', function () {
+        domCache.eventModal.classList.remove('active');
+        domCache.eventForm.reset();
     });
 
-    eventModal?.addEventListener('click', function (e) {
-        if (e.target === eventModal) {
-            eventModal.classList.remove('active');
-            eventForm.reset();
+    domCache.eventModal?.addEventListener('click', function (e) {
+        if (e.target === domCache.eventModal) {
+            domCache.eventModal.classList.remove('active');
+            domCache.eventForm.reset();
         }
     });
 
-    eventForm?.addEventListener('submit', function (e) {
+    domCache.eventForm?.addEventListener('submit', function (e) {
         e.preventDefault();
 
-        const formData = new FormData(eventForm);
+        const formData = new FormData(domCache.eventForm);
         const eventData = {
             title: formData.get('title'),
             description: formData.get('description'),
@@ -364,8 +401,8 @@ function initializeEventHandlers() {
             .then(async data => {
                 if (data.success) {
                     showNotification('Event created successfully!', 'success');
-                    eventModal.classList.remove('active');
-                    eventForm.reset();
+                    domCache.eventModal.classList.remove('active');
+                    domCache.eventForm.reset();
                     await refreshCalendarView();
                 } else {
                     showNotification('Error creating event: ' + data.error, 'error');
@@ -378,15 +415,10 @@ function initializeEventHandlers() {
     });
 
     // Task details modal
-    const taskDetailsModal = document.getElementById('taskDetailsModal');
-    const closeTaskDetails = document.getElementById('closeTaskDetails');
-    const closeTaskDetailsBtn = document.getElementById('closeTaskDetailsBtn');
-    const editTaskBtn = document.getElementById('editTaskBtn');
+    domCache.closeTaskDetails?.addEventListener('click', closeTaskDetailsModal);
+    domCache.closeTaskDetailsBtn?.addEventListener('click', closeTaskDetailsModal);
 
-    closeTaskDetails?.addEventListener('click', closeTaskDetailsModal);
-    closeTaskDetailsBtn?.addEventListener('click', closeTaskDetailsModal);
-
-    editTaskBtn?.addEventListener('click', function () {
+    domCache.editTaskBtn?.addEventListener('click', function () {
         if (isGoogleCalendarEvent && currentEventId) {
             const currentEvent = calendarEvents.find(e => e.id === currentEventId);
             if (currentEvent && currentEvent.htmlLink) {
@@ -468,13 +500,15 @@ function initializeEventHandlers() {
 // =============================================================================
 
 document.addEventListener('DOMContentLoaded', async function () {
+    // Initialize DOM element cache
+    initializeDOMCache();
+    
     // Get initial date and view
-    const initialDataElement = document.getElementById('initialData');
     let initialDate, initialView, initialCalendarConnected;
 
-    if (initialDataElement) {
+    if (domCache.initialDataElement) {
         try {
-            const initialData = JSON.parse(initialDataElement.textContent);
+            const initialData = JSON.parse(domCache.initialDataElement.textContent);
             initialDate = initialData.initialDate;
             initialView = initialData.initialView;
             initialCalendarConnected = initialData.calendarConnected;
