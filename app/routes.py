@@ -687,7 +687,12 @@ def generate_flashcards_from_study_plan(plan_id):
     
     try:
         # Use Gemini AI to generate flashcards from the study plan
-        from google import genai
+        try:
+            from google import genai
+        except ImportError:
+            flash('Google Generative AI library is not installed. Please contact the administrator.', 'danger')
+            return redirect(url_for('main.view_study_plan', plan_id=plan_id))
+        
         import os
         
         api_key = os.getenv('GEMINI_API_KEY', 'AIzaSyCbDUdL0WUWP20lS4rZM4bqGBSmUqoj54o')
