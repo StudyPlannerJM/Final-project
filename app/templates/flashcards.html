@@ -90,13 +90,6 @@
                         Your Flashcards
                     {% endif %}
                 </h2>
-                {% if selected_deck %}
-                    <div style="margin-top: 0.5rem;">
-                        <a href="{{ url_for('main.flashcards') }}" class="btn btn-secondary btn-sm">
-                            <i class="fas fa-arrow-left"></i> Back to All Decks
-                        </a>
-                    </div>
-                {% endif %}
             </div>
             <div class="header-actions">
                 <a href="{{ url_for('main.add_flashcard') }}{% if selected_deck %}?deck_id={{ selected_deck.id }}{% endif %}" class="btn btn-primary">
@@ -104,6 +97,14 @@
                 </a>
             </div>
         </div>
+
+        {% if selected_deck %}
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <a href="{{ url_for('main.flashcards') }}" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-arrow-left"></i> Back to All Decks
+                </a>
+            </div>
+        {% endif %}
 
         <div class="flashcards-list">
             {% if flashcards %}

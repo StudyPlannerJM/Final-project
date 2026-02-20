@@ -29,7 +29,17 @@ function setIcon(iconClass) {
     if (iconInput) {
         iconInput.value = iconClass;
         
-        // Visual feedback
+        // Update the current icon preview
+        const currentIconElement = document.getElementById('currentIconElement');
+        const currentIconText = document.getElementById('currentIconText');
+        if (currentIconElement) {
+            currentIconElement.className = 'fas ' + iconClass;
+        }
+        if (currentIconText) {
+            currentIconText.textContent = iconClass;
+        }
+        
+        // Visual feedback on buttons
         const buttons = document.querySelectorAll('.icon-btn');
         buttons.forEach(btn => {
             btn.style.backgroundColor = '';
