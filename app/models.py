@@ -70,6 +70,14 @@ class Flashcard(db.Model):
         "User", backref=db.backref("flashcards", lazy=True)
     )
 
+    def __init__(self, question, answer, user_id, deck_id=None, **kwargs):
+        """Initialize a flashcard with question, answer, user_id, and optional deck_id"""
+        super().__init__(**kwargs)
+        self.question = question
+        self.answer = answer
+        self.user_id = user_id
+        self.deck_id = deck_id
+
     def __repr__(self):
         return (
             f"Flashcard('{self.question}', '{self.answer}', "
@@ -105,6 +113,16 @@ class Deck(db.Model):
         db.UniqueConstraint('user_id', 'name', name='unique_deck_per_user'),
         db.Index('idx_deck_user', 'user_id'),
     )
+    
+    def __init__(self, name, user_id, description=None, color='#3498db', icon=None, is_default=False, **kwargs):
+        """Initialize a deck with name, user_id, and optional parameters"""
+        super().__init__(**kwargs)
+        self.name = name
+        self.user_id = user_id
+        self.description = description
+        self.color = color
+        self.icon = icon
+        self.is_default = is_default
     
     def __repr__(self):
         return f'<Deck {self.name}>'

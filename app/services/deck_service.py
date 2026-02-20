@@ -1,4 +1,3 @@
-#type: ignore
 """
 Deck service for business logic related to flashcard decks
 """
@@ -85,7 +84,7 @@ class DeckService:
         Returns:
             List of Deck objects ordered by name
         """
-        return Deck.query.filter_by(user_id=user_id).order_by(Deck.name).all()
+        return Deck.query.filter_by(user_id=user_id).order_by(Deck.name).all()  # type: ignore
     
     @staticmethod
     def get_deck_by_id(deck_id, user_id):
@@ -148,9 +147,9 @@ class DeckService:
             
             # Check for duplicate name (excluding current deck)
             existing_deck = Deck.query.filter(
-                Deck.user_id == user_id,
-                Deck.name == name.strip(),
-                Deck.id != deck_id
+                Deck.user_id == user_id,  # type: ignore
+                Deck.name == name.strip(),  # type: ignore
+                Deck.id != deck_id  # type: ignore
             ).first()
             
             if existing_deck:
