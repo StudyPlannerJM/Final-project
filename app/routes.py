@@ -191,6 +191,10 @@ def dashboard():
         PomodoroSession.completed == True
     ).count()
 
+    # Deck and Flashcard statistics
+    total_decks = Deck.query.filter_by(user_id=current_user.id).count()
+    total_flashcards = Flashcard.query.filter_by(user_id=current_user.id).count()
+
     return render_template(
         'dashboard.html',
         title='Dashboard',
@@ -202,7 +206,10 @@ def dashboard():
         # NEW: Pass study stats
         today_minutes=today_minutes,
         week_minutes=week_minutes,
-        pomodoros_today=pomodoros_today
+        pomodoros_today=pomodoros_today,
+        # Flashcard stats
+        total_decks=total_decks,
+        total_flashcards=total_flashcards
     )
 
 
