@@ -60,12 +60,10 @@
                             <i class="fas fa-edit"></i> Edit
                         </a>
                         {% if not deck.is_default %}
-                            <form action="{{ url_for('main.delete_deck', deck_id=deck.id) }}" method="POST" style="display:inline;">
-                                <button type="submit" class="btn btn-sm btn-danger" 
-                                        onclick="return confirm('Delete deck \'{{ deck.name }}\' and all {{ deck.flashcard_count }} flashcard(s)? This cannot be undone!');">
-                                    <i class="fas fa-trash"></i> Delete
-                                </button>
-                            </form>
+                            <button type="button" class="btn btn-sm btn-danger" 
+                                    onclick="showDeleteDeckModal({{ deck.id }}, '{{ deck.name }}', {{ deck.flashcard_count }})">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
                         {% endif %}
                     </div>
                 </div>
@@ -78,4 +76,46 @@
             </div>
         {% endif %}
     </div>
+
+    {% include 'components/delete_modal.html' %}
+{% endblock %}
+
+{% block body_extra %}
+    <script src="{{ url_for('static', filename='js/decks.js') }}"></script>
+    <script>
+        let deckToDelete = null;
+
+        function showDeleteDeckModal(deckId, deckName, flashcardCount) {
+            deckToDelete = deckId;
+            const message = `Delete deck '${deckName}' and all ${flashcardCount} flashcard(s)?`;
+            document.getElementById('deleteModalMessage').textContent = message;
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+
+        window.closeDeleteModal = function() {
+            document.getElementById('deleteModal').style.display = 'none';
+            deckToDelete = null;
+        }
+
+        function confirmDeleteDeck() {
+            if (deckToDelete) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/delete_deck/${deckToDelete}`;
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        // Set up confirm button for deck deletion
+        document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDeleteDeck);
+
+        // Close modal when clicking overlay
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('deleteModal');
+            if (event.target === modal) {
+                closeDeleteModal();
+            }
+        });
+    </script>
 {% endblock %}
