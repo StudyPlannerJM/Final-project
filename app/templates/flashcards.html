@@ -11,14 +11,47 @@
 
 {% block content %}
     <div class="flashcards-header">
-        <h2><i class="fas fa-layer-group"></i> Your Flashcards</h2>
-        <a href="{{ url_for('main.add_flashcard') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Add New Flashcard</a>
+        <div class="header-left">
+            <h2><i class="fas fa-layer-group"></i> Your Flashcards</h2>
+            {% if selected_deck %}
+                <span class="deck-badge" style="background-color: {{ selected_deck.color }}22; color: {{ selected_deck.color }}; border: 1px solid {{ selected_deck.color }};">
+                    <i class="fas {{ selected_deck.icon or 'fa-folder' }}"></i> {{ selected_deck.name }}
+                </span>
+            {% endif %}
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('main.add_flashcard') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add New Flashcard
+            </a>
+        </div>
     </div>
+
+    <!-- Deck Filter Dropdown -->
+    <div class="filter-section">
+        <div class="filter-group">
+            <label for="deckFilter"><i class="fas fa-filter"></i> Filter by Deck:</label>
+            <select id="deckFilter" class="form-control" onchange="filterByDeck(this.value)">
+                <option value="">All Decks</option>
+                {% for deck in decks %}
+                    <option value="{{ deck.id }}" {% if selected_deck and selected_deck.id == deck.id %}selected{% endif %}>
+                        {{ deck.name }} ({{ deck.flashcards.count() }})
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
     <div class="flashcards-list">
         {% if flashcards %}
             {% for flashcard in flashcards %}
                 <div class="flashcard-wrapper">
                     <div class="flashcard-item" data-flashcard-id="{{ flashcard.id }}">
+                        <!-- Deck indicator -->
+                        <div class="flashcard-deck-indicator" style="background-color: {{ flashcard.deck.color }};">
+                            <i class="fas {{ flashcard.deck.icon or 'fa-folder' }}"></i>
+                            <span>{{ flashcard.deck.name }}</span>
+                        </div>
+                        
                         <div class="flashcard-content">
                             <div class="flashcard-front">
                                 <div class="flashcard-inner">
@@ -69,8 +102,13 @@
         {% else %}
             <div class="empty-state">
                 <i class="fas fa-layer-group empty-icon"></i>
-                <p>You haven't created any flashcards yet.</p>
-                <p>Click "Add New Flashcard" to get started!</p>
+                {% if selected_deck %}
+                    <p>No flashcards in the "{{ selected_deck.name }}" deck yet.</p>
+                    <p>Click "Add New Flashcard" to create one!</p>
+                {% else %}
+                    <p>You haven't created any flashcards yet.</p>
+                    <p>Click "Add New Flashcard" to get started!</p>
+                {% endif %}
             </div>
         {% endif %}
     </div>
@@ -81,6 +119,14 @@
         function flipCard(button) {
             const flashcard = button.closest('.flashcard-item');
             flashcard.classList.toggle('flipped');
+        }
+        
+        function filterByDeck(deckId) {
+            if (deckId) {
+                window.location.href = "{{ url_for('main.flashcards') }}?deck_id=" + deckId;
+            } else {
+                window.location.href = "{{ url_for('main.flashcards') }}";
+            }
         }
     </script>
 {% endblock %}
