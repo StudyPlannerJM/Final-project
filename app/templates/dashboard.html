@@ -101,7 +101,7 @@
             <div class="stat-card flashcard">
                 <div class="stat-icon">📊</div>
                 <div class="stat-content">
-                    <h3>{% if total_decks &gt; 0 %}{{ (total_flashcards / total_decks) | round(1) }}{% else %}0{% endif %}</h3>
+                    <h3>{% if total_decks > 0 %}{{ (total_flashcards / total_decks) | round(1) }}{% else %}0{% endif %}</h3>
                     <p>Avg Cards per Deck</p>
                 </div>
             </div>
@@ -132,7 +132,7 @@
                 <span class="btn-icon">🎴</span>
                 <span>Add Flashcard</span>
             </a>
-            <a href="{{ url_for('main.decks') }}" class="action-btn secondary">
+            <a href="{{ url_for('main.flashcards') }}" class="action-btn secondary">
                 <span class="btn-icon">📚</span>
                 <span>View Decks</span>
             </a>

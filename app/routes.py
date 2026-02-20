@@ -708,33 +708,40 @@ def delete_deck(deck_id):
 @main.route("/flashcards")
 @login_required
 def flashcards():
-    """Display flashcards, optionally filtered by deck"""
+    """Display flashcards organized by decks"""
     deck_id = request.args.get('deck_id', type=int)
     
     try:
-        # Get all decks for the filter dropdown
+        # Get all decks for the user
         user_decks = DeckService.get_user_decks(current_user.id)
         
-        # Get flashcards (filtered by deck if specified)
+        # Add flashcard count to each deck
+        for deck in user_decks:
+            deck.flashcard_count = deck.flashcards.count()
+        
+        # If no deck selected, show deck grid view
+        if not deck_id:
+            return render_template(
+                "flashcards.html",
+                title="Flashcards",
+                decks=user_decks,
+                show_decks=True
+            )
+        
+        # If deck selected, show flashcards in that deck
+        selected_deck = DeckService.get_deck_by_id(deck_id, current_user.id)
         user_flashcards = FlashcardService.get_user_flashcards(
             current_user.id,
             deck_id=deck_id
         )
         
-        # Get selected deck info if filtering
-        selected_deck = None
-        if deck_id:
-            try:
-                selected_deck = DeckService.get_deck_by_id(deck_id, current_user.id)
-            except:
-                pass
-        
         return render_template(
             "flashcards.html",
-            title="Flashcards",
+            title=f"{selected_deck.name} - Flashcards",
             flashcards=user_flashcards,
             decks=user_decks,
-            selected_deck=selected_deck
+            selected_deck=selected_deck,
+            show_decks=False
         )
     except Exception as e:
         current_app.logger.error(f"Error loading flashcards: {str(e)}")
@@ -746,6 +753,16 @@ def flashcards():
 def add_flashcard():
     """Create a new flashcard"""
     form = FlashcardForm()
+    
+    # Pre-select deck if provided in query parameter
+    if request.method == 'GET':
+        deck_id = request.args.get('deck_id', type=int)
+        if deck_id:
+            try:
+                deck = DeckService.get_deck_by_id(deck_id, current_user.id)
+                form.deck.data = deck
+            except:
+                pass
     
     if form.validate_on_submit():
         try:

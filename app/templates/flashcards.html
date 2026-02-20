@@ -5,128 +5,200 @@
 
 {% block head_extra %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/flashcards.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/decks.css') }}">
 {% endblock %}
 
 {% block page_title %}{{ title }}{% endblock %}
 
 {% block content %}
-    <div class="flashcards-header">
-        <div class="header-left">
-            <h2><i class="fas fa-layer-group"></i> Your Flashcards</h2>
-            {% if selected_deck %}
-                <span class="deck-badge" style="background-color: {{ selected_deck.color }}22; color: {{ selected_deck.color }}; border: 1px solid {{ selected_deck.color }};">
-                    <i class="fas {{ selected_deck.icon or 'fa-folder' }}"></i> {{ selected_deck.name }}
-                </span>
-            {% endif %}
+    {% if show_decks %}
+        <!-- DECK GRID VIEW -->
+        <div class="decks-header">
+            <h2><i class="fas fa-layer-group"></i> Your Flashcard Decks</h2>
+            <div class="header-actions">
+                <a href="{{ url_for('main.add_deck') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Create New Deck
+                </a>
+            </div>
         </div>
-        <div class="header-actions">
-            <a href="{{ url_for('main.add_flashcard') }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Add New Flashcard
-            </a>
-        </div>
-    </div>
 
-    <!-- Deck Filter Dropdown -->
-    <div class="filter-section">
-        <div class="filter-group">
-            <label for="deckFilter"><i class="fas fa-filter"></i> Filter by Deck:</label>
-            <select id="deckFilter" class="form-control" onchange="filterByDeck(this.value)">
-                <option value="">All Decks</option>
+        <div class="decks-grid">
+            {% if decks %}
                 {% for deck in decks %}
-                    <option value="{{ deck.id }}" {% if selected_deck and selected_deck.id == deck.id %}selected{% endif %}>
-                        {{ deck.name }} ({{ deck.flashcards.count() }})
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-    </div>
-
-    <div class="flashcards-list">
-        {% if flashcards %}
-            {% for flashcard in flashcards %}
-                <div class="flashcard-wrapper">
-                    <div class="flashcard-item" data-flashcard-id="{{ flashcard.id }}">
-                        <!-- Deck indicator -->
-                        <div class="flashcard-deck-indicator" style="background-color: {{ flashcard.deck.color }};">
-                            <i class="fas {{ flashcard.deck.icon or 'fa-folder' }}"></i>
-                            <span>{{ flashcard.deck.name }}</span>
+                    <div class="deck-card" data-color="{{ deck.color }}" style="border-left: 4px solid var(--deck-color);">
+                        <div class="deck-header" style="background: linear-gradient(135deg, var(--deck-color-light1), var(--deck-color-light2));">
+                            <div class="deck-icon" style="color: var(--deck-color);">
+                                <i class="fas {{ deck.icon or 'fa-folder' }}"></i>
+                            </div>
+                            <div class="deck-info">
+                                <h3>{{ deck.name }}</h3>
+                                {% if deck.is_default %}
+                                    <span class="badge badge-default">Default</span>
+                                {% endif %}
+                            </div>
                         </div>
-                        
-                        <div class="flashcard-content">
-                            <div class="flashcard-front">
-                                <div class="flashcard-inner">
-                                    <div class="flashcard-label">Question</div>
-                                    <div class="flashcard-question">
-                                        <h3>{{ flashcard.question }}</h3>
-                                    </div>
-                                    <button class="btn-flip" onclick="flipCard(this)">
-                                        <i class="fas fa-sync-alt"></i> Show Answer
-                                    </button>
-                                </div>
-                                <div class="flashcard-actions">
-                                    <a href="{{ url_for('main.edit_flashcard', flashcard_id=flashcard.id) }}" class="btn btn-secondary btn-sm" title="Edit">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </a>
-                                    <form action="{{ url_for('main.delete_flashcard', flashcard_id=flashcard.id) }}" method="POST" style="display:inline;">
-                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this flashcard?');" title="Delete">
-                                            <i class="fas fa-trash"></i> Delete
-                                        </button>
-                                    </form>
+                        <div class="deck-body">
+                            {% if deck.description %}
+                                <p class="deck-description">{{ deck.description }}</p>
+                            {% else %}
+                                <p class="deck-description text-muted">No description</p>
+                            {% endif %}
+                            <div class="deck-stats">
+                                <div class="stat">
+                                    <i class="fas fa-layer-group"></i>
+                                    <span>{{ deck.flashcard_count }} flashcard{{ 's' if deck.flashcard_count != 1 else '' }}</span>
                                 </div>
                             </div>
-                            <div class="flashcard-back">
-                                <div class="flashcard-inner">
-                                    <div class="flashcard-label">Answer</div>
-                                    <div class="flashcard-answer">
-                                        <p>{{ flashcard.answer }}</p>
-                                    </div>
-                                    <button class="btn-flip" onclick="flipCard(this)">
-                                        <i class="fas fa-sync-alt"></i> Show Question
-                                    </button>
-                                </div>
-                                <div class="flashcard-actions">
-                                    <a href="{{ url_for('main.edit_flashcard', flashcard_id=flashcard.id) }}" class="btn btn-secondary btn-sm" title="Edit">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </a>
-                                    <form action="{{ url_for('main.delete_flashcard', flashcard_id=flashcard.id) }}" method="POST" style="display:inline;">
-                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this flashcard?');" title="Delete">
-                                            <i class="fas fa-trash"></i> Delete
+                        </div>
+                        <div class="deck-actions">
+                            <a href="{{ url_for('main.flashcards', deck_id=deck.id) }}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-folder-open"></i> Open Deck
+                            </a>
+                            <a href="{{ url_for('main.edit_deck', deck_id=deck.id) }}" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            {% if not deck.is_default %}
+                                <button onclick="confirmDeleteDeck('{{ deck.id }}')" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-folder-open"></i>
+                    </div>
+                    <p>You haven't created any decks yet.</p>
+                    <p>Create your first deck to organize your flashcards!</p>
+                    <a href="{{ url_for('main.add_deck') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create Your First Deck
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <!-- FLASHCARDS VIEW FOR SPECIFIC DECK -->
+        <div class="flashcards-header">
+            <div class="header-left">
+                <h2>
+                    <i class="fas fa-layer-group"></i>
+                    {% if selected_deck %}
+                        {{ selected_deck.name }}
+                    {% else %}
+                        Your Flashcards
+                    {% endif %}
+                </h2>
+                {% if selected_deck %}
+                    <div style="margin-top: 0.5rem;">
+                        <a href="{{ url_for('main.flashcards') }}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> Back to All Decks
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="header-actions">
+                <a href="{{ url_for('main.add_flashcard') }}{% if selected_deck %}?deck_id={{ selected_deck.id }}{% endif %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Flashcard
+                </a>
+            </div>
+        </div>
+
+        <div class="flashcards-list">
+            {% if flashcards %}
+                {% for flashcard in flashcards %}
+                    <div class="flashcard-wrapper">
+                        <div class="flashcard-item" data-flashcard-id="{{ flashcard.id }}">
+                            <!-- Deck indicator -->
+                            <div class="flashcard-deck-indicator" data-color="{{ flashcard.deck.color }}" style="background-color: var(--deck-indicator-color);">
+                                <i class="fas {{ flashcard.deck.icon or 'fa-folder' }}"></i>
+                                <span>{{ flashcard.deck.name }}</span>
+                            </div>
+                            
+                            <div class="flashcard-content">
+                                <div class="flashcard-front">
+                                    <div class="flashcard-inner">
+                                        <div class="flashcard-label">Question</div>
+                                        <div class="flashcard-question">
+                                            <h3>{{ flashcard.question }}</h3>
+                                        </div>
+                                        <button class="btn-flip" onclick="flipCard(this)">
+                                            <i class="fas fa-sync-alt"></i> Show Answer
                                         </button>
-                                    </form>
+                                    </div>
+                                    <div class="flashcard-actions">
+                                        <a href="{{ url_for('main.edit_flashcard', flashcard_id=flashcard.id) }}" class="btn btn-secondary btn-sm" title="Edit">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        <form action="{{ url_for('main.delete_flashcard', flashcard_id=flashcard.id) }}" method="POST" style="display:inline;">
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this flashcard?');" title="Delete">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="flashcard-back">
+                                    <div class="flashcard-inner">
+                                        <div class="flashcard-label">Answer</div>
+                                        <div class="flashcard-answer">
+                                            <p>{{ flashcard.answer }}</p>
+                                        </div>
+                                        <button class="btn-flip" onclick="flipCard(this)">
+                                            <i class="fas fa-sync-alt"></i> Show Question
+                                        </button>
+                                    </div>
+                                    <div class="flashcard-actions">
+                                        <a href="{{ url_for('main.edit_flashcard', flashcard_id=flashcard.id) }}" class="btn btn-secondary btn-sm" title="Edit">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        <form action="{{ url_for('main.delete_flashcard', flashcard_id=flashcard.id) }}" method="POST" style="display:inline;">
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this flashcard?');" title="Delete">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-layer-group empty-icon"></i>
+                    {% if selected_deck %}
+                        <p>No flashcards in "{{ selected_deck.name }}" yet.</p>
+                        <p>Click "Add Flashcard" to create one!</p>
+                    {% else %}
+                        <p>No flashcards found.</p>
+                        <p>Click "Add Flashcard" to get started!</p>
+                    {% endif %}
                 </div>
-            {% endfor %}
-        {% else %}
-            <div class="empty-state">
-                <i class="fas fa-layer-group empty-icon"></i>
-                {% if selected_deck %}
-                    <p>No flashcards in the "{{ selected_deck.name }}" deck yet.</p>
-                    <p>Click "Add New Flashcard" to create one!</p>
-                {% else %}
-                    <p>You haven't created any flashcards yet.</p>
-                    <p>Click "Add New Flashcard" to get started!</p>
-                {% endif %}
-            </div>
-        {% endif %}
-    </div>
+            {% endif %}
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block body_extra %}
+    <script src="{{ url_for('static', filename='js/decks.js') }}"></script>
     <script>
         function flipCard(button) {
             const flashcard = button.closest('.flashcard-item');
             flashcard.classList.toggle('flipped');
         }
         
-        function filterByDeck(deckId) {
-            if (deckId) {
-                window.location.href = "{{ url_for('main.flashcards') }}?deck_id=" + deckId;
-            } else {
-                window.location.href = "{{ url_for('main.flashcards') }}";
-            }
-        }
+        document.querySelectorAll('.deck-card[data-color]').forEach(card => {
+            const color = card.getAttribute('data-color');
+            const lightColor1 = color + '08';
+            const lightColor2 = color + '15';
+            card.style.setProperty('--deck-color', color);
+            card.style.setProperty('--deck-color-light1', lightColor1);
+            card.style.setProperty('--deck-color-light2', lightColor2);
+        });
+        
+        document.querySelectorAll('.flashcard-deck-indicator[data-color]').forEach(indicator => {
+            const color = indicator.getAttribute('data-color');
+            indicator.style.setProperty('--deck-indicator-color', color);
+        });
     </script>
 {% endblock %}
