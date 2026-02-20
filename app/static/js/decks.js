@@ -63,7 +63,77 @@ function confirmDeleteDeck(deckId) {
     }
 }
 
+// ==============================================================================
+// DELETE MODAL FUNCTIONALITY
+// ==============================================================================
+
+let deckToDelete = null;
+
+/**
+ * Show delete confirmation modal for deck
+ */
+function showDeleteDeckModal(deckId, deckName, flashcardCount) {
+    deckToDelete = deckId;
+    const message = `Delete deck '${deckName}' and all ${flashcardCount} flashcard(s)?`;
+    document.getElementById('deleteModalMessage').textContent = message;
+    document.getElementById('deleteModal').style.display = 'flex';
+}
+
+/**
+ * Close delete confirmation modal
+ */
+window.closeDeleteModal = function() {
+    const modal = document.getElementById('deleteModal');
+    if (modal) {
+        modal.style.display = 'none';
+        deckToDelete = null;
+    }
+}
+
+/**
+ * Confirm and execute deck deletion
+ */
+function confirmDelete() {
+    if (deckToDelete) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/delete_deck/${deckToDelete}`;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+/**
+ * Initialize delete button functionality
+ */
+function initializeDeleteButtons() {
+    // Delete deck buttons
+    document.querySelectorAll('.delete-deck-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const deckId = this.dataset.deckId;
+            const deckName = this.dataset.deckName;
+            const flashcardCount = this.dataset.flashcardCount;
+            showDeleteDeckModal(deckId, deckName, flashcardCount);
+        });
+    });
+    
+    // Set up confirm button
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', confirmDelete);
+    }
+    
+    // Close modal when clicking overlay
+    document.addEventListener('click', function(event) {
+        const modal = document.getElementById('deleteModal');
+        if (modal && event.target === modal) {
+            closeDeleteModal();
+        }
+    });
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     initializeColorPicker();
+    initializeDeleteButtons();
 });
