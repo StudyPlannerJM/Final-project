@@ -7,7 +7,7 @@ from wtforms.validators import (
     DataRequired, Email, EqualTo, ValidationError, Optional, NumberRange
 )
 from wtforms_sqlalchemy.fields import QuerySelectField
-from app.models import User, Category
+from app.models import Deck, User, Category
 from flask_login import current_user
 
 
@@ -75,8 +75,16 @@ class TaskForm(FlaskForm):
 class FlashcardForm(FlaskForm):
     question = TextAreaField("Question", validators=[DataRequired()])
     answer = TextAreaField("Answer", validators=[DataRequired()])
+    deck = QuerySelectField(
+        'Deck',
+        query_factory=lambda: Deck.query.filter_by(
+            user_id=current_user.id
+        ).order_by(Deck.name).all(), # type: ignore
+        get_label='name',
+        allow_blank=False,
+        validators=[DataRequired()]
+    )
     submit = SubmitField("Save Flashcard")
-
 
 class StudyPlanForm(FlaskForm):
     """Form for AI-powered study plan generation"""
@@ -109,3 +117,27 @@ class StudyPlanForm(FlaskForm):
         validators=[DataRequired()]
     )
     submit = SubmitField('Generate Personalized Plan')
+
+class DeckForm(FlaskForm):
+    """Form for creating and editing flashcard decks"""
+    name = StringField(
+        'Deck Name',
+        validators=[DataRequired()],
+        render_kw={"placeholder": "e.g., Python Programming, Biology"}
+    )
+    description = TextAreaField(
+        'Description',
+        validators=[Optional()],
+        render_kw={"placeholder": "What is this deck about?"}
+    )
+    color = StringField(
+        'Color',
+        validators=[Optional()],
+        render_kw={"type": "color", "value": "#3498db"}
+    )
+    icon = StringField(
+        'Icon (FontAwesome)',
+        validators=[Optional()],
+        render_kw={"placeholder": "e.g., fa-brain, fa-book, fa-code"}
+    )
+    submit = SubmitField('Save Deck')
