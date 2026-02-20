@@ -1,0 +1,29 @@
+/* ==============================================================================
+   AI PLANNER - RESPONSIVE
+   Mobile and tablet responsive styles
+   ============================================================================== */
+
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .plan-details-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .header-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+    
+    .header-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .plans-grid {
+        grid-template-columns: 1fr;
+    }
+}

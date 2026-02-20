@@ -4,7 +4,9 @@
 {% block title %}{{ title }} - Study Planner{% endblock %}
 
 {% block head_extra %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/summarizer.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/summarizer/summarizer-grid.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/summarizer/summarizer-components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/summarizer/summarizer-responsive.css') }}">
 {% endblock %}
 
 {% block page_title %}{{ title }}{% endblock %}

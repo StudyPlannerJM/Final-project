@@ -1,0 +1,97 @@
+/* =============================================================================
+   SCHEDULE - MINI CALENDAR
+   Sidebar mini calendar component
+   ============================================================================= */
+
+.mini-calendar {
+    background-color: var(--bg-color-secondary);
+    border-radius: 12px;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.mini-calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.current-month-year {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.nav-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    border: none;
+    background-color: var(--bg-color-tertiary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.weekday-labels {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.weekday-labels span {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-color-secondary);
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.calendar-day:hover {
+    background-color: var(--bg-color-tertiary);
+}
+
+.calendar-day.other-month {
+    color: var(--text-color-tertiary);
+}
+
+.calendar-day.today {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 700;
+}
+
+.calendar-day.selected {
+    background-color: var(--accent-color);
+    color: white;
+    font-weight: 700;
+}
+
+/* Selected takes priority over today */
+.calendar-day.today.selected {
+    background-color: var(--accent-color);
+}

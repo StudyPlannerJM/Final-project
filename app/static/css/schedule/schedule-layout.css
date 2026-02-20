@@ -1,0 +1,250 @@
+/* =============================================================================
+   SCHEDULE - LAYOUT
+   Main grid structure and sidebar components
+   ============================================================================= */
+
+.calendar-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 20px;
+    padding: 20px;
+    min-height: calc(100vh - 80px);
+    background-color: var(--bg-color-primary);
+}
+
+/* =============================================================================
+   LEFT SIDEBAR
+   ============================================================================= */
+
+.calendar-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Google Calendar Connection Card */
+.calendar-integration-card {
+    background-color: var(--bg-color-secondary);
+    border-radius: 12px;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.integration-header-mini {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.integration-icon-mini {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #4285f4 0%, #ea4335 50%, #fbbc04 75%, #34a853 100%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.integration-icon-mini i {
+    font-size: 1.2rem;
+    color: white;
+}
+
+.integration-info-mini h4 {
+    margin: 0 0 5px 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 12px;
+}
+
+.status-badge.connected {
+    background-color: #d1f4e0;
+    color: #0f5132;
+}
+
+.status-badge.disconnected {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.connection-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.btn-connect-mini,
+.btn-disconnect-mini,
+.btn-sync-mini {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.btn-connect-mini {
+    background-color: #4285f4;
+    color: white;
+}
+
+.btn-connect-mini:hover {
+    background-color: #3367d6;
+}
+
+.btn-sync-mini {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-sync-mini:hover {
+    background-color: #218838;
+}
+
+.btn-disconnect-mini {
+    background-color: var(--bg-color-tertiary);
+    color: var(--text-color-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-disconnect-mini:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* =============================================================================
+   MY CALENDARS
+   ============================================================================= */
+
+.my-calendars {
+    background-color: var(--bg-color-secondary);
+    border-radius: 12px;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.my-calendars h4 {
+    margin: 0 0 12px 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.calendar-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    cursor: pointer;
+}
+
+.color-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+.color-indicator.personal { background-color: #ea4335; }
+.color-indicator.work { background-color: #4285f4; }
+.color-indicator.study { background-color: #fbbc04; }
+
+/* =============================================================================
+   MAIN CALENDAR CONTAINER
+   ============================================================================= */
+
+.calendar-main {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background-color: var(--bg-color-secondary);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+}
+
+.week-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.week-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.week-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.view-controls {
+    display: flex;
+    gap: 5px;
+    background-color: var(--bg-color-tertiary);
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.view-btn {
+    padding: 6px 16px;
+    border: none;
+    background-color: transparent;
+    color: var(--text-color-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.view-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.week-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.today-btn {
+    padding: 8px 16px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-color-tertiary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.today-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}

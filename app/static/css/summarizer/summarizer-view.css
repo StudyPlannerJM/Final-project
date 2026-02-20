@@ -1,0 +1,219 @@
+/* ==============================================================================
+   SUMMARIZER - VIEW
+   View summary page with tabs and content display
+   ============================================================================== */
+
+.view-summary-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.view-summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.summary-detail-card {
+    background: var(--bg-color-secondary);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.summary-detail-header {
+    padding: 30px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.summary-detail-info h1 {
+    margin: 0 0 10px 0;
+    font-size: 1.8em;
+    color: var(--text-color-primary);
+}
+
+.summary-meta-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    color: var(--text-color-secondary);
+    font-size: 0.9em;
+}
+
+.summary-meta-info span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.summary-meta-info i {
+    color: var(--accent-color);
+}
+
+/* Tabs */
+.summary-content-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.dark-theme .summary-content-tabs {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.tab-btn {
+    padding: 15px 25px;
+    border: none;
+    background: none;
+    color: var(--text-color-secondary);
+    font-size: 1em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.tab-btn:hover {
+    color: var(--accent-color);
+}
+
+.tab-btn.active {
+    color: var(--accent-color);
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--accent-color);
+    border-radius: 3px 3px 0 0;
+}
+
+/* Tab Content */
+.tab-content {
+    padding: 25px 30px;
+}
+
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+.summary-text-box,
+.original-text-box {
+    background: var(--bg-color-primary);
+    border-radius: 10px;
+    padding: 30px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.summary-text-box h3,
+.original-text-box h3 {
+    margin: 0 0 20px 0;
+    color: var(--text-color-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.summary-text-box h3 i {
+    color: #f39c12;
+}
+
+.original-text-box h3 i {
+    color: var(--accent-color);
+}
+
+.summary-bullets {
+    line-height: 1.9;
+    color: var(--text-color-primary);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 1.05em;
+    letter-spacing: 0.2px;
+}
+
+.summary-bullets p,
+.original-text p {
+    margin-bottom: 1em;
+    text-indent: 0;
+}
+
+.summary-bullets br,
+.original-text br {
+    display: block;
+    content: "";
+    margin-top: 0.5em;
+    line-height: 2;
+    color: var(--text-color-primary);
+    font-size: 1.05em;
+    white-space: pre-wrap;
+    padding: 10px 0;
+}
+
+.summary-bullets br {
+    display: block;
+    content: "";
+    margin-top: 8px;
+}
+
+/* Style for bullet points */
+.summary-bullets p,
+.summary-bullets span {
+    margin-bottom: 12px;
+    display: block;
+}
+
+/* Header styling for summary */
+.summary-header-text {
+    font-weight: bold;
+    color: var(--accent-color);
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.original-text {
+    line-height: 1.9;
+    color: var(--text-color-secondary);
+    max-height: 600px;
+    overflow-y: auto;
+    padding-right: 15px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 1em;
+    letter-spacing: 0.2px;
+    text-align: justify;
+}
+
+.original-text::-webkit-scrollbar {
+    width: 6px;
+}
+
+.original-text::-webkit-scrollbar-track {
+    background: var(--bg-color-secondary);
+    border-radius: 3px;
+}
+
+.original-text::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+.original-text::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-color);
+}

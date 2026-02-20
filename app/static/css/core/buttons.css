@@ -1,0 +1,61 @@
+/* ================================================
+   BUTTON STYLES
+   ================================================ */
+
+.btn {
+    padding: 12px 20px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.btn-primary {
+    background-color: var(--accent-color);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #357abd;
+}
+
+.btn-secondary {
+    background-color: #bdc3c7;
+    color: #333;
+}
+
+.btn-secondary:hover {
+    background-color: #a0a7ad;
+}
+
+body.dark-theme .btn-secondary {
+    background-color: #4a627a;
+    color: #ecf0f1;
+}
+
+body.dark-theme .btn-secondary:hover {
+    background-color: #3b5166;
+}
+
+.btn-sm { 
+    padding: 5px 10px; 
+    font-size: 0.8em; 
+}
+
+.btn-success { 
+    background-color: #2ecc71; 
+    color: #fff; 
+    border: none; 
+    border-radius: 4px; 
+    cursor: pointer; 
+}
+
+.btn-danger { 
+    background-color: #e74c3c; 
+    color: #fff; 
+}

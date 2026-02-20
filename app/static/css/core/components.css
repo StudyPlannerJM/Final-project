@@ -1,0 +1,335 @@
+/* ================================================
+   REUSABLE COMPONENTS
+   ================================================ */
+
+/* Task List */
+.task-list-section { 
+    margin-top: 30px; 
+    background-color: var(--bg-color-secondary); 
+    padding: 20px; 
+    border-radius: 8px; 
+}
+
+.task-list { 
+    list-style: none; 
+    padding: 0; 
+    margin: 0; 
+}
+
+.task-item { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 15px; 
+    border: 1px solid var(--border-color); 
+    border-radius: 5px; 
+    margin-bottom: 10px; 
+}
+
+.task-item.completed { 
+    background-color: #e0ffe0; 
+    opacity: 0.7; 
+}
+
+.dark-theme .task-item.completed { 
+    background-color: #3a504a; 
+}
+
+.task-title { 
+    font-weight: bold; 
+}
+
+.task-item.completed .task-title { 
+    text-decoration: line-through; 
+}
+
+.task-due-date { 
+    font-size: 0.9em; 
+    color: var(--text-color-secondary); 
+}
+
+.task-actions { 
+    display: flex; 
+    gap: 10px; 
+}
+
+/* Flash Messages */
+.flash-messages { 
+    margin: 20px 0; 
+}
+
+.flash-message {
+    padding: 12px 20px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border-left: 4px solid;
+    animation: slideIn 0.3s ease;
+}
+
+.flash-message.success {
+    background-color: #d4edda;
+    border-color: #28a745;
+    color: #155724;
+}
+
+.flash-message.danger {
+    background-color: #f8d7da;
+    border-color: #dc3545;
+    color: #721c24;
+}
+
+.flash-message.warning {
+    background-color: #fff3cd;
+    border-color: #ffc107;
+    color: #856404;
+}
+
+.flash-message.info {
+    background-color: #d1ecf1;
+    border-color: #17a2b8;
+    color: #0c5460;
+}
+
+.dark-theme .flash-message.success {
+    background-color: #1e4620;
+    color: #a8d5a8;
+}
+
+.dark-theme .flash-message.danger {
+    background-color: #4a1e1e;
+    color: #d5a8a8;
+}
+
+.dark-theme .flash-message.warning {
+    background-color: #4a3e1e;
+    color: #d5cba8;
+}
+
+.dark-theme .flash-message.info {
+    background-color: #1e3e4a;
+    color: #a8cbd5;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Floating Pomodoro Timer Widget */
+#floating-pomodoro {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    min-width: 180px;
+    animation: slideIn 0.3s ease-out;
+    font-family: 'Inter', sans-serif;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.floating-timer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.floating-timer-display {
+    font-size: 28px;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 2px;
+}
+
+.floating-timer-status {
+    font-size: 12px;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.floating-timer-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.floating-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+
+.floating-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.floating-btn:active {
+    transform: scale(0.95);
+}
+
+/* Responsive adjustments for floating timer */
+@media (max-width: 768px) {
+    #floating-pomodoro {
+        bottom: 10px;
+        right: 10px;
+        min-width: 150px;
+        padding: 12px 15px;
+    }
+
+    .floating-timer-display {
+        font-size: 24px;
+    }
+
+    .floating-timer-status {
+        font-size: 10px;
+    }
+
+    .floating-btn {
+        padding: 5px 8px;
+        font-size: 14px;
+    }
+}
+
+/* ================================================
+   DELETE CONFIRMATION MODAL
+   ================================================ */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.delete-modal {
+    background: white;
+    border-radius: 12px;
+    padding: 0;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.delete-modal .modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.delete-modal .modal-header h3 {
+    margin: 0;
+    color: #dc3545;
+}
+
+.delete-modal .modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #999;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.delete-modal .modal-close:hover {
+    color: #333;
+}
+
+.delete-modal .modal-body {
+    padding: 30px 20px;
+    text-align: center;
+}
+
+.warning-icon {
+    font-size: 48px;
+    color: #ffc107;
+    margin-bottom: 15px;
+}
+
+.delete-modal .modal-body p {
+    margin: 10px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.warning-text {
+    color: #dc3545;
+    font-weight: 600;
+    font-size: 14px !important;
+}
+
+.delete-modal .modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.delete-modal .btn-danger {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.delete-modal .btn-danger:hover {
+    background-color: #c82333;
+}
