@@ -1,9 +1,12 @@
+<!doctype html>
 {% extends 'base.html' %}
 
 {% block title %}{{ summary.title }} - Study Planner{% endblock %}
 
 {% block head_extra %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/summarizer.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/summarizer/summarizer-view.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/summarizer/summarizer-components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/summarizer/summarizer-responsive.css') }}">
 {% endblock %}
 
 {% block page_title %}{{ title }}{% endblock %}

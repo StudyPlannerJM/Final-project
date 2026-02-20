@@ -1,0 +1,51 @@
+/* ==============================================================================
+   SUMMARIZER - COMPONENTS
+   Buttons and shared components
+   ============================================================================== */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95em;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: var(--accent-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #3a7bc8;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: var(--bg-color-primary);
+    color: var(--text-color-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background: var(--border-color);
+}
+
+.btn-danger {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c0392b;
+}
+
+.btn-sm {
+    padding: 8px 15px;
+    font-size: 0.85em;
+}

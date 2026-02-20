@@ -6,7 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Study Planner{% endblock %}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
+    <!-- Core CSS Files -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/core/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/core/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/core/sidebar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/core/forms.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/core/buttons.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/core/components.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/kanban.css') }}">
     {% block head_extra %}{% endblock %}
 </head>

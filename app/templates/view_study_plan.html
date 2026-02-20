@@ -4,7 +4,9 @@
 {% block title %}{{ title }} - Study Planner{% endblock %}
 
 {% block head_extra %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/ai_planner.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ai-planner/ai-planner-view.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ai-planner/ai-planner-components.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ai-planner/ai-planner-responsive.css') }}">
 {% endblock %}
 
 {% block page_title %}Study Plan: {{ plan.subject }}{% endblock %}

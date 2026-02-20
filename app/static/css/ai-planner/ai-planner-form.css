@@ -1,0 +1,254 @@
+/* ==============================================================================
+   AI PLANNER - FORM
+   Form elements for study plan generation
+   ============================================================================== */
+
+/* Main Container */
+.ai-planner-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Header Section */
+.planner-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 30px 20px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+    border-radius: 12px;
+    color: white;
+}
+
+.header-icon {
+    font-size: 3em;
+    margin-bottom: 15px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.planner-header h2 {
+    margin: 10px 0;
+    font-size: 2em;
+    font-weight: 700;
+}
+
+.planner-header .subtitle {
+    font-size: 1.1em;
+    opacity: 0.95;
+    margin: 10px 0 0;
+}
+
+/* Form Section */
+.form-section {
+    background-color: var(--bg-color-secondary);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.plan-form {
+    width: 100%;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-color-primary);
+    font-size: 0.95em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-group label i {
+    color: var(--primary-color);
+}
+
+.form-control {
+    padding: 12px 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1em;
+    background-color: var(--bg-color-primary);
+    color: var(--text-color-primary);
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+}
+
+.form-control::placeholder {
+    color: var(--text-color-tertiary);
+}
+
+/* Subject field width restriction */
+#subject {
+    max-width: 85%;
+}
+
+.error-message {
+    color: #e74c3c;
+    font-size: 0.85em;
+    margin-top: 5px;
+}
+
+/* Time Input Group */
+.time-input-group {
+    grid-column: 1 / -1; /* Span full width */
+}
+
+.time-input-wrapper {
+    display: flex;
+    gap: 10px;
+}
+
+.time-input-wrapper .time-number {
+    flex: 2;
+}
+
+.time-input-wrapper .time-unit {
+    flex: 1;
+}
+
+/* Form Actions */
+.form-actions {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.btn-generate {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 15px 50px;
+    font-size: 1.1em;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-generate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.btn-generate i {
+    font-size: 1.2em;
+}
+
+.btn-generate:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-view-all {
+    background: transparent;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+    padding: 15px 40px;
+    font-size: 1.1em;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+}
+
+.btn-view-all:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);
+    text-decoration: none;
+}
+
+.btn-view-all i {
+    font-size: 1.1em;
+}
+
+/* Loading Indicator */
+.loading-indicator {
+    text-align: center;
+    padding: 30px;
+    background: var(--bg-color-secondary);
+    border-radius: 12px;
+    margin: 20px 0;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.loading-indicator p {
+    color: var(--text-color-primary);
+    font-size: 1.1em;
+    margin: 15px 0;
+    font-weight: 500;
+}
+
+.spinner {
+    margin: 0 auto 20px;
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--border-color);
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.progress-bar {
+    width: 100%;
+    max-width: 400px;
+    height: 8px;
+    background-color: var(--border-color);
+    border-radius: 10px;
+    margin: 20px auto 0;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    transition: width 0.1s ease;
+}

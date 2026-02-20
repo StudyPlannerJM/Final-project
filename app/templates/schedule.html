@@ -2,7 +2,13 @@
 {% extends "base.html" %}
 
 {% block head_extra %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/schedule.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/schedule/schedule-layout.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/schedule/schedule-mini-calendar.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/schedule/schedule-week-view.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/schedule/schedule-day-view.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/schedule/schedule-month-view.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/schedule/schedule-components.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/schedule/schedule-responsive.css') }}">
 {% endblock %}
 
 {% block page_title %}Calendar{% endblock %}
