@@ -202,16 +202,74 @@
 /* Icon Suggestions */
 .icon-suggestions {
     margin: 1.5rem 0;
-    padding: 1rem;
+    padding: 1.5rem;
     background-color: #f8f9fa;
     border-radius: 8px;
+    max-height: 500px;
+    overflow-y: auto;
 }
 
-.icon-suggestions label {
+.icon-suggestions > label {
     display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
+    margin-bottom: 1rem;
+    font-weight: 700;
     color: #2c3e50;
+    font-size: 1.1rem;
+}
+
+/* Current Icon Display */
+.current-icon-display {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border: 2px solid #3498db;
+}
+
+.current-icon-display > span {
+    font-weight: 600;
+    color: #495057;
+}
+
+.current-icon-preview {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.current-icon-preview i {
+    font-size: 1.5rem;
+}
+
+.current-icon-preview span {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+}
+
+.icon-category {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.icon-category:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.icon-category h4 {
+    margin: 0 0 0.75rem 0;
+    color: #495057;
+    font-size: 0.95rem;
+    font-weight: 600;
 }
 
 .icon-options {
@@ -221,7 +279,7 @@
 }
 
 .icon-btn {
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 0.75rem;
     border: 1px solid #ddd;
     background: white;
     border-radius: 6px;
@@ -229,14 +287,17 @@
     transition: all 0.2s;
     display: flex;
     align-items: center;
-    gap: 0.25rem;
-    font-size: 0.9rem;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    color: #495057;
 }
 
 .icon-btn:hover {
     background-color: #3498db;
     color: white;
     border-color: #3498db;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
 }
 
 .icon-btn i {

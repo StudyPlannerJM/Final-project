@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Study Planner{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/decks.css') }}">
+{% endblock %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <div class="form-container">
+        <div class="form-card">
+            <h2><i class="fas fa-plus-circle"></i> Create New Deck</h2>
+            
+            <form method="POST" action="{{ url_for('main.add_deck') }}" novalidate>
+                {{ form.hidden_tag() }}
+                
+                <div class="form-group">
+                    {{ form.name.label(class="form-label") }}
+                    {{ form.name(class="form-control", placeholder="e.g., Python Programming") }}
+                    {% for error in form.name.errors %}
+                        <span class="invalid-feedback">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                
+                <div class="form-group">
+                    {{ form.description.label(class="form-label") }}
+                    {{ form.description(class="form-control", rows="3", placeholder="Brief description of what this deck covers...") }}
+                    {% for error in form.description.errors %}
+                        <span class="invalid-feedback">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                
+                <div class="form-group">
+                    {{ form.color.label(class="form-label") }}
+                    <div class="color-picker-wrapper">
+                        {{ form.color(class="form-control color-input", value='#3498db') }}
+                        <span class="color-preview" id="colorPreview"></span>
+                    </div>
+                    {% for error in form.color.errors %}
+                        <span class="invalid-feedback">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                
+                <!-- Hidden icon field - value set by icon buttons below -->
+                {{ form.icon(type="hidden", value='fa-book') }}
+                
+                <div class="icon-suggestions">
+                    <label>Choose an Icon:</label>
+                    
+                    <div class="current-icon-display">
+                        <span>Currently selected:</span>
+                        <div class="current-icon-preview" id="currentIconPreview">
+                            <i class="fas fa-book" id="currentIconElement"></i>
+                            <span id="currentIconText">fa-book</span>
+                        </div>
+                    </div>
+                    
+                    <div class="icon-category">
+                        <h4>📚 Education & Learning</h4>
+                        <div class="icon-options">
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-book')">
+                                <i class="fas fa-book"></i> Book
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-book-open')">
+                                <i class="fas fa-book-open"></i> Open Book
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-brain')">
+                                <i class="fas fa-brain"></i> Brain
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-graduation-cap')">
+                                <i class="fas fa-graduation-cap"></i> Graduate
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-user-graduate')">
+                                <i class="fas fa-user-graduate"></i> Student
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-lightbulb')">
+                                <i class="fas fa-lightbulb"></i> Idea
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-pencil-alt')">
+                                <i class="fas fa-pencil-alt"></i> Pencil
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-pen')">
+                                <i class="fas fa-pen"></i> Pen
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="icon-category">
+                        <h4>🔬 Science & Tech</h4>
+                        <div class="icon-options">
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-flask')">
+                                <i class="fas fa-flask"></i> Flask
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-atom')">
+                                <i class="fas fa-atom"></i> Atom
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-microscope')">
+                                <i class="fas fa-microscope"></i> Microscope
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-dna')">
+                                <i class="fas fa-dna"></i> DNA
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-code')">
+                                <i class="fas fa-code"></i> Code
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-laptop-code')">
+                                <i class="fas fa-laptop-code"></i> Laptop
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-rocket')">
+                                <i class="fas fa-rocket"></i> Rocket
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-robot')">
+                                <i class="fas fa-robot"></i> Robot
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="icon-category">
+                        <h4>🔢 Math & Numbers</h4>
+                        <div class="icon-options">
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-calculator')">
+                                <i class="fas fa-calculator"></i> Calculator
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-square-root-alt')">
+                                <i class="fas fa-square-root-alt"></i> Square Root
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-infinity')">
+                                <i class="fas fa-infinity"></i> Infinity
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-chart-line')">
+                                <i class="fas fa-chart-line"></i> Chart
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-percentage')">
+                                <i class="fas fa-percentage"></i> Percent
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-divide')">
+                                <i class="fas fa-divide"></i> Divide
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="icon-category">
+                        <h4>🌍 Languages & Geography</h4>
+                        <div class="icon-options">
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-language')">
+                                <i class="fas fa-language"></i> Language
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-globe')">
+                                <i class="fas fa-globe"></i> Globe
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-comments')">
+                                <i class="fas fa-comments"></i> Chat
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-map')">
+                                <i class="fas fa-map"></i> Map
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-map-marked-alt')">
+                                <i class="fas fa-map-marked-alt"></i> Map Marked
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-flag')">
+                                <i class="fas fa-flag"></i> Flag
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="icon-category">
+                        <h4>🎨 Arts & Creativity</h4>
+                        <div class="icon-options">
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-palette')">
+                                <i class="fas fa-palette"></i> Palette
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-paint-brush')">
+                                <i class="fas fa-paint-brush"></i> Brush
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-music')">
+                                <i class="fas fa-music"></i> Music
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-guitar')">
+                                <i class="fas fa-guitar"></i> Guitar
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-theater-masks')">
+                                <i class="fas fa-theater-masks"></i> Theater
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-camera')">
+                                <i class="fas fa-camera"></i> Camera
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="icon-category">
+                        <h4>📝 Other Subjects</h4>
+                        <div class="icon-options">
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-balance-scale')">
+                                <i class="fas fa-balance-scale"></i> Law
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-heartbeat')">
+                                <i class="fas fa-heartbeat"></i> Medicine
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-landmark')">
+                                <i class="fas fa-landmark"></i> History
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-coins')">
+                                <i class="fas fa-coins"></i> Economics
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-running')">
+                                <i class="fas fa-running"></i> Sports
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-star')">
+                                <i class="fas fa-star"></i> Star
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-certificate')">
+                                <i class="fas fa-certificate"></i> Certificate
+                            </button>
+                            <button type="button" class="icon-btn" onclick="setIcon('fa-trophy')">
+                                <i class="fas fa-trophy"></i> Trophy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus-circle"></i> {{ form.submit.label.text }}
+                    </button>
+                    <a href="{{ url_for('main.decks') }}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block body_extra %}
+    <script src="{{ url_for('static', filename='js/decks.js') }}"></script>
+{% endblock %}
