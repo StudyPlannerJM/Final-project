@@ -101,7 +101,7 @@
             <div class="stat-card flashcard">
                 <div class="stat-icon">📊</div>
                 <div class="stat-content">
-                    <h3>{{ (total_flashcards / total_decks) | round(1) if total_decks > 0 else 0 }}</h3>
+                    <h3>{% if total_decks &gt; 0 %}{{ (total_flashcards / total_decks) | round(1) }}{% else %}0{% endif %}</h3>
                     <p>Avg Cards per Deck</p>
                 </div>
             </div>

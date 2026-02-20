@@ -83,6 +83,11 @@
     border-color: #9c27b0;
 }
 
+.stat-card.flashcard {
+    border-color: #9b59b6;
+    background: linear-gradient(135deg, rgba(155, 89, 182, 0.05), rgba(142, 68, 173, 0.05));
+}
+
 .stat-icon {
     font-size: 2.5rem;
     line-height: 1;

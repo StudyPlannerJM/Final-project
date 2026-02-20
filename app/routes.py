@@ -27,6 +27,8 @@ from app.summarizer import (
 # AI Planner functions
 from app.ai_planner import generate_study_plan, format_plan_for_display
 from app.models import Task, Flashcard, Summary, Category, StudyPlan
+from app.services.deck_service import DeckService
+from app.services.flashcard_service import FlashcardService
 from app import db
 from flask_login import login_required, current_user
 from app.forms import TaskForm, FlashcardForm, StudyPlanForm
