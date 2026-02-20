@@ -4,12 +4,17 @@
 # ==============================================================================
 
 import os
-from google import genai
+try:
+    from google import genai
+except ImportError:
+    genai = None  # Will handle this in the functions
 from flask import current_app
 
 
 def configure_gemini_api():
     """Configure the Google Gemini API with the API key"""
+    if genai is None:
+        raise ImportError("Google Generative AI library is not installed. Run: pip install google-generativeai")
     api_key = current_app.config.get('GEMINI_API_KEY')
     if not api_key:
         raise ValueError("GEMINI_API_KEY is not configured")

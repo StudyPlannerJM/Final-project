@@ -80,6 +80,34 @@
         </div>
     </div>
 
+    <!-- Flashcard Overview -->
+    <div class="section">
+        <h2 class="section-title">🎴 Flashcards & Decks</h2>
+        <div class="stats-grid">
+            <div class="stat-card flashcard">
+                <div class="stat-icon">📚</div>
+                <div class="stat-content">
+                    <h3>{{ total_decks }}</h3>
+                    <p>Deck{{ 's' if total_decks != 1 else '' }}</p>
+                </div>
+            </div>
+            <div class="stat-card flashcard">
+                <div class="stat-icon">🃏</div>
+                <div class="stat-content">
+                    <h3>{{ total_flashcards }}</h3>
+                    <p>Flashcard{{ 's' if total_flashcards != 1 else '' }}</p>
+                </div>
+            </div>
+            <div class="stat-card flashcard">
+                <div class="stat-icon">📊</div>
+                <div class="stat-content">
+                    <h3>{% if total_decks == 0 %}0{% else %}{{ (total_flashcards / total_decks) | round(1) }}{% endif %}</h3>
+                    <p>Avg Cards per Deck</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Quick Actions -->
     <div class="section">
         <h2 class="section-title">🚀 Quick Actions</h2>
@@ -99,6 +127,14 @@
             <a href="{{ url_for('main.ai_plan_generator') }}" class="action-btn quaternary">
                 <span class="btn-icon">🤖</span>
                 <span>AI Study Plan</span>
+            </a>
+            <a href="{{ url_for('main.add_flashcard') }}" class="action-btn primary">
+                <span class="btn-icon">🎴</span>
+                <span>Add Flashcard</span>
+            </a>
+            <a href="{{ url_for('main.flashcards') }}" class="action-btn secondary">
+                <span class="btn-icon">📚</span>
+                <span>View Decks</span>
             </a>
         </div>
     </div>

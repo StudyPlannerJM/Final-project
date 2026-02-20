@@ -9,16 +9,34 @@
     <div class="form-container">
         <form method="POST" action="{{ url_for('main.add_flashcard') }}" novalidate>
             {{ form.hidden_tag() }}
+            
+            <div class="form-group">
+                {{ form.deck.label(class="form-label") }}
+                {{ form.deck(class="form-control") }}
+                {% for error in form.deck.errors %}
+                    <span class="invalid-feedback">{{ error }}</span>
+                {% endfor %}
+                <small class="form-text">
+                    Don't see your deck? <a href="{{ url_for('main.add_deck') }}">Create a new deck</a>
+                </small>
+            </div>
+            
             <div class="form-group">
                 {{ form.question.label(class="form-label") }}
                 {{ form.question(class="form-control", rows="5", placeholder="Enter your question") }}
-                {% for error in form.question.errors %}<span class="invalid-feedback">{{ error }}</span>{% endfor %}
+                {% for error in form.question.errors %}
+                    <span class="invalid-feedback">{{ error }}</span>
+                {% endfor %}
             </div>
+            
             <div class="form-group">
                 {{ form.answer.label(class="form-label") }}
                 {{ form.answer(class="form-control", rows="5", placeholder="Enter the answer") }}
-                {% for error in form.answer.errors %}<span class="invalid-feedback">{{ error }}</span>{% endfor %}
+                {% for error in form.answer.errors %}
+                    <span class="invalid-feedback">{{ error }}</span>
+                {% endfor %}
             </div>
+            
             <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
             <a href="{{ url_for('main.flashcards') }}" class="btn btn-secondary">Cancel</a>
         </form>

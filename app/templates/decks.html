@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Study Planner{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/decks.css') }}">
+{% endblock %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <div class="decks-header">
+        <h2><i class="fas fa-folder"></i> Your Flashcard Decks</h2>
+        <a href="{{ url_for('main.add_deck') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create New Deck
+        </a>
+    </div>
+
+    <div class="decks-grid">
+        {% if decks %}
+            {% for deck in decks %}
+                <div class="deck-card" style="--deck-color: {{ deck.color }}; border-left: 4px solid var(--deck-color);">
+                    <div class="deck-header" style="background: linear-gradient(135deg, var(--deck-color), var(--deck-color));">
+                        <div class="deck-icon" style="color: var(--deck-color);">
+                            <i class="fas {{ deck.icon or 'fa-layer-group' }}"></i>
+                        </div>
+                        <div class="deck-info">
+                            <h3>{{ deck.name }}</h3>
+                            {% if deck.is_default %}
+                                <span class="badge badge-default">Default</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="deck-body">
+                        {% if deck.description %}
+                            <p class="deck-description">{{ deck.description }}</p>
+                        {% else %}
+                            <p class="deck-description text-muted">No description</p>
+                        {% endif %}
+                        
+                        <div class="deck-stats">
+                            <div class="stat">
+                                <i class="fas fa-layer-group"></i>
+                                <span>{{ deck.flashcard_count }} card{{ 's' if deck.flashcard_count != 1 else '' }}</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-calendar"></i>
+                                <span>{{ deck.created_at.strftime('%b %d, %Y') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="deck-actions">
+                        <a href="{{ url_for('main.flashcards', deck_id=deck.id) }}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-eye"></i> View Cards
+                        </a>
+                        <a href="{{ url_for('main.edit_deck', deck_id=deck.id) }}" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        {% if not deck.is_default %}
+                            <form action="{{ url_for('main.delete_deck', deck_id=deck.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-danger" 
+                                        onclick="return confirm('Delete deck \'{{ deck.name }}\' and all {{ deck.flashcard_count }} flashcard(s)? This cannot be undone!');">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-folder-open empty-icon"></i>
+                <p>You haven't created any decks yet.</p>
+                <p>Click "Create New Deck" to organize your flashcards!</p>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

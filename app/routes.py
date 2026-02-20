@@ -6,7 +6,8 @@
 import json
 import os
 from datetime import datetime, timedelta
-from app.models import StudySession, PomodoroSession
+from app.models import StudySession, PomodoroSession, Deck
+from app.forms import DeckForm
 
 from flask import (
     Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify
@@ -26,6 +27,8 @@ from app.summarizer import (
 # AI Planner functions
 from app.ai_planner import generate_study_plan, format_plan_for_display
 from app.models import Task, Flashcard, Summary, Category, StudyPlan
+from app.services.deck_service import DeckService
+from app.services.flashcard_service import FlashcardService
 from app import db
 from flask_login import login_required, current_user
 from app.forms import TaskForm, FlashcardForm, StudyPlanForm
@@ -190,6 +193,10 @@ def dashboard():
         PomodoroSession.completed == True
     ).count()
 
+    # Deck and Flashcard statistics
+    total_decks = Deck.query.filter_by(user_id=current_user.id).count()
+    total_flashcards = Flashcard.query.filter_by(user_id=current_user.id).count()
+
     return render_template(
         'dashboard.html',
         title='Dashboard',
@@ -201,7 +208,10 @@ def dashboard():
         # NEW: Pass study stats
         today_minutes=today_minutes,
         week_minutes=week_minutes,
-        pomodoros_today=pomodoros_today
+        pomodoros_today=pomodoros_today,
+        # Flashcard stats
+        total_decks=total_decks,
+        total_flashcards=total_flashcards
     )
 
 
@@ -593,7 +603,104 @@ def get_today_study_minutes(user_id):
 
     return total or 0
 
+# ==============================================================================
+# DECK ROUTES
+# ==============================================================================
 
+@main.route("/decks")
+@login_required
+def decks():
+    """Display all decks for the current user"""
+    try:
+        user_decks = DeckService.get_user_decks(current_user.id)
+        # Add flashcard count to each deck
+        for deck in user_decks:
+            deck.flashcard_count = deck.flashcards.count()
+        return render_template("decks.html", title="My Decks", decks=user_decks)
+    except Exception as e:
+        current_app.logger.error(f"Error loading decks: {str(e)}")
+        flash("Error loading decks", "danger")
+        return redirect(url_for("main.dashboard"))
+
+
+@main.route("/add_deck", methods=["GET", "POST"])
+@login_required
+def add_deck():
+    """Create a new deck"""
+    form = DeckForm()
+    if form.validate_on_submit():
+        try:
+            deck = DeckService.create_deck(
+                user_id=current_user.id,
+                name=form.name.data,
+                description=form.description.data,
+                color=form.color.data or '#3498db',
+                icon=form.icon.data
+            )
+            flash(f"Deck '{deck.name}' has been created!", "success")
+            return redirect(url_for("main.decks"))
+        except ValidationError as e:
+            flash(str(e), "danger")
+        except Exception as e:
+            current_app.logger.error(f"Error creating deck: {str(e)}")
+            flash("Error creating deck", "danger")
+    
+    return render_template("add_deck.html", title="Create Deck", form=form)
+
+
+@main.route("/edit_deck/<int:deck_id>", methods=["GET", "POST"])
+@login_required
+def edit_deck(deck_id):
+    """Edit an existing deck"""
+    try:
+        deck = DeckService.get_deck_by_id(deck_id, current_user.id)
+    except (NotFoundError, AuthorizationError) as e:
+        flash(str(e), "danger")
+        return redirect(url_for("main.decks"))
+    
+    form = DeckForm(obj=deck)
+    
+    if form.validate_on_submit():
+        try:
+            DeckService.update_deck(
+                deck_id=deck_id,
+                user_id=current_user.id,
+                name=form.name.data,
+                description=form.description.data,
+                color=form.color.data,
+                icon=form.icon.data
+            )
+            flash(f"Deck '{form.name.data}' has been updated!", "success")
+            return redirect(url_for("main.decks"))
+        except ValidationError as e:
+            flash(str(e), "danger")
+        except Exception as e:
+            current_app.logger.error(f"Error updating deck: {str(e)}")
+            flash("Error updating deck", "danger")
+    
+    return render_template("edit_deck.html", title="Edit Deck", form=form, deck=deck)
+
+
+@main.route("/delete_deck/<int:deck_id>", methods=["POST"])
+@login_required
+def delete_deck(deck_id):
+    """Delete a deck and all its flashcards"""
+    try:
+        deck = DeckService.get_deck_by_id(deck_id, current_user.id)
+        deck_name = deck.name
+        flashcard_count = deck.flashcards.count()
+        
+        DeckService.delete_deck(deck_id, current_user.id)
+        flash(f"Deck '{deck_name}' and {flashcard_count} flashcard(s) have been deleted!", "success")
+    except ValidationError as e:
+        flash(str(e), "warning")
+    except (NotFoundError, AuthorizationError) as e:
+        flash(str(e), "danger")
+    except Exception as e:
+        current_app.logger.error(f"Error deleting deck: {str(e)}")
+        flash("Error deleting deck", "danger")
+    
+    return redirect(url_for("main.decks"))
 # ==============================================================================
 # FLASHCARD ROUTES
 # ==============================================================================
@@ -601,52 +708,113 @@ def get_today_study_minutes(user_id):
 @main.route("/flashcards")
 @login_required
 def flashcards():
-    # Display all my flashcards for studying
-    # Sorted by creation date (newest first)
-    user_flashcards = Flashcard.query.filter_by(
-        author=current_user
-    ).order_by(Flashcard.date_created.desc()).all()
-    return render_template(
-        "flashcards.html", title="Flashcards", flashcards=user_flashcards
-    )
-
+    """Display flashcards organized by decks"""
+    deck_id = request.args.get('deck_id', type=int)
+    
+    try:
+        # Get all decks for the user
+        user_decks = DeckService.get_user_decks(current_user.id)
+        
+        # Add flashcard count to each deck
+        for deck in user_decks:
+            deck.flashcard_count = deck.flashcards.count()
+        
+        # If no deck selected, show deck grid view
+        if not deck_id:
+            return render_template(
+                "flashcards.html",
+                title="Flashcards",
+                decks=user_decks,
+                show_decks=True
+            )
+        
+        # If deck selected, show flashcards in that deck
+        selected_deck = DeckService.get_deck_by_id(deck_id, current_user.id)
+        user_flashcards = FlashcardService.get_user_flashcards(
+            current_user.id,
+            deck_id=deck_id
+        )
+        
+        return render_template(
+            "flashcards.html",
+            title=f"{selected_deck.name} - Flashcards",
+            flashcards=user_flashcards,
+            decks=user_decks,
+            selected_deck=selected_deck,
+            show_decks=False
+        )
+    except Exception as e:
+        current_app.logger.error(f"Error loading flashcards: {str(e)}")
+        flash("Error loading flashcards", "danger")
+        return redirect(url_for("main.dashboard"))
 
 @main.route("/add_flashcard", methods=["GET", "POST"])
 @login_required
 def add_flashcard():
-    # Create a new flashcard with question and answer
+    """Create a new flashcard"""
     form = FlashcardForm()
+    
+    # Pre-select deck if provided in query parameter
+    if request.method == 'GET':
+        deck_id = request.args.get('deck_id', type=int)
+        if deck_id:
+            try:
+                deck = DeckService.get_deck_by_id(deck_id, current_user.id)
+                form.deck.data = deck
+            except:
+                pass
+    
     if form.validate_on_submit():
-        new_flashcard = Flashcard(
-            question=form.question.data,
-            answer=form.answer.data,
-            author=current_user
-        )
-        db.session.add(new_flashcard)
-        db.session.commit()
-        flash("Your flashcard has been added!", "success")
-        return redirect(url_for("main.flashcards"))
-    return render_template(
-        "add_flashcards.html", title="Add Flashcard", form=form
-    )
-
+        try:
+            flashcard = FlashcardService.create_flashcard(
+                user_id=current_user.id,
+                question=form.question.data,
+                answer=form.answer.data,
+                deck_id=form.deck.data.id if form.deck.data else None
+            )
+            flash("Your flashcard has been added!", "success")
+            return redirect(url_for("main.flashcards", deck_id=flashcard.deck_id))
+        except ValidationError as e:
+            flash(str(e), "danger")
+        except Exception as e:
+            current_app.logger.error(f"Error creating flashcard: {str(e)}")
+            flash("Error creating flashcard", "danger")
+    
+    return render_template("add_flashcards.html", title="Add Flashcard", form=form)
 
 @main.route("/edit_flashcard/<int:flashcard_id>", methods=["GET", "POST"])
 @login_required
 def edit_flashcard(flashcard_id):
-    # Edit an existing flashcard - update question or answer
-    flashcard = Flashcard.query.get_or_404(flashcard_id)
-    if flashcard.author != current_user:
-        flash("You are not authorized to edit this flashcard.", "danger")
+    """Edit an existing flashcard"""
+    try:
+        flashcard = FlashcardService.get_flashcard_by_id(flashcard_id, current_user.id)
+    except (NotFoundError, AuthorizationError) as e:
+        flash(str(e), "danger")
         return redirect(url_for("main.flashcards"))
-
+    
     form = FlashcardForm(obj=flashcard)
+    
+    # Pre-select the current deck
+    if request.method == 'GET':
+        form.deck.data = flashcard.deck
+    
     if form.validate_on_submit():
-        flashcard.question = form.question.data
-        flashcard.answer = form.answer.data
-        db.session.commit()
-        flash("Your flashcard has been updated!", "success")
-        return redirect(url_for("main.flashcards"))
+        try:
+            FlashcardService.update_flashcard(
+                flashcard_id=flashcard_id,
+                user_id=current_user.id,
+                question=form.question.data,
+                answer=form.answer.data,
+                deck_id=form.deck.data.id if form.deck.data else None
+            )
+            flash("Your flashcard has been updated!", "success")
+            return redirect(url_for("main.flashcards", deck_id=form.deck.data.id))
+        except ValidationError as e:
+            flash(str(e), "danger")
+        except Exception as e:
+            current_app.logger.error(f"Error updating flashcard: {str(e)}")
+            flash("Error updating flashcard", "danger")
+    
     return render_template(
         "edit_flashcards.html",
         title="Edit Flashcard",
@@ -654,40 +822,55 @@ def edit_flashcard(flashcard_id):
         flashcard=flashcard
     )
 
-
 @main.route("/delete_flashcard/<int:flashcard_id>", methods=["POST"])
 @login_required
 def delete_flashcard(flashcard_id):
-    # Delete a flashcard
-    flashcard = Flashcard.query.get_or_404(flashcard_id)
-    if flashcard.author != current_user:
-        flash("You are not authorized to delete this flashcard.", "danger")
-        return redirect(url_for("main.flashcards"))
-
-    db.session.delete(flashcard)
-    db.session.commit()
-    flash("Your flashcard has been deleted!", "success")
+    """Delete a flashcard"""
+    try:
+        flashcard = FlashcardService.get_flashcard_by_id(flashcard_id, current_user.id)
+        deck_id = flashcard.deck_id
+        
+        FlashcardService.delete_flashcard(flashcard_id, current_user.id)
+        flash("Your flashcard has been deleted!", "success")
+        return redirect(url_for("main.flashcards", deck_id=deck_id))
+    except (NotFoundError, AuthorizationError) as e:
+        flash(str(e), "danger")
+    except Exception as e:
+        current_app.logger.error(f"Error deleting flashcard: {str(e)}")
+        flash("Error deleting flashcard", "danger")
+    
     return redirect(url_for("main.flashcards"))
-
 
 @main.route("/generate_flashcards_from_study_plan/<int:plan_id>", methods=["POST"])
 @login_required
 def generate_flashcards_from_study_plan(plan_id):
     """Generate flashcards from a study plan using AI"""
-    # Get the study plan
     plan = StudyPlan.query.get_or_404(plan_id)
     
-    # Security check - verify user owns this plan
+    # Security check
     if plan.user_id != current_user.id:
         flash('You are not authorized to access this plan.', 'danger')
         return redirect(url_for('main.my_study_plans'))
     
-    # Get number of cards from form
     num_cards = int(request.form.get('num_cards', 10))
     
     try:
-        # Use Gemini AI to generate flashcards from the study plan
-        from google import genai
+        # Auto-create or get deck named after the study plan subject
+        deck = DeckService.get_or_create_deck(
+            user_id=current_user.id,
+            name=plan.subject,
+            description=f"Flashcards generated from {plan.subject} study plan",
+            color='#9b59b6',  # Purple for AI-generated decks
+            icon='fa-robot'
+        )
+        
+        # Use Gemini AI to generate flashcards
+        try:
+            from google import genai
+        except ImportError:
+            flash('Google Generative AI library is not installed.', 'danger')
+            return redirect(url_for('main.view_study_plan', plan_id=plan_id))
+        
         import os
         
         api_key = os.getenv('GEMINI_API_KEY', 'AIzaSyCbDUdL0WUWP20lS4rZM4bqGBSmUqoj54o')
@@ -710,12 +893,12 @@ Make the questions specific and the answers clear and educational."""
             contents=prompt
         )
         
-        # Parse the response to extract Q&A pairs
+        # Parse Q&A pairs
         flashcard_text = response.text
         lines = flashcard_text.strip().split('\n')
         
+        flashcards_data = []
         question = None
-        cards_added = 0
         
         for line in lines:
             line = line.strip()
@@ -723,25 +906,29 @@ Make the questions specific and the answers clear and educational."""
                 question = line[2:].strip()
             elif line.startswith('A:') and question:
                 answer = line[2:].strip()
-                # Create and save the flashcard
-                new_flashcard = Flashcard(
-                    question=question,
-                    answer=answer,
-                    author=current_user
-                )
-                db.session.add(new_flashcard)
-                cards_added += 1
+                flashcards_data.append({
+                    'question': question,
+                    'answer': answer
+                })
                 question = None
         
-        db.session.commit()
-        flash(f'Successfully generated {cards_added} flashcards from your study plan!', 'success')
+        # Use service to bulk create flashcards
+        created_flashcards = FlashcardService.bulk_create_flashcards(
+            user_id=current_user.id,
+            flashcards_data=flashcards_data,
+            deck_id=deck.id
+        )
+        
+        flash(
+            f"Successfully generated {len(created_flashcards)} flashcards in deck '{deck.name}'!",
+            'success'
+        )
         
     except Exception as e:
         current_app.logger.error(f"Error generating flashcards: {str(e)}")
         flash(f'Error generating flashcards: {str(e)}', 'danger')
     
-    return redirect(url_for('main.flashcards'))
-
+    return redirect(url_for('main.flashcards', deck_id=deck.id))
 # ==============================================================================
 # GOOGLE CALENDAR INTEGRATION ROUTES
 # ==============================================================================

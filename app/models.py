@@ -64,9 +64,19 @@ class Flashcard(db.Model):
     answer = db.Column(db.Text, nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    deck_id = db.Column(db.Integer, db.ForeignKey('deck.id'), nullable=True)
+    
     author = db.relationship(
         "User", backref=db.backref("flashcards", lazy=True)
     )
+
+    def __init__(self, question, answer, user_id, deck_id=None, **kwargs):
+        """Initialize a flashcard with question, answer, user_id, and optional deck_id"""
+        super().__init__(**kwargs)
+        self.question = question
+        self.answer = answer
+        self.user_id = user_id
+        self.deck_id = deck_id
 
     def __repr__(self):
         return (
@@ -74,6 +84,48 @@ class Flashcard(db.Model):
             f"'{self.date_created}')"
         )
 
+class Deck(db.Model):
+    """
+    Deck model for organizing flashcards
+    Each user can have multiple decks to organize their flashcards
+    """
+    __tablename__ = 'deck'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    color = db.Column(db.String(7), default='#3498db')  # Hex color for UI
+    icon = db.Column(db.String(50), nullable=True)  # FontAwesome icon name
+    
+    # Link to user
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    # Metadata
+    is_default = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    owner = db.relationship('User', backref=db.backref('decks', lazy='dynamic'))
+    flashcards = db.relationship('Flashcard', backref='deck', lazy='dynamic', cascade='all, delete-orphan')
+    
+    # Ensure each user can't have duplicate deck names
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'name', name='unique_deck_per_user'),
+        db.Index('idx_deck_user', 'user_id'),
+    )
+    
+    def __init__(self, name, user_id, description=None, color='#3498db', icon=None, is_default=False, **kwargs):
+        """Initialize a deck with name, user_id, and optional parameters"""
+        super().__init__(**kwargs)
+        self.name = name
+        self.user_id = user_id
+        self.description = description
+        self.color = color
+        self.icon = icon
+        self.is_default = is_default
+    
+    def __repr__(self):
+        return f'<Deck {self.name}>'
 
 class Summary(db.Model):
     id = db.Column(db.Integer, primary_key=True)

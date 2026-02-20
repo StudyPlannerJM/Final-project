@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/kanban.css') }}">
     {% block head_extra %}{% endblock %}
 </head>
+
 <body>
     <div class="wrapper">
         <nav class="sidebar">
@@ -20,25 +22,32 @@
                     <a href="/" class="nav-link"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{url_for('main.tasks')}}" class="nav-link"><i class="fas fa-tasks"></i><span>Tasks</span></a>
+                    <a href="{{url_for('main.tasks')}}" class="nav-link"><i
+                            class="fas fa-tasks"></i><span>Tasks</span></a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{url_for('main.schedule')}}" class="nav-link"><i class="fas fa-calendar-alt"></i><span>Schedule</span></a>
+                    <a href="{{url_for('main.schedule')}}" class="nav-link"><i
+                            class="fas fa-calendar-alt"></i><span>Schedule</span></a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ url_for('main.pomodoro') }}" class="nav-link"><i class="fas fa-clock"></i><span>Pomodoro</span></a>
+                    <a href="{{ url_for('main.pomodoro') }}" class="nav-link"><i
+                            class="fas fa-clock"></i><span>Pomodoro</span></a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ url_for('main.flashcards') }}" class="nav-link"><i class="fas fa-layer-group"></i><span>Flashcards</span></a>
+                    <a href="{{ url_for('main.flashcards') }}" class="nav-link"><i
+                            class="fas fa-layer-group"></i><span>Flashcards</span></a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ url_for('main.summarizer') }}" class="nav-link"><i class="fas fa-file-alt"></i><span>Summarizer</span></a>
+                    <a href="{{ url_for('main.summarizer') }}" class="nav-link"><i
+                            class="fas fa-file-alt"></i><span>Summarizer</span></a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ url_for('main.ai_plan_generator') }}" class="nav-link"><i class="fas fa-brain"></i><span>AI Plan Generator</span></a>
+                    <a href="{{ url_for('main.ai_plan_generator') }}" class="nav-link"><i
+                            class="fas fa-brain"></i><span>AI Plan Generator</span></a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ url_for('main.settings') }}" class="nav-link"><i class="fas fa-cog"></i><span>Settings</span></a>
+                    <a href="{{ url_for('main.settings') }}" class="nav-link"><i
+                            class="fas fa-cog"></i><span>Settings</span></a>
                 </li>
             </ul>
         </nav>
@@ -59,23 +68,24 @@
                     </div>
                 </div>
             </header>
-            
+
             <div class="flash-messages">
                 {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <div class="flash-message {{ category }}">{{ message }}</div>
-                        {% endfor %}
-                    {% endif %}
+                {% if messages %}
+                {% for category, message in messages %}
+                <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+                {% endif %}
                 {% endwith %}
             </div>
-            
+
             {% block content %}{% endblock %}
-            
+
         </main>
     </div>
-    
+
     <script src="{{ url_for('static', filename='js/common.js') }}"></script>
     {% block body_extra %}{% endblock %}
 </body>
+
 </html>
