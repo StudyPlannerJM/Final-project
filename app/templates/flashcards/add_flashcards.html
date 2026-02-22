@@ -7,7 +7,7 @@
 
 {% block content %}
     <div class="form-container">
-        <form method="POST" action="{{ url_for('main.add_flashcard') }}" novalidate>
+        <form method="POST" action="{{ url_for('flashcards.add') }}" novalidate>
             {{ form.hidden_tag() }}
             
             <div class="form-group">
@@ -17,7 +17,7 @@
                     <span class="invalid-feedback">{{ error }}</span>
                 {% endfor %}
                 <small class="form-text">
-                    Don't see your deck? <a href="{{ url_for('main.add_deck') }}">Create a new deck</a>
+                    Don't see your deck? <a href="{{ url_for('flashcards.add_deck') }}">Create a new deck</a>
                 </small>
             </div>
             
@@ -38,7 +38,7 @@
             </div>
             
             <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
-            <a href="{{ url_for('main.flashcards') }}" class="btn btn-secondary">Cancel</a>
+            <a href="{{ url_for('flashcards.index') }}" class="btn btn-secondary">Cancel</a>
         </form>
     </div>
 {% endblock %}

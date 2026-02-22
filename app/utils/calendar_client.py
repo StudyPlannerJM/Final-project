@@ -458,6 +458,40 @@ def get_events_for_month(service, year, month):
     return events_by_date
 
 
+def sync_unsynced_tasks_to_calendar(user):
+    """
+    Sync all existing tasks (with due dates) that aren't synced to Google Calendar.
+    Returns tuple: (success_count, total_count)
+    """
+    from app.models import Task
+    from app import db
+    
+    service = get_calendar_service(user)
+    if not service:
+        return (0, 0)
+    
+    # Get all unsynced tasks with due dates
+    unsynced_tasks = Task.query.filter_by(
+        user_id=user.id,
+        synced_to_calendar=False
+    ).filter(Task.due_date.isnot(None)).all()
+    
+    success_count = 0
+    total_count = len(unsynced_tasks)
+    
+    for task in unsynced_tasks:
+        event_id = create_calendar_event(service, task)
+        if event_id:
+            task.google_event_id = event_id
+            task.synced_to_calendar = True
+            success_count += 1
+    
+    # Commit all changes at once
+    if success_count > 0:
+        db.session.commit()
+    
+    return (success_count, total_count)
+
 
 # ==============================================================================
 # END OF FILE

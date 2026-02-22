@@ -15,7 +15,7 @@ function confirmDelete() {
     if (taskIdToDelete) {
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = `/delete_task/${taskIdToDelete}`;
+        form.action = `/tasks/delete/${taskIdToDelete}`;
         document.body.appendChild(form);
         form.submit();
     }

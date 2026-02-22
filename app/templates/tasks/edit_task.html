@@ -11,7 +11,7 @@
 
 {% block content %}
     <div class="form-container">
-        <form method="POST" action="{{ url_for('main.edit_task', task_id=task.id) }}" novalidate>
+        <form method="POST" action="{{ url_for('tasks.edit', task_id=task.id) }}" novalidate>
             {{form.hidden_tag()}}
             <div class="form-group">
                 {{form.title.label(class="form-label")}}
@@ -50,7 +50,7 @@
             </div>        
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
-                <a href="{{ url_for('main.tasks') }}" class="btn btn-secondary">Cancel</a>
+                <a href="{{ url_for('tasks.index') }}" class="btn btn-secondary">Cancel</a>
                 <button type="button" class="btn btn-danger" onclick="showDeleteModal()">Delete Task</button>
             </div>
         </form>
@@ -62,7 +62,7 @@
 {% block body_extra %}
 <script>
     // Set the delete URL for the JavaScript module
-    const deleteTaskUrl = "{{ url_for('main.delete_task', task_id=task.id) }}";
+    const deleteTaskUrl = "{{ url_for('tasks.delete', task_id=task.id) }}";
 </script>
 <script src="{{ url_for('static', filename='js/edit-task.js') }}"></script>
 {% endblock %}

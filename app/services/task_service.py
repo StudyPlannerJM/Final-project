@@ -125,7 +125,7 @@ class TaskService:
         if status:
             query = query.filter_by(status=status)
         
-        return query.order_by(Task.data_created.desc()).all()
+        return query.order_by(Task.date_created.desc()).all()
     
     @staticmethod
     def delete_task(task_id, user_id):

@@ -103,7 +103,7 @@ class TestAuthRoutes:
     
     def test_protected_route_requires_login(self, client):
         """Test that protected routes redirect to login"""
-        response = client.get('/tasks')
+        response = client.get('/tasks/')
         
         # Should redirect to login page
         assert response.status_code == 302
@@ -111,7 +111,7 @@ class TestAuthRoutes:
     
     def test_authenticated_user_can_access_protected_route(self, auth_client):
         """Test that authenticated users can access protected routes"""
-        response = auth_client.get('/tasks')
+        response = auth_client.get('/tasks/')
         
         assert response.status_code == 200
         assert b'Tasks' in response.data or b'task' in response.data

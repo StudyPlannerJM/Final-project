@@ -38,7 +38,7 @@
             </div>
         </div>
         
-        <a href="{{ url_for('main.pomodoro') }}" class="btn btn-primary">
+        <a href="{{ url_for('pomodoro.index') }}" class="btn btn-primary">
             <i class="fas fa-play"></i> Back to Timer
         </a>
     </div>
@@ -89,7 +89,7 @@
     
         <div class="pagination">
             {% if pagination.has_prev %}
-            <a href="{{ url_for('main.my_pomodoro_sessions', page=pagination.prev_num) }}" class="pagination-btn">
+            <a href="{{ url_for('pomodoro.sessions', page=pagination.prev_num) }}" class="pagination-btn">
                 <i class="fas fa-chevron-left"></i> Previous
             </a>
             {% else %}
@@ -103,7 +103,7 @@
             </span>
             
             {% if pagination.has_next %}
-            <a href="{{ url_for('main.my_pomodoro_sessions', page=pagination.next_num) }}" class="pagination-btn">
+            <a href="{{ url_for('pomodoro.sessions', page=pagination.next_num) }}" class="pagination-btn">
                 Next <i class="fas fa-chevron-right"></i>
             </a>
             {% else %}
@@ -119,7 +119,7 @@
         <i class="fas fa-clock"></i>
         <h3>No Pomodoro Sessions Yet</h3>
         <p>Start your first study session to track your progress!</p>
-        <a href="{{ url_for('main.pomodoro') }}" class="btn btn-primary">
+        <a href="{{ url_for('pomodoro.index') }}" class="btn btn-primary">
             <i class="fas fa-play"></i> Start Timer
         </a>
     </div>

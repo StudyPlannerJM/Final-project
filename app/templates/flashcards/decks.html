@@ -12,7 +12,7 @@
 {% block content %}
     <div class="decks-header">
         <h2><i class="fas fa-folder"></i> Your Flashcard Decks</h2>
-        <a href="{{ url_for('main.add_deck') }}" class="btn btn-primary">
+        <a href="{{ url_for('flashcards.add_deck') }}" class="btn btn-primary">
             <i class="fas fa-plus"></i> Create New Deck
         </a>
     </div>
@@ -53,10 +53,10 @@
                     </div>
                     
                     <div class="deck-actions">
-                        <a href="{{ url_for('main.flashcards', deck_id=deck.id) }}" class="btn btn-sm btn-primary">
+                        <a href="{{ url_for('flashcards.index', deck_id=deck.id) }}" class="btn btn-sm btn-primary">
                             <i class="fas fa-eye"></i> View Cards
                         </a>
-                        <a href="{{ url_for('main.edit_deck', deck_id=deck.id) }}" class="btn btn-sm btn-secondary">
+                        <a href="{{ url_for('flashcards.edit_deck', deck_id=deck.id) }}" class="btn btn-sm btn-secondary">
                             <i class="fas fa-edit"></i> Edit
                         </a>
                         {% if not deck.is_default %}

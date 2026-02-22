@@ -7,7 +7,7 @@
 
 {% block content %}
     <div class="form-container">
-        <form method="POST" action="{{ url_for('main.edit_flashcard', flashcard_id=flashcard.id) }}" novalidate>
+        <form method="POST" action="{{ url_for('flashcards.edit', flashcard_id=flashcard.id) }}" novalidate>
             {{ form.hidden_tag() }}
             
             <div class="form-group">
@@ -35,7 +35,7 @@
             </div>
             
             <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
-            <a href="{{ url_for('main.flashcards', deck_id=flashcard.deck_id) }}" class="btn btn-secondary">Cancel</a>
+            <a href="{{ url_for('flashcards.index', deck_id=flashcard.deck_id) }}" class="btn btn-secondary">Cancel</a>
         </form>
     </div>
 {% endblock %}
