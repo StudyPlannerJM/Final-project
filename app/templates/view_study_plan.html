@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/ai-planner/ai-planner-view.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/ai-planner/ai-planner-components.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/ai-planner/ai-planner-responsive.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/view-study-plan-print.css') }}">
 {% endblock %}
 
 {% block page_title %}Study Plan: {{ plan.subject }}{% endblock %}
@@ -103,44 +104,8 @@
         </form>
     </div>
 </div>
+{% endblock %}
 
-<style>
-    @media print {
-        .sidebar, .top-header, .header-actions, .plan-actions {
-            display: none !important;
-        }
-        .main-content {
-            padding: 0;
-        }
-        .plan-content-section {
-            page-break-inside: avoid;
-        }
-    }
-</style>
-
-<script>
-    // Flashcard generation loading indicator
-    document.getElementById('flashcard-form').addEventListener('submit', function(e) {
-        if (!confirm('Generate flashcards from this study plan?')) {
-            e.preventDefault();
-            return false;
-        }
-        
-        document.getElementById('flashcard-loading').style.display = 'block';
-        document.querySelector('.flashcard-options').style.opacity = '0.5';
-        document.getElementById('flashcard-submit-btn').disabled = true;
-        
-        // Animate progress bar
-        const progressFill = document.getElementById('flashcard-progress');
-        let width = 0;
-        const interval = setInterval(() => {
-            if (width >= 90) {
-                clearInterval(interval);
-            } else {
-                width += 1;
-                progressFill.style.width = width + '%';
-            }
-        }, 150);
-    });
-</script>
+{% block body_extra %}
+<script src="{{ url_for('static', filename='js/view-study-plan.js') }}"></script>
 {% endblock %}

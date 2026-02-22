@@ -4,9 +4,9 @@
 {% block title %}{{ summary.title }} - Study Planner{% endblock %}
 
 {% block head_extra %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/summarizer/summarizer-view.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/summarizer/summarizer-components.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/summarizer/summarizer-responsive.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/summarizer/summarizer-view.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/summarizer/summarizer-components.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/summarizer/summarizer-responsive.css') }}">
 {% endblock %}
 
 {% block page_title %}{{ title }}{% endblock %}
@@ -75,23 +75,5 @@
 {% endblock %}
 
 {% block body_extra %}
-<script>
-    // Tab switching functionality
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabPanels = document.querySelectorAll('.tab-panel');
-    
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const tabName = this.dataset.tab;
-            
-            // Remove active class from all buttons and panels
-            tabBtns.forEach(b => b.classList.remove('active'));
-            tabPanels.forEach(p => p.classList.remove('active'));
-            
-            // Add active class to clicked button and corresponding panel
-            this.classList.add('active');
-            document.getElementById(tabName + '-panel').classList.add('active');
-        });
-    });
-</script>
+<script src="{{ url_for('static', filename='js/view-summary.js') }}"></script>
 {% endblock %}

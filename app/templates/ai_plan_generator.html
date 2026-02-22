@@ -132,25 +132,8 @@
         {% endif %}
     </div>
 </div>
+{% endblock %}
 
-<script>
-    // Show loading indicator when form is submitted
-    document.querySelector('.plan-form').addEventListener('submit', function() {
-        document.getElementById('loading-indicator').style.display = 'block';
-        document.querySelector('.form-section').style.opacity = '0.5';
-        document.querySelector('.btn-generate').disabled = true;
-        
-        // Animate progress bar
-        const progressFill = document.querySelector('.progress-bar-fill');
-        let width = 0;
-        const interval = setInterval(() => {
-            if (width >= 90) {
-                clearInterval(interval);
-            } else {
-                width += 1;
-                progressFill.style.width = width + '%';
-            }
-        }, 100);
-    });
-</script>
+{% block body_extra %}
+<script src="{{ url_for('static', filename='js/ai-plan-generator.js') }}"></script>
 {% endblock %}
