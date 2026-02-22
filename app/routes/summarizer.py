@@ -7,7 +7,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, current_user
 from app.models import Summary
 from app import db
-from app.summarizer import (
+from app.utils.document_processor import (
     get_allowed_extensions,
     get_file_type,
     extract_text,

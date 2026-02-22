@@ -1,6 +1,7 @@
 """
 Routes package - Blueprint modules for organized routing
 """
+from .auth import auth_bp
 from .main import main_bp
 from .tasks import tasks_bp
 from .flashcards import flashcards_bp
@@ -10,6 +11,7 @@ from .summarizer import summarizer_bp
 from .ai_planner import ai_planner_bp
 
 __all__ = [
+    'auth_bp',
     'main_bp',
     'tasks_bp',
     'flashcards_bp',

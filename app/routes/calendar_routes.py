@@ -8,7 +8,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, current_user
 from app.models import Task
 from app import db
-from app.google_calendar import (
+from app.utils.calendar_client import (
     get_google_auth_flow,
     get_calendar_service,
     sync_unsynced_tasks_to_calendar,

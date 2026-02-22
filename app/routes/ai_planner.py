@@ -6,7 +6,7 @@ from flask_login import login_required, current_user
 from app.forms import StudyPlanForm
 from app.models import StudyPlan
 from app import db
-from app.ai_planner import generate_study_plan, format_plan_for_display
+from app.utils.ai_generator import generate_study_plan, format_plan_for_display
 
 ai_planner_bp = Blueprint('ai_planner', __name__, url_prefix='/ai-planner')
 

@@ -32,8 +32,8 @@ def create_app(config_name=None):
         return User.query.get(int(user_id))
     
     # Import blueprints here to avoid circular imports
-    from app.auth import auth as auth_blueprint
     from app.routes import (
+        auth_bp,
         main_bp,
         tasks_bp,
         flashcards_bp,
@@ -44,7 +44,7 @@ def create_app(config_name=None):
     )
 
     # Register blueprints
-    app.register_blueprint(auth_blueprint, url_prefix='/auth')
+    app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(main_bp)  # No prefix - dashboard at /
     app.register_blueprint(tasks_bp)  # /tasks
     app.register_blueprint(flashcards_bp)  # /flashcards

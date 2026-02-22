@@ -5,9 +5,9 @@ from app.models import User
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, current_user, login_required
 
-auth = Blueprint('auth', __name__)
+auth_bp = Blueprint('auth', __name__)
 
-@auth.route('/login', methods=['GET', 'POST'])
+@auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard'))
@@ -25,7 +25,7 @@ def login():
         return redirect(url_for('main.dashboard'))
     return render_template('auth/login.html', title='Sign In', form=form)
 
-@auth.route('/register', methods=['GET', 'POST'])
+@auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard'))
@@ -39,7 +39,7 @@ def register():
         return redirect(url_for('auth.login'))
     return render_template('auth/register.html', title='Register', form=form)
 
-@auth.route('/logout')
+@auth_bp.route('/logout')
 def logout():    
     logout_user() 
     flash('You have been logged out.', 'info')   

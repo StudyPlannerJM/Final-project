@@ -6,7 +6,7 @@ from flask_login import login_required, current_user
 from app.models import Task, Category
 from app.forms import TaskForm
 from app import db
-from app.google_calendar import get_calendar_service, create_calendar_event, update_calendar_event, delete_calendar_event
+from app.utils.calendar_client import get_calendar_service, create_calendar_event, update_calendar_event, delete_calendar_event
 
 tasks_bp = Blueprint('tasks', __name__, url_prefix='/tasks')
 
