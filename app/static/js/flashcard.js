@@ -125,13 +125,13 @@ function confirmDelete() {
     if (deleteType === 'flashcard' && flashcardToDelete) {
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = `/delete_flashcard/${flashcardToDelete}`;
+        form.action = `/flashcards/delete/${flashcardToDelete}`;
         document.body.appendChild(form);
         form.submit();
     } else if (deleteType === 'deck' && deckToDelete) {
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = `/delete_deck/${deckToDelete}`;
+        form.action = `/flashcards/delete_deck/${deckToDelete}`;
         document.body.appendChild(form);
         form.submit();
     }

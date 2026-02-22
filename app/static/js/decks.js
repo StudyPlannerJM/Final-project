@@ -59,7 +59,11 @@ function setIcon(iconClass) {
  */
 function confirmDeleteDeck(deckId) {
     if (confirm('Are you sure you want to delete this deck? All flashcards in this deck will be moved to the default deck.')) {
-        window.location.href = `/delete_deck/${deckId}`;
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/flashcards/delete_deck/${deckId}`;
+        document.body.appendChild(form);
+        form.submit();
     }
 }
 
@@ -97,7 +101,7 @@ function confirmDelete() {
     if (deckToDelete) {
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = `/delete_deck/${deckToDelete}`;
+        form.action = `/flashcards/delete_deck/${deckToDelete}`;
         document.body.appendChild(form);
         form.submit();
     }

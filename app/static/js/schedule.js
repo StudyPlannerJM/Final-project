@@ -429,7 +429,7 @@ function initializeEventHandlers() {
                 window.open(googleCalendarUrl, '_blank');
             }
         } else if (currentTaskId) {
-            window.location.href = `/edit_task/${currentTaskId}`;
+            window.location.href = `/tasks/edit/${currentTaskId}`;
         }
     });
 
@@ -444,7 +444,7 @@ function initializeEventHandlers() {
         button.addEventListener('click', function () {
             const taskId = this.getAttribute('data-task-id');
 
-            fetch(`/sync_task_to_calendar/${taskId}`, {
+            fetch(`/calendar/sync_task/${taskId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -472,7 +472,7 @@ function initializeEventHandlers() {
 
             const taskId = this.getAttribute('data-task-id');
 
-            fetch(`/remove_task_from_calendar/${taskId}`, {
+            fetch(`/calendar/remove_task/${taskId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

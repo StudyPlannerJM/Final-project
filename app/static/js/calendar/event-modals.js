@@ -125,7 +125,7 @@ export function showTaskDetails(task) {
     if (editTaskBtn) {
         editTaskBtn.style.display = 'inline-block';
         editTaskBtn.onclick = function () {
-            window.location.href = `/edit_task/${task.id}`;
+            window.location.href = `/tasks/edit/${task.id}`;
         };
     }
 

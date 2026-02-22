@@ -6,6 +6,7 @@ from app.services.flashcard_service import FlashcardService
 from app.services.pomodoro_service import PomodoroService
 from app.services.summary_service import SummaryService
 from app.services.study_plan_service import StudyPlanService
+from app.services.calendar_service import CalendarService
 
 __all__ = [
     'TaskService',
@@ -14,4 +15,5 @@ __all__ = [
     'PomodoroService',
     'SummaryService',
     'StudyPlanService',
+    'CalendarService',
 ]
