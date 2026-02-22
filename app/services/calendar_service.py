@@ -181,7 +181,7 @@ class CalendarService:
         
         Args:
             target_date: Target datetime
-            view: View type ('week', 'month', 'day')
+            view: View type ('week', 'month', 'day', 'upcoming')
             
         Returns:
             Tuple of (start_date, end_date)
@@ -195,6 +195,11 @@ class CalendarService:
             # Get single day
             start_date = target_date.replace(hour=0, minute=0, second=0, microsecond=0)
             end_date = target_date.replace(hour=23, minute=59, second=59)
+        elif view == 'upcoming':
+            # Get next 7 days from today (for upcoming events)
+            start_date = target_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            end_date = start_date + timedelta(days=7)
+            end_date = end_date.replace(hour=23, minute=59, second=59)
         else:  # week (default)
             # Get full week (Monday to Sunday)
             start_date = target_date - timedelta(days=target_date.weekday())
