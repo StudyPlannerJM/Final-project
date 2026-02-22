@@ -143,8 +143,8 @@ def get_today_study_minutes(user_id):
     today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
 
     total = db.session.query(db.func.sum(StudySession.duration_minutes)).filter(
-        StudySession.user_id == user_id,
-        StudySession.start_time >= today_start
+        StudySession.user_id == user_id,  # type: ignore
+        StudySession.start_time >= today_start  # type: ignore
     ).scalar()
 
     return total or 0

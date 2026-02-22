@@ -53,7 +53,7 @@ def upload():
             return redirect(request.url)
         
         # STEP 3: Validate file type
-        if not allowed_file(file.filename):
+        if not file.filename or not allowed_file(file.filename):
             flash('Invalid file type. Allowed types: PDF, DOCX, JPG, PNG, GIF, BMP, TIFF', 'danger')
             return redirect(request.url)
         
@@ -96,7 +96,7 @@ def upload():
                 extracted_text=extracted_text,
                 summary_text=summary_text,
                 file_type=file_type,
-                author=current_user
+                user_id=current_user.id
             )
             
             db.session.add(new_summary)

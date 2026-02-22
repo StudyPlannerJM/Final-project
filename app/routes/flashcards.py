@@ -272,8 +272,10 @@ def generate_from_study_plan(plan_id):
         flash('You are not authorized to access this plan.', 'danger')
         return redirect(url_for('ai_planner.my_plans'))
     
+    # Extract number of cards to generate
     num_cards = int(request.form.get('num_cards', 10))
     
+    deck = None  # Initialize to prevent unbound variable error
     try:
         # Auto-create or get deck named after the study plan subject
         deck = DeckService.get_or_create_deck(
@@ -312,7 +314,7 @@ Make the questions specific and the answers clear and educational."""
         )
         
         # Parse Q&A pairs
-        flashcard_text = response.text
+        flashcard_text = response.text or ""
         lines = flashcard_text.strip().split('\n')
         
         flashcards_data = []
@@ -346,4 +348,8 @@ Make the questions specific and the answers clear and educational."""
         current_app.logger.error(f"Error generating flashcards: {str(e)}")
         flash(f'Error generating flashcards: {str(e)}', 'danger')
     
-    return redirect(url_for('flashcards.index', deck_id=deck.id))
+    # Redirect to deck page or ai_planner if deck wasn't created
+    if deck:
+        return redirect(url_for('flashcards.index', deck_id=deck.id))
+    else:
+        return redirect(url_for('ai_planner.view_plan', plan_id=plan_id))

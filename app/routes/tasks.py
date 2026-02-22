@@ -113,10 +113,10 @@ def add():
         # STEP 5: Create the new task with all form data
         new_task = Task(
             title=form.title.data,
+            user_id=current_user.id,
             description=form.description.data,
             due_date=form.due_date.data,
-            category_id=category_id,  # Foreign key to Category table
-            author=current_user  # Links task to current logged-in user
+            category_id=category_id  # Foreign key to Category table
         )
 
         # STEP 6: Save task to database

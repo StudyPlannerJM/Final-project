@@ -35,21 +35,21 @@ def dashboard():
 
     # Today's study time
     today_minutes = db.session.query(db.func.sum(StudySession.duration_minutes)).filter(
-        StudySession.user_id == current_user.id,
-        StudySession.start_time >= today_start
+        StudySession.user_id == current_user.id,  # type: ignore
+        StudySession.start_time >= today_start  # type: ignore
     ).scalar() or 0
 
     # This week's study time
     week_minutes = db.session.query(db.func.sum(StudySession.duration_minutes)).filter(
-        StudySession.user_id == current_user.id,
-        StudySession.start_time >= week_start
+        StudySession.user_id == current_user.id,  # type: ignore
+        StudySession.start_time >= week_start  # type: ignore
     ).scalar() or 0
 
     # Pomodoros completed today
     pomodoros_today = PomodoroSession.query.filter(
-        PomodoroSession.user_id == current_user.id,
-        PomodoroSession.start_time >= today_start,
-        PomodoroSession.completed == True
+        PomodoroSession.user_id == current_user.id,  # type: ignore
+        PomodoroSession.start_time >= today_start,  # type: ignore
+        PomodoroSession.completed == True  # type: ignore
     ).count()
 
     # Deck and Flashcard statistics

@@ -50,6 +50,14 @@ class Task(db.Model):
     google_event_id = db.Column(db.String(255), nullable=True)  # Link to calendar event
     synced_to_calendar = db.Column(db.Boolean, default=False)
     
+    def __init__(self, title, user_id, description=None, due_date=None, category_id=None, **kwargs):
+        """Initialize a task with required and optional parameters"""
+        super().__init__(**kwargs)
+        self.title = title
+        self.user_id = user_id
+        self.description = description
+        self.due_date = due_date
+        self.category_id = category_id
 
     def __repr__(self):
         return (
@@ -140,6 +148,16 @@ class Summary(db.Model):
         "User", backref=db.backref("summaries", lazy=True)
     )
 
+    def __init__(self, title, original_filename, file_type, user_id, extracted_text=None, summary_text=None, **kwargs):
+        """Initialize a summary with required and optional parameters"""
+        super().__init__(**kwargs)
+        self.title = title
+        self.original_filename = original_filename
+        self.file_type = file_type
+        self.user_id = user_id
+        self.extracted_text = extracted_text
+        self.summary_text = summary_text
+
     def __repr__(self):
         return f"Summary('{self.title}', '{self.date_created}')"
 
@@ -173,6 +191,16 @@ class Category(db.Model):
         db.Index('idx_category_user', 'user_id'),
     )
 
+    def __init__(self, name, user_id, description=None, color='#3498db', icon=None, is_default=False, **kwargs):
+        """Initialize a category with required and optional parameters"""
+        super().__init__(**kwargs)
+        self.name = name
+        self.user_id = user_id
+        self.description = description
+        self.color = color
+        self.icon = icon
+        self.is_default = is_default
+
     def __repr__(self):
         return f'<Category {self.name}>'
 
@@ -196,6 +224,16 @@ class StudyPlan(db.Model):
     
     # Relationship
     user = db.relationship('User', backref=db.backref('study_plans', lazy='dynamic'))
+    
+    def __init__(self, user_id, subject, time_value, time_unit, knowledge_level, plan_content, **kwargs):
+        """Initialize a study plan with required parameters"""
+        super().__init__(**kwargs)
+        self.user_id = user_id
+        self.subject = subject
+        self.time_value = time_value
+        self.time_unit = time_unit
+        self.knowledge_level = knowledge_level
+        self.plan_content = plan_content
     
     def __repr__(self):
         return f'<StudyPlan {self.subject} for {self.user_id}>'
@@ -228,6 +266,17 @@ class StudySession(db.Model):
     # Relationships
     user = db.relationship('User', backref=db.backref('study_sessions', lazy='dynamic'))
     task = db.relationship('Task', backref=db.backref('study_sessions', lazy='dynamic'))
+
+    def __init__(self, user_id, start_time, end_time=None, duration_minutes=None, task_id=None, notes=None, productivity_rating=None, **kwargs):
+        """Initialize a study session with required and optional parameters"""
+        super().__init__(**kwargs)
+        self.user_id = user_id
+        self.start_time = start_time
+        self.end_time = end_time
+        self.duration_minutes = duration_minutes
+        self.task_id = task_id
+        self.notes = notes
+        self.productivity_rating = productivity_rating
 
     def calculate_duration(self):
         """Calculate duration in minutes"""
@@ -269,6 +318,19 @@ class PomodoroSession(db.Model):
     user = db.relationship('User', backref=db.backref('pomodoro_sessions', lazy='dynamic'))
     task = db.relationship('Task', backref=db.backref('pomodoro_sessions', lazy='dynamic'))
     study_session = db.relationship('StudySession', backref=db.backref('pomodoro_session', uselist=False))
+
+    def __init__(self, user_id, start_time, duration_minutes=25, break_duration_minutes=5, end_time=None, completed=False, task_id=None, study_session_id=None, notes=None, **kwargs):
+        """Initialize a pomodoro session with required and optional parameters"""
+        super().__init__(**kwargs)
+        self.user_id = user_id
+        self.start_time = start_time
+        self.duration_minutes = duration_minutes
+        self.break_duration_minutes = break_duration_minutes
+        self.end_time = end_time
+        self.completed = completed
+        self.task_id = task_id
+        self.study_session_id = study_session_id
+        self.notes = notes
 
     def __repr__(self):
         return f'<PomodoroSession {self.id}: {self.duration_minutes}min>'

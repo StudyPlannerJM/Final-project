@@ -52,9 +52,9 @@ def oauth2callback():
     token_data = {
         'token': credentials.token,
         'refresh_token': credentials.refresh_token,
-        'token_uri': credentials.token_uri,
-        'client_id': credentials.client_id,
-        'client_secret': credentials.client_secret,
+        'token_uri': credentials.token_uri,  # type: ignore
+        'client_id': credentials.client_id,  # type: ignore
+        'client_secret': credentials.client_secret,  # type: ignore
         'scopes': credentials.scopes
     }
 
@@ -68,7 +68,7 @@ def oauth2callback():
     unsynced_count = Task.query.filter_by(
         user_id=current_user.id,
         synced_to_calendar=False
-    ).filter(Task.due_date.isnot(None)).count()
+    ).filter(Task.due_date.isnot(None)).count()  # type: ignore
     
     if unsynced_count > 0:
         # Redirect to sync prompt
@@ -224,11 +224,11 @@ def api_calendar_events():
 
     # Fetch local tasks for the date range
     tasks = Task.query.filter(
-        Task.user_id == current_user.id,
-        Task.due_date.isnot(None),
-        Task.due_date >= start_date,
-        Task.due_date <= end_date
-    ).order_by(Task.due_date.asc()).all()
+        Task.user_id == current_user.id,  # type: ignore
+        Task.due_date.isnot(None),  # type: ignore
+        Task.due_date >= start_date,  # type: ignore
+        Task.due_date <= end_date  # type: ignore
+    ).order_by(Task.due_date.asc()).all()  # type: ignore
 
     # Filter out duplicate Google Calendar events (tasks already synced)
     synced_event_ids = [task.google_event_id for task in tasks if task.google_event_id]
