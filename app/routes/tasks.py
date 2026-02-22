@@ -6,6 +6,7 @@ from flask_login import login_required, current_user
 from app.models import Task, Category
 from app.forms import TaskForm
 from app import db
+from app.decorators import require_resource_ownership
 from app.utils.calendar_client import get_calendar_service, create_calendar_event, update_calendar_event, delete_calendar_event
 
 tasks_bp = Blueprint('tasks', __name__, url_prefix='/tasks')
@@ -18,17 +19,17 @@ def index():
     
     # STEP 1: Get all "todo" tasks for current user, sorted by creation date
     todo_tasks = Task.query.filter_by(user_id=current_user.id, status="todo").order_by(
-        Task.data_created.asc()
+        Task.date_created.asc()
     ).all()
     
     # STEP 2: Get all "doing" (in progress) tasks
     doing_tasks = Task.query.filter_by(user_id=current_user.id, status="doing").order_by(
-        Task.data_created.asc()
+        Task.date_created.asc()
     ).all()
     
     # STEP 3: Get all "done" (completed) tasks
     done_tasks = Task.query.filter_by(user_id=current_user.id, status='done').order_by(
-        Task.data_created.asc()
+        Task.date_created.asc()
     ).all()
     
     # STEP 4: Pass all three lists to the template for display
@@ -43,25 +44,22 @@ def index():
 
 @tasks_bp.route('/update_status/<int:task_id>/<status>', methods=['POST'])
 @login_required
+@require_resource_ownership(Task, id_param='task_id')
 def update_status(task_id, status):
     """Update task status when dragging between Kanban columns (AJAX endpoint)"""
     
-    # STEP 1: Get the task from database
+    # STEP 1: Get the task from database (ownership already verified by decorator)
     task = Task.query.get_or_404(task_id)
 
-    # STEP 2: Security check - make sure current user owns this task
-    if task.user_id != current_user.id:
-        return {'success': False, 'error': 'Unauthorized'}, 403
-
-    # STEP 3: Validate the new status is valid (todo, doing, or done)
+    # STEP 2: Validate the new status is valid (todo, doing, or done)
     if status not in ['todo', 'doing', 'done']:
         return {'success': False, 'error': 'Invalid status'}, 400
 
-    # STEP 4: Update the task's status and save to database
+    # STEP 3: Update the task's status and save to database
     task.status = status
     db.session.commit()
 
-    # STEP 5: Return success response to JavaScript
+    # STEP 4: Return success response to JavaScript
     return {'success': True, 'task_id': task_id, 'new_status': status}
 
 
@@ -145,14 +143,11 @@ def add():
 
 @tasks_bp.route('/edit/<int:task_id>', methods=['GET', 'POST'])
 @login_required
+@require_resource_ownership(Task, id_param='task_id')
 def edit(task_id):
     """Edit an existing task - modify title, description, date, or category"""
 
     task = Task.query.get_or_404(task_id)
-
-    if task.user_id != current_user.id:
-        flash('You are not authorized to edit this task.', 'danger')
-        return redirect(url_for('tasks.index'))
 
     form = TaskForm(obj=task)
 
@@ -210,12 +205,10 @@ def edit(task_id):
 
 @tasks_bp.route('/delete/<int:task_id>', methods=['POST'])
 @login_required
+@require_resource_ownership(Task, id_param='task_id')
 def delete(task_id):
     """Delete a task permanently from the database"""
     task = Task.query.get_or_404(task_id)
-    if task.user_id != current_user.id:
-        flash('You are not authorized to delete this task.', 'danger')
-        return redirect(url_for('tasks.index'))
 
     # Delete from Google Calendar if synced
     if task.google_event_id and current_user.calendar_sync_enabled:
@@ -231,12 +224,10 @@ def delete(task_id):
 
 @tasks_bp.route('/complete/<int:task_id>', methods=['POST'])
 @login_required
+@require_resource_ownership(Task, id_param='task_id')
 def complete(task_id):
     """Toggle task completion status (mark as complete/incomplete)"""
     task = Task.query.get_or_404(task_id)
-    if task.user_id != current_user.id:
-        flash('You are not authorized to complete this task.', 'danger')
-        return redirect(url_for('tasks.index'))
     task.is_complete = not task.is_complete
     db.session.commit()
     flash('Task status updated!', 'success')

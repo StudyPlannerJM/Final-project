@@ -6,7 +6,7 @@ from flask import Blueprint, render_template, request, jsonify
 from flask_login import login_required, current_user
 from app.models import PomodoroSession, StudySession, Task
 from app import db
-
+from app.decorators import require_resource_ownership
 pomodoro_bp = Blueprint('pomodoro', __name__, url_prefix='/pomodoro')
 
 
@@ -57,13 +57,10 @@ def sessions():
 
 @pomodoro_bp.route('/api/delete/<int:session_id>', methods=['DELETE'])
 @login_required
+@require_resource_ownership(PomodoroSession, id_param='session_id')
 def delete_session(session_id):
     """Delete a pomodoro session"""
     session = PomodoroSession.query.get_or_404(session_id)
-    
-    # Security check: ensure session belongs to current user
-    if session.user_id != current_user.id:
-        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
     
     try:
         db.session.delete(session)
@@ -143,8 +140,8 @@ def get_today_study_minutes(user_id):
     today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
 
     total = db.session.query(db.func.sum(StudySession.duration_minutes)).filter(
-        StudySession.user_id == user_id,  # type: ignore
-        StudySession.start_time >= today_start  # type: ignore
+        StudySession.user_id == user_id,
+        StudySession.start_time >= today_start
     ).scalar()
 
     return total or 0
