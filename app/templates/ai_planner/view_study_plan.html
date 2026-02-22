@@ -25,10 +25,10 @@
             </div>
         </div>
         <div class="header-actions">
-            <a href="{{ url_for('main.ai_plan_generator') }}" class="btn btn-secondary">
+            <a href="{{ url_for('ai_planner.generator') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Back to Generator
             </a>
-            <a href="{{ url_for('main.my_study_plans') }}" class="btn btn-info">
+            <a href="{{ url_for('ai_planner.my_plans') }}" class="btn btn-info">
                 <i class="fas fa-folder-open"></i> All Plans
             </a>
             <button onclick="window.print()" class="btn btn-primary">
@@ -59,7 +59,7 @@
     </div>
 
     <div class="flashcard-generation-section">
-        <form method="POST" action="{{ url_for('main.generate_flashcards_from_study_plan', plan_id=plan.id) }}" 
+        <form method="POST" action="{{ url_for('flashcards.generate_from_study_plan', plan_id=plan.id) }}" 
               class="flashcard-generation-form"
               id="flashcard-form">
             <div class="flashcard-options">
@@ -96,7 +96,7 @@
     </div>
 
     <div class="plan-actions">
-        <form method="POST" action="{{ url_for('main.delete_study_plan', plan_id=plan.id) }}" 
+        <form method="POST" action="{{ url_for('ai_planner.delete_plan', plan_id=plan.id) }}" 
               onsubmit="return confirm('Are you sure you want to delete this study plan? This action cannot be undone.');">
             <button type="submit" class="btn btn-danger">
                 <i class="fas fa-trash"></i> Delete Plan

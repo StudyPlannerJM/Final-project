@@ -112,27 +112,27 @@
     <div class="section">
         <h2 class="section-title">🚀 Quick Actions</h2>
         <div class="quick-actions">
-            <a href="{{ url_for('main.add_task') }}" class="action-btn primary">
+            <a href="{{ url_for('tasks.add') }}" class="action-btn primary">
                 <span class="btn-icon">➕</span>
                 <span>Add Task</span>
             </a>
-            <a href="{{ url_for('main.pomodoro') }}" class="action-btn secondary">
+            <a href="{{ url_for('pomodoro.index') }}" class="action-btn secondary">
                 <span class="btn-icon">🍅</span>
                 <span>Start Pomodoro</span>
             </a>
-            <a href="{{ url_for('main.schedule') }}" class="action-btn tertiary">
+            <a href="{{ url_for('calendar.schedule') }}" class="action-btn tertiary">
                 <span class="btn-icon">📅</span>
                 <span>View Schedule</span>
             </a>
-            <a href="{{ url_for('main.ai_plan_generator') }}" class="action-btn quaternary">
+            <a href="{{ url_for('ai_planner.generator') }}" class="action-btn quaternary">
                 <span class="btn-icon">🤖</span>
                 <span>AI Study Plan</span>
             </a>
-            <a href="{{ url_for('main.add_flashcard') }}" class="action-btn primary">
+            <a href="{{ url_for('flashcards.add') }}" class="action-btn primary">
                 <span class="btn-icon">🎴</span>
                 <span>Add Flashcard</span>
             </a>
-            <a href="{{ url_for('main.flashcards') }}" class="action-btn secondary">
+            <a href="{{ url_for('flashcards.index') }}" class="action-btn secondary">
                 <span class="btn-icon">📚</span>
                 <span>View Decks</span>
             </a>
@@ -160,7 +160,7 @@
                         {% endif %}
                     </p>
                 </div>
-                <a href="{{ url_for('main.edit_task', task_id=task.id) }}" class="task-edit-btn">Edit</a>
+                <a href="{{ url_for('tasks.edit', task_id=task.id) }}" class="task-edit-btn">Edit</a>
             </div>
             {% endfor %}
         </div>

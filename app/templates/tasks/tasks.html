@@ -42,14 +42,14 @@
                             </span>
                             {% endif %}
                             <div class="task-actions">
-                                <a href="{{ url_for('main.edit_task', task_id=task.id) }}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
+                                <a href="{{ url_for('tasks.edit', task_id=task.id) }}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
                                 <button type="button" class="btn btn-sm btn-danger" onclick="showDeleteModal('{{ task.id }}')"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
                     {% endfor %}
                 </div>
                 <div class="add-task-button">
-                    <a href="{{ url_for('main.add_task') }}" class="btn btn-primary btn-sm">+ Add Task</a>
+                    <a href="{{ url_for('tasks.add') }}" class="btn btn-primary btn-sm">+ Add Task</a>
                 </div>
             </div>
 
@@ -80,14 +80,14 @@
                             </span>
                             {% endif %}
                             <div class="task-actions">
-                                <a href="{{ url_for('main.edit_task', task_id=task.id) }}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
+                                <a href="{{ url_for('tasks.edit', task_id=task.id) }}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
                                 <button type="button" class="btn btn-sm btn-danger" onclick="showDeleteModal('{{ task.id }}')"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
                     {% endfor %}
                 </div>
                 <div class="add-task-button">
-                    <a href="{{ url_for('main.add_task') }}" class="btn btn-primary btn-sm">+ Add Task</a>
+                    <a href="{{ url_for('tasks.add') }}" class="btn btn-primary btn-sm">+ Add Task</a>
                 </div>
             </div>
 
@@ -118,14 +118,14 @@
                             </span>
                             {% endif %}
                             <div class="task-actions">
-                                <a href="{{ url_for('main.edit_task', task_id=task.id) }}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
+                                <a href="{{ url_for('tasks.edit', task_id=task.id) }}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
                                 <button type="button" class="btn btn-sm btn-danger" onclick="showDeleteModal('{{ task.id }}')"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
                     {% endfor %}
                 </div>
                 <div class="add-task-button">
-                    <a href="{{ url_for('main.add_task') }}" class="btn btn-primary btn-sm">+ Add Task</a>
+                    <a href="{{ url_for('tasks.add') }}" class="btn btn-primary btn-sm">+ Add Task</a>
                 </div>
             </div>
         </div>

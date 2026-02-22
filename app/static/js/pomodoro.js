@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to save completed Pomodoro session to database
     function savePomodoroSession(durationMinutes) {
-        fetch('/api/pomodoro/complete', {
+        fetch('/pomodoro/api/complete', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -296,7 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function deleteSession(sessionId) {
-        fetch(`/api/pomodoro/delete/${sessionId}`, {
+        fetch(`/pomodoro/api/delete/${sessionId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',

@@ -35,7 +35,7 @@
 
                     <!-- Action Buttons -->
                     <div class="d-grid gap-2">
-                        <form method="POST" action="{{ url_for('main.sync_existing_tasks') }}">
+                        <form method="POST" action="{{ url_for('calendar.sync_existing_tasks') }}">
                             <button type="submit" class="btn btn-success btn-lg w-100 mb-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" 
                                      class="bi bi-check-circle me-2" viewBox="0 0 16 16">
@@ -46,7 +46,7 @@
                             </button>
                         </form>
 
-                        <form method="POST" action="{{ url_for('main.skip_sync_existing_tasks') }}">
+                        <form method="POST" action="{{ url_for('calendar.skip_sync_existing_tasks') }}">
                             <button type="submit" class="btn btn-outline-secondary btn-lg w-100">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" 
                                      class="bi bi-skip-forward me-2" viewBox="0 0 16 16">

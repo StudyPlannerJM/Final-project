@@ -7,7 +7,7 @@
 
 {% block content %}
     <div class="form-container">
-        <form method="POST" action="{{ url_for('main.add_task') }}" novalidate>
+        <form method="POST" action="{{ url_for('tasks.add') }}" novalidate>
             {{ form.hidden_tag() }}
             <div class="form-group">
                 {{ form.title.label(class="form-label") }}

@@ -82,7 +82,7 @@ async function fetchCalendarData(date, view) {
     const dateStr = date.toISOString().split('T')[0];
 
     try {
-        const response = await fetch(`/api/calendar/events?date=${dateStr}&view=${view}`);
+        const response = await fetch(`/calendar/api/events?date=${dateStr}&view=${view}`);
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -115,7 +115,7 @@ async function fetchUpcomingEvents() {
     const todayStr = today.toISOString().split('T')[0];
 
     try {
-        const response = await fetch(`/api/calendar/events?date=${todayStr}&view=week`);
+        const response = await fetch(`/calendar/api/events?date=${todayStr}&view=week`);
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -390,7 +390,7 @@ function initializeEventHandlers() {
             end: `${formData.get('date')}T${formData.get('end_time')}:00`
         };
 
-        fetch('/api/calendar/event', {
+        fetch('/calendar/api/create_event', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

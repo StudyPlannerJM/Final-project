@@ -40,16 +40,16 @@
 
             <div class="connection-actions">
                 {% if calendar_connected %}
-                    <form method="POST" action="{{ url_for('main.sync_existing_tasks') }}" style="margin-bottom: 8px;">
+                    <form method="POST" action="{{ url_for('calendar.sync_existing_tasks') }}" style="margin-bottom: 8px;">
                         <button type="submit" class="btn-sync-mini" title="Sync all unsynced tasks">
                             <i class="fas fa-sync-alt"></i> Sync All Tasks
                         </button>
                     </form>
-                    <a href="{{ url_for('main.disconnect_google') }}" class="btn-disconnect-mini">
+                    <a href="{{ url_for('calendar.disconnect_google') }}" class="btn-disconnect-mini">
                         <i class="fas fa-unlink"></i> Disconnect
                     </a>
                 {% else %}
-                    <a href="{{ url_for('main.authorize_google') }}" class="btn-connect-mini">
+                    <a href="{{ url_for('calendar.authorize_google') }}" class="btn-connect-mini">
                         <i class="fas fa-link"></i> Connect Now
                     </a>
                 {% endif %}

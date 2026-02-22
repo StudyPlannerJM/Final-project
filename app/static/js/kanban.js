@@ -68,7 +68,7 @@ columns.forEach(column => {
  */
 function updateTaskStatus(taskId, newStatus, taskCard) {
     // Construct the URL for the backend route
-    const url = `/update_task_status/${taskId}/${newStatus}`;
+    const url = `/tasks/update_status/${taskId}/${newStatus}`;
 
     // Send POST request to backend
     fetch(url, {
