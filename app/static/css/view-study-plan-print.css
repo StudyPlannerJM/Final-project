@@ -1,0 +1,17 @@
+/* View Study Plan - Print Styles */
+@media print {
+    .sidebar, 
+    .top-header, 
+    .header-actions, 
+    .plan-actions {
+        display: none !important;
+    }
+    
+    .main-content {
+        padding: 0;
+    }
+    
+    .plan-content-section {
+        page-break-inside: avoid;
+    }
+}

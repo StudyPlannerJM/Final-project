@@ -85,7 +85,8 @@
     </div>
     
     {# Pagination Controls #}
-        {% if pagination.pages &gt; 1 %}
+        {% if pagination.pages > 1 %}
+    
         <div class="pagination">
             {% if pagination.has_prev %}
             <a href="{{ url_for('main.my_pomodoro_sessions', page=pagination.prev_num) }}" class="pagination-btn">

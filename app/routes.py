@@ -238,7 +238,7 @@ def tasks():
     
     # STEP 4: Pass all three lists to the template for display
     return render_template(
-        'tasks.html', 
+        'tasks/tasks.html', 
         title='Tasks', 
         todo_tasks=todo_tasks,
         doing_tasks=doing_tasks,
@@ -349,7 +349,7 @@ def add_task():
         return redirect(url_for('main.tasks'))
 
     # GET request: Show empty form
-    return render_template('add_task.html', title='Add New Task', form=form)
+    return render_template('tasks/add_task.html', title='Add New Task', form=form)
 
 @main.route('/edit_task/<int:task_id>', methods=['GET', 'POST'])
 @login_required
@@ -414,7 +414,7 @@ def edit_task(task_id):
         flash("Your task has been updated!", "success")
         return redirect(url_for("main.tasks"))
 
-    return render_template("edit_task.html", title="Edit Task", form=form, task=task)
+    return render_template("tasks/edit_task.html", title="Edit Task", form=form, task=task)
 
 
 @main.route('/delete_task/<int:task_id>', methods=['POST'])
@@ -475,7 +475,7 @@ def pomodoro():
         .limit(3)\
         .all()
     
-    return render_template('pomodoro.html', recent_sessions=recent_sessions, title="Pomodoro Timer")
+    return render_template('pomodoro/pomodoro.html', recent_sessions=recent_sessions, title="Pomodoro Timer")
 
 @main.route('/my-pomodoro-sessions')
 @login_required
@@ -498,7 +498,7 @@ def my_pomodoro_sessions():
     completed_sessions = len([s for s in all_sessions if s.completed])
     total_minutes = sum([s.duration_minutes for s in all_sessions if s.completed])
     
-    return render_template('my_pomodoro_sessions.html', 
+    return render_template('pomodoro/my_pomodoro_sessions.html', 
                          sessions=sessions,
                          pagination=pagination,
                          total_sessions=total_sessions,
@@ -616,7 +616,7 @@ def decks():
         # Add flashcard count to each deck
         for deck in user_decks:
             deck.flashcard_count = deck.flashcards.count()
-        return render_template("decks.html", title="My Decks", decks=user_decks)
+        return render_template("flashcards/decks.html", title="My Decks", decks=user_decks)
     except Exception as e:
         current_app.logger.error(f"Error loading decks: {str(e)}")
         flash("Error loading decks", "danger")
@@ -645,7 +645,7 @@ def add_deck():
             current_app.logger.error(f"Error creating deck: {str(e)}")
             flash("Error creating deck", "danger")
     
-    return render_template("add_deck.html", title="Create Deck", form=form)
+    return render_template("flashcards/add_deck.html", title="Create Deck", form=form)
 
 
 @main.route("/edit_deck/<int:deck_id>", methods=["GET", "POST"])
@@ -678,7 +678,7 @@ def edit_deck(deck_id):
             current_app.logger.error(f"Error updating deck: {str(e)}")
             flash("Error updating deck", "danger")
     
-    return render_template("edit_deck.html", title="Edit Deck", form=form, deck=deck)
+    return render_template("flashcards/edit_deck.html", title="Edit Deck", form=form, deck=deck)
 
 
 @main.route("/delete_deck/<int:deck_id>", methods=["POST"])
@@ -722,7 +722,7 @@ def flashcards():
         # If no deck selected, show deck grid view
         if not deck_id:
             return render_template(
-                "flashcards.html",
+                "flashcards/flashcards.html",
                 title="Flashcards",
                 decks=user_decks,
                 show_decks=True
@@ -736,7 +736,7 @@ def flashcards():
         )
         
         return render_template(
-            "flashcards.html",
+            "flashcards/flashcards.html",
             title=f"{selected_deck.name} - Flashcards",
             flashcards=user_flashcards,
             decks=user_decks,
@@ -780,7 +780,7 @@ def add_flashcard():
             current_app.logger.error(f"Error creating flashcard: {str(e)}")
             flash("Error creating flashcard", "danger")
     
-    return render_template("add_flashcards.html", title="Add Flashcard", form=form)
+    return render_template("flashcards/add_flashcards.html", title="Add Flashcard", form=form)
 
 @main.route("/edit_flashcard/<int:flashcard_id>", methods=["GET", "POST"])
 @login_required
@@ -816,7 +816,7 @@ def edit_flashcard(flashcard_id):
             flash("Error updating flashcard", "danger")
     
     return render_template(
-        "edit_flashcards.html",
+        "flashcards/edit_flashcards.html",
         title="Edit Flashcard",
         form=form,
         flashcard=flashcard
@@ -1004,7 +1004,7 @@ def calendar_sync_prompt():
         flash('Please connect Google Calendar first.', 'warning')
         return redirect(url_for('main.schedule'))
     
-    return render_template('calendar_sync_prompt.html', 
+    return render_template('calendar/calendar_sync_prompt.html', 
                          title='Sync Tasks to Calendar',
                          count=count)
 
@@ -1077,7 +1077,7 @@ def schedule():
 
     # Pass minimal data to template - JavaScript will load the rest
     return render_template(
-        'schedule.html',
+        'calendar/schedule.html',
         title='Schedule',
         calendar_connected=calendar_connected,
         target_date=target_date,
@@ -1427,7 +1427,7 @@ def summarizer():
         author=current_user
     ).order_by(Summary.date_created.desc()).all()
     return render_template(
-        'summarizer.html', title='Summarizer', summaries=user_summaries
+        'summarizer/summarizer.html', title='Summarizer', summaries=user_summaries
     )
 
 
@@ -1509,7 +1509,7 @@ def upload_summary():
             if os.path.exists(file_path):
                 os.remove(file_path)
     
-    return render_template('upload_summary.html', title='Upload Document')
+    return render_template('summarizer/upload_summary.html', title='Upload Document')
 
 
 @main.route('/view_summary/<int:summary_id>')
@@ -1524,7 +1524,7 @@ def view_summary(summary_id):
         return redirect(url_for('main.summarizer'))
     
     return render_template(
-        'view_summary.html', title='View Summary', summary=summary
+        'summarizer/view_summary.html', title='View Summary', summary=summary
     )
 
 
@@ -1590,7 +1590,7 @@ def ai_plan_generator():
         .order_by(StudyPlan.created_at.desc()).limit(5).all()
     
     return render_template(
-        'ai_plan_generator.html',
+        'ai_planner/ai_plan_generator.html',
         title='AI Study Plan Generator',
         form=form,
         previous_plans=previous_plans
@@ -1612,7 +1612,7 @@ def view_study_plan(plan_id):
     formatted_content = format_plan_for_display(plan.plan_content)
     
     return render_template(
-        'view_study_plan.html',
+        'ai_planner/view_study_plan.html',
         title=f'Study Plan: {plan.subject}',
         plan=plan,
         formatted_content=formatted_content
@@ -1627,7 +1627,7 @@ def my_study_plans():
         .order_by(StudyPlan.created_at.desc()).all()
     
     return render_template(
-        'my_study_plans.html',
+        'ai_planner/my_study_plans.html',
         title='My Study Plans',
         plans=plans
     )

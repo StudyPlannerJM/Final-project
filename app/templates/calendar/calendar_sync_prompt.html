@@ -1,4 +1,9 @@
+<!doctype html>
 {% extends "base.html" %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/calendar-sync-prompt.css') }}">
+{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
@@ -64,31 +69,4 @@
         </div>
     </div>
 </div>
-
-<style>
-.card {
-    border: none;
-    border-radius: 15px;
-}
-
-.btn-lg {
-    padding: 12px 24px;
-    font-size: 1.1rem;
-    border-radius: 8px;
-}
-
-.btn-success {
-    background-color: #28a745;
-    border: none;
-}
-
-.btn-success:hover {
-    background-color: #218838;
-}
-
-.btn-outline-secondary:hover {
-    background-color: #6c757d;
-    color: white;
-}
-</style>
 {% endblock %}
