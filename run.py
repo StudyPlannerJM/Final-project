@@ -18,13 +18,41 @@ with app.app_context():
         admin = User(
             username="admin",  # type: ignore
             email="admin@admin.com",  # type: ignore
-            password_hash=generate_password_hash("admin")  # type: ignore
+            password_hash=generate_password_hash("admin"),  # type: ignore
+            is_admin=True  # type: ignore
         )
         db.session.add(admin)
         db.session.commit()
         print("Admin created: admin@admin.com / admin")
+    else:
+        # Ensure existing admin has is_admin flag
+        if not admin.is_admin:
+            admin.is_admin = True
+            db.session.commit()
+            print("Admin user updated with admin privileges.")
+
+    # Create test student users
+    test_users = [
+        {"username": "student1", "email": "student1@study.com"},
+        {"username": "student2", "email": "student2@study.com"},
+        {"username": "student3", "email": "student3@study.com"},
+    ]
+    for u_data in test_users:
+        existing = User.query.filter_by(username=u_data["username"]).first()
+        if not existing:
+            student = User(
+                username=u_data["username"],  # type: ignore
+                email=u_data["email"],  # type: ignore
+                is_admin=False  # type: ignore
+            )
+            student.set_password("user123")
+            db.session.add(student)
+            print(f"Test user created: {u_data['email']} / user123")
+    db.session.commit()
+
 if __name__ == '__main__':
     try:
-        app.run(debug=False)
+        app.run(debug=True)
     except KeyboardInterrupt:
         print("\nServer stopped gracefully.")
+
