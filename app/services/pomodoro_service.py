@@ -2,7 +2,7 @@
 Pomodoro service for business logic related to pomodoro sessions
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from app import db
 from app.models import PomodoroSession, StudySession, Task, User
 from app.exceptions import (
@@ -32,7 +32,7 @@ class PomodoroService:
             NotFoundError: If user or task not found
         """
         # Validate user exists
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if not user:
             raise NotFoundError(f"User with id {user_id} not found")
         
@@ -42,14 +42,14 @@ class PomodoroService:
         
         # If task_id provided, validate it exists and belongs to user
         if task_id:
-            task = Task.query.get(task_id)
+            task = db.session.get(Task, task_id)
             if not task:
                 raise NotFoundError(f"Task with id {task_id} not found")
             if task.user_id != user_id:
                 raise AuthorizationError("You don't have permission to link this task")
         
         # Calculate start and end times
-        end_time = datetime.utcnow()
+        end_time = datetime.now(timezone.utc)
         start_time = end_time - timedelta(minutes=duration)
         
         # Create Pomodoro session
@@ -80,7 +80,7 @@ class PomodoroService:
 
         # Update task's actual time
         if task_id:
-            task = Task.query.get(task_id)
+            task = db.session.get(Task, task_id)
             if task and task.user_id == user_id:
                 task.actual_minutes = (task.actual_minutes or 0) + duration
 
@@ -104,7 +104,7 @@ class PomodoroService:
             NotFoundError: If session not found
             AuthorizationError: If user doesn't own the session
         """
-        session = PomodoroSession.query.get(session_id)
+        session = db.session.get(PomodoroSession, session_id)
         if not session:
             raise NotFoundError(f"Session with id {session_id} not found")
         
@@ -128,7 +128,7 @@ class PomodoroService:
         Raises:
             NotFoundError: If user not found
         """
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if not user:
             raise NotFoundError(f"User with id {user_id} not found")
         
@@ -154,7 +154,7 @@ class PomodoroService:
         Returns:
             Total minutes studied today
         """
-        today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+        today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
 
         total = db.session.query(db.func.sum(StudySession.duration_minutes)).filter(
             StudySession.user_id == user_id,

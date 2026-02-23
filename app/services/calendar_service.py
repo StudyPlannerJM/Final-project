@@ -68,7 +68,7 @@ class CalendarService:
         Raises:
             NotFoundError: If user not found
         """
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if not user:
             raise NotFoundError(f"User with id {user_id} not found")
         
@@ -269,7 +269,7 @@ class CalendarService:
             ValidationError: If calendar not connected or sync fails
         """
         # Get the task from database
-        task = Task.query.get(task_id)
+        task = db.session.get(Task, task_id)
         if not task:
             raise NotFoundError(f"Task with id {task_id} not found")
 
@@ -278,7 +278,7 @@ class CalendarService:
             raise AuthorizationError("You don't have permission to sync this task")
 
         # Check if Google Calendar is connected
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if not user.calendar_sync_enabled:
             raise ValidationError("Google Calendar not connected")
 
@@ -327,7 +327,7 @@ class CalendarService:
             ValidationError: If task not synced or removal fails
         """
         # Get the task from database
-        task = Task.query.get(task_id)
+        task = db.session.get(Task, task_id)
         if not task:
             raise NotFoundError(f"Task with id {task_id} not found")
 
@@ -340,7 +340,7 @@ class CalendarService:
             raise ValidationError("Task not synced to calendar")
 
         # Get calendar service connection
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         service = get_calendar_service(user)
         if not service:
             raise ValidationError("Failed to connect to Google Calendar")

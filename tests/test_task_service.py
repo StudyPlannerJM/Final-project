@@ -1,7 +1,7 @@
 """Tests for task service functionality"""
 
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from app.services.task_service import TaskService
 from app.exceptions import ValidationError, AuthorizationError, NotFoundError
 from app.models import Task, User
@@ -42,7 +42,7 @@ class TestTaskService:
     
     def test_create_task_with_due_date(self, db_session, test_user):
         """Test task creation with due date"""
-        due_date = datetime.utcnow() + timedelta(days=7)
+        due_date = datetime.now(timezone.utc) + timedelta(days=7)
         task = TaskService.create_task(
             user_id=test_user.id,
             title="Task with deadline",
@@ -51,7 +51,7 @@ class TestTaskService:
             category_id=None
         )
         
-        assert task.due_date == due_date
+        assert task.due_date == due_date.replace(tzinfo=None)
     
     def test_create_task_short_title(self, test_user):
         """Test task creation with too short title"""
@@ -217,7 +217,8 @@ class TestTaskService:
         TaskService.delete_task(task_id, test_user.id)
         
         # Verify task is deleted
-        deleted_task = Task.query.get(task_id)
+        from app import db
+        deleted_task = db.session.get(Task, task_id)
         assert deleted_task is None
     
     def test_delete_task_unauthorized(self, db_session, test_user, test_user_2):

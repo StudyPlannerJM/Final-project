@@ -47,7 +47,7 @@ class SummaryService:
             NotFoundError: If user not found
         """
         # Validate user exists
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if not user:
             raise NotFoundError(f"User with id {user_id} not found")
         
@@ -139,7 +139,7 @@ class SummaryService:
             NotFoundError: If summary not found
             AuthorizationError: If user doesn't own the summary
         """
-        summary = Summary.query.get(summary_id)
+        summary = db.session.get(Summary, summary_id)
         if not summary:
             raise NotFoundError(f"Summary with id {summary_id} not found")
         
@@ -165,7 +165,7 @@ class SummaryService:
             NotFoundError: If summary not found
             AuthorizationError: If user doesn't own the summary
         """
-        summary = Summary.query.get(summary_id)
+        summary = db.session.get(Summary, summary_id)
         if not summary:
             raise NotFoundError(f"Summary with id {summary_id} not found")
         
@@ -188,7 +188,7 @@ class SummaryService:
         Raises:
             NotFoundError: If user not found
         """
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if not user:
             raise NotFoundError(f"User with id {user_id} not found")
         

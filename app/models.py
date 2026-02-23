@@ -1,5 +1,5 @@
 from app import db
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import event
@@ -32,7 +32,7 @@ class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
-    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+    date_created = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     due_date = db.Column(db.DateTime, nullable=True)   
        
     # Category column
@@ -70,7 +70,7 @@ class Flashcard(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     question = db.Column(db.Text, nullable=False)
     answer = db.Column(db.Text, nullable=False)
-    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+    date_created = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     deck_id = db.Column(db.Integer, db.ForeignKey('deck.id'), nullable=True)
     
@@ -110,7 +110,7 @@ class Deck(db.Model):
     
     # Metadata
     is_default = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     
     # Relationships
     owner = db.relationship('User', backref=db.backref('decks', lazy='dynamic'))
@@ -142,7 +142,7 @@ class Summary(db.Model):
     extracted_text = db.Column(db.Text, nullable=True)
     summary_text = db.Column(db.Text, nullable=True)
     file_type = db.Column(db.String(20), nullable=False)  # 'word', 'pdf', 'ocr'
-    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+    date_created = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     author = db.relationship(
         "User", backref=db.backref("summaries", lazy=True)
@@ -179,7 +179,7 @@ class Category(db.Model):
 
     # Metadata
     is_default = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     deleted_at = db.Column(db.DateTime, nullable=True)  # Soft delete
 
     # Relationship to user
@@ -220,7 +220,7 @@ class StudyPlan(db.Model):
     plan_content = db.Column(db.Text, nullable=False)
     
     # Metadata
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     
     # Relationship
     user = db.relationship('User', backref=db.backref('study_plans', lazy='dynamic'))
@@ -249,7 +249,7 @@ class StudySession(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     # Time tracking
-    start_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    start_time = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     end_time = db.Column(db.DateTime, nullable=True)
     duration_minutes = db.Column(db.Integer, nullable=True)  # Calculated on end
 
@@ -261,7 +261,7 @@ class StudySession(db.Model):
     notes = db.Column(db.Text, nullable=True)
     productivity_rating = db.Column(db.Integer, nullable=True)  # 1-5 stars
 
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     user = db.relationship('User', backref=db.backref('study_sessions', lazy='dynamic'))
@@ -302,7 +302,7 @@ class PomodoroSession(db.Model):
     break_duration_minutes = db.Column(db.Integer, default=5)
 
     # Time
-    start_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    start_time = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     end_time = db.Column(db.DateTime, nullable=True)
     completed = db.Column(db.Boolean, default=False)  # Did user finish or abandon?
 
@@ -312,7 +312,7 @@ class PomodoroSession(db.Model):
     study_session_id = db.Column(db.Integer, db.ForeignKey('study_session.id'), nullable=True)
 
     notes = db.Column(db.Text, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     user = db.relationship('User', backref=db.backref('pomodoro_sessions', lazy='dynamic'))

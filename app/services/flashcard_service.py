@@ -41,7 +41,7 @@ class FlashcardService:
             raise ValidationError("Answer is required")
         
         # Validate user exists
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if not user:
             raise NotFoundError(f"User with id {user_id} not found")
         
@@ -83,7 +83,7 @@ class FlashcardService:
             NotFoundError: If flashcard not found
             AuthorizationError: If user doesn't own the flashcard
         """
-        flashcard = Flashcard.query.get(flashcard_id)
+        flashcard = db.session.get(Flashcard, flashcard_id)
         
         if not flashcard:
             raise NotFoundError(f"Flashcard with id {flashcard_id} not found")
@@ -194,7 +194,7 @@ class FlashcardService:
             NotFoundError: If user or deck not found
         """
         # Validate user exists
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if not user:
             raise NotFoundError(f"User with id {user_id} not found")
         

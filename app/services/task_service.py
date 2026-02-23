@@ -42,7 +42,7 @@ class TaskService:
             )
         
         # Validate user exists
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if not user:
             raise NotFoundError(f"User with id {user_id} not found")
         
@@ -80,7 +80,7 @@ class TaskService:
             ValidationError: If status is invalid
         """
         # Get task
-        task = Task.query.get(task_id)
+        task = db.session.get(Task, task_id)
         if not task:
             raise NotFoundError(f"Task with id {task_id} not found")
         
@@ -140,7 +140,7 @@ class TaskService:
             NotFoundError: If task not found
             AuthorizationError: If user doesn't own the task
         """
-        task = Task.query.get(task_id)
+        task = db.session.get(Task, task_id)
         if not task:
             raise NotFoundError(f"Task with id {task_id} not found")
         
@@ -171,7 +171,7 @@ class TaskService:
             AuthorizationError: If user doesn't own the task
             ValidationError: If validation fails
         """
-        task = Task.query.get(task_id)
+        task = db.session.get(Task, task_id)
         if not task:
             raise NotFoundError(f"Task with id {task_id} not found")
         
