@@ -33,7 +33,7 @@ class StudyPlanService:
             NotFoundError: If user not found
         """
         # Validate user exists
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if not user:
             raise NotFoundError(f"User with id {user_id} not found")
         
@@ -104,7 +104,7 @@ class StudyPlanService:
             NotFoundError: If plan not found
             AuthorizationError: If user doesn't own the plan
         """
-        plan = StudyPlan.query.get(plan_id)
+        plan = db.session.get(StudyPlan, plan_id)
         if not plan:
             raise NotFoundError(f"Study plan with id {plan_id} not found")
         
@@ -130,7 +130,7 @@ class StudyPlanService:
             NotFoundError: If plan not found
             AuthorizationError: If user doesn't own the plan
         """
-        plan = StudyPlan.query.get(plan_id)
+        plan = db.session.get(StudyPlan, plan_id)
         if not plan:
             raise NotFoundError(f"Study plan with id {plan_id} not found")
         
@@ -154,7 +154,7 @@ class StudyPlanService:
         Raises:
             NotFoundError: If user not found
         """
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if not user:
             raise NotFoundError(f"User with id {user_id} not found")
         

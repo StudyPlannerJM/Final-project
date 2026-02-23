@@ -10,7 +10,7 @@ from google.oauth2.credentials import Credentials  # Handles Google authenticati
 from google_auth_oauthlib.flow import Flow  # Manages the OAuth2 login flow
 from googleapiclient.discovery import build  # Creates the Google Calendar API service
 from googleapiclient.errors import HttpError  # Catches errors from Google API
-from datetime import datetime, timedelta  # For handling dates and times
+from datetime import datetime, timedelta, timezone  # For handling dates and times
 from flask import url_for  # Generates URLs for my Flask app
 
 # IMPORTANT: Allow OAuth2 to work over HTTP for local development
@@ -50,7 +50,7 @@ def get_google_auth_flow():
     flow = Flow.from_client_secrets_file(
         CLIENT_SECRET_FILE,  # My app's credentials
         scopes=SCOPES,  # What permissions I'm asking for
-        redirect_uri=url_for('main.oauth2callback', _external=True)  # Where Google sends user back
+        redirect_uri=url_for('calendar.oauth2callback', _external=True)  # Where Google sends user back
     )
     return flow
 
@@ -300,7 +300,7 @@ def get_upcoming_events(service, max_results=10):
         # STEP 1: Get current time in ISO format with 'Z' at the end
         # 'Z' means UTC time (Universal Coordinated Time)
         # Example: "2024-01-15T10:30:00Z"
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         now_iso = now.isoformat() + 'Z'
         
         # STEP 2: Calculate 7 days from now

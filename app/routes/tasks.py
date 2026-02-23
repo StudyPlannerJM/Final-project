@@ -154,7 +154,7 @@ def edit(task_id):
     # On GET request, pre-select the category
     if request.method == "GET":
         if task.category_id:
-            form.category.data = Category.query.get(task.category_id)
+            form.category.data = db.session.get(Category, task.category_id)
 
     if form.validate_on_submit():
         task.title = form.title.data
@@ -181,13 +181,10 @@ def edit(task_id):
                 db.session.flush()
 
             task.category_id = category.id
-            task.category = category.name  # Keep old field in sync
         elif selected_category:
             task.category_id = selected_category.id
-            task.category = selected_category.name
         else:
             task.category_id = None
-            task.category = None
 
         db.session.commit()
 

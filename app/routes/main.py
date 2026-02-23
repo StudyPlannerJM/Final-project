@@ -1,7 +1,7 @@
 """
 Main Blueprint - Dashboard and general routes
 """
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from flask import Blueprint, render_template
 from flask_login import login_required, current_user
 from app.models import Task, StudySession, PomodoroSession, Deck, Flashcard
@@ -30,7 +30,7 @@ def dashboard():
     ).limit(5).all()
 
     # NEW: Get study statistics
-    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
     week_start = today_start - timedelta(days=7)
 
     # Today's study time

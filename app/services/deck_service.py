@@ -39,7 +39,7 @@ class DeckService:
             raise ValidationError("Deck name must not exceed 100 characters")
         
         # Validate user exists
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if not user:
             raise NotFoundError(f"User with id {user_id} not found")
         
@@ -102,7 +102,7 @@ class DeckService:
             NotFoundError: If deck not found
             AuthorizationError: If user doesn't own the deck
         """
-        deck = Deck.query.get(deck_id)
+        deck = db.session.get(Deck, deck_id)
         
         if not deck:
             raise NotFoundError(f"Deck with id {deck_id} not found")
