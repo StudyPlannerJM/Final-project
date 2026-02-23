@@ -18,6 +18,11 @@
 </head>
 
 <body>
+    <!-- Dashboard Decorative Background Shapes -->
+    <div class="dashboard-bg-shape shape1"></div>
+    <div class="dashboard-bg-shape shape2"></div>
+    <div class="dashboard-bg-shape shape3"></div>
+
     <div class="wrapper">
         <nav class="sidebar">
             <div class="sidebar-header">
@@ -71,12 +76,22 @@
                     <h1>{% block page_title %}{% endblock %}</h1>
                 </div>
                 <div class="header-right">
-                    <div>
-                        <span>Hello, {{ current_user.username }}!</span>
-                        <a class="btn btn-danger btn-sm" href="{{ url_for('auth.logout') }}">Logout</a>
+                    <div class="user-greeting">
+                        <img class="user-avatar" src="https://ui-avatars.com/api/?name={{ current_user.username|urlencode }}&background=6c63ff&color=fff&rounded=true&size=32" alt="avatar">
+                        <span class="greeting-text">
+                            Hello, {{ current_user.username }}
+                            {% if current_user.is_admin %}
+                                <span class="admin-badge">Admin</span>
+                            {% endif %}
+                        </span>
                     </div>
+                    <a class="logout-btn styled-logout-btn" href="{{ url_for('auth.logout') }}">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
                     <div class="theme-toggle moon">
-                        <button id="theme-toggle" class="theme-btn"><i class="fas fa-moon"></i></button>
+                        <button id="theme-toggle" class="theme-btn">
+                            <i class="fas fa-moon"></i>
+                        </button>
                     </div>
                 </div>
             </header>
