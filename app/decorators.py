@@ -6,6 +6,25 @@ from flask import abort
 from flask_login import current_user
 
 
+def admin_required(f):
+    """
+    Decorator to restrict a route to admin users only.
+    Must be used after @login_required.
+
+    Usage:
+        @login_required
+        @admin_required
+        def admin_only_view():
+            ...
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_admin:
+            abort(403, description='Administrator access required.')
+        return f(*args, **kwargs)
+    return decorated_function
+
+
 def require_resource_ownership(model_class, id_param='id', user_field='user_id'):
     """
     Decorator to check if current user owns the resource.
