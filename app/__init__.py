@@ -40,7 +40,8 @@ def create_app(config_name=None):
         pomodoro_bp,
         calendar_bp,
         summarizer_bp,
-        ai_planner_bp
+        ai_planner_bp,
+        admin_bp
     )
 
     # Register blueprints
@@ -52,5 +53,6 @@ def create_app(config_name=None):
     app.register_blueprint(calendar_bp)  # /calendar
     app.register_blueprint(summarizer_bp)  # /summarizer
     app.register_blueprint(ai_planner_bp)  # /ai-planner
+    app.register_blueprint(admin_bp)  # /admin
     
     return app

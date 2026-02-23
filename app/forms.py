@@ -4,7 +4,7 @@ from wtforms import (
     BooleanField, SubmitField, TextAreaField, IntegerField, FloatField
 )
 from wtforms.validators import (
-    DataRequired, Email, EqualTo, ValidationError, Optional, NumberRange
+    DataRequired, Email, EqualTo, ValidationError, Optional, NumberRange, Length
 )
 from wtforms_sqlalchemy.fields import QuerySelectField
 from app.models import Deck, User, Category
@@ -141,3 +141,56 @@ class DeckForm(FlaskForm):
         render_kw={"placeholder": "e.g., fa-brain, fa-book, fa-code"}
     )
     submit = SubmitField('Save Deck')
+
+
+class AdminCreateUserForm(FlaskForm):
+    """Form for admin to create a new user"""
+    username = StringField('Username', validators=[DataRequired(), Length(min=3, max=64)])
+    email = StringField('Email', validators=[DataRequired(), Email(), Length(max=120)])
+    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
+    password2 = PasswordField(
+        'Repeat Password',
+        validators=[DataRequired(), EqualTo('password')]
+    )
+    is_admin = BooleanField('Admin Privileges')
+    submit = SubmitField('Create User')
+
+    def validate_username(self, username):
+        user = User.query.filter_by(username=username.data).first()
+        if user is not None:
+            raise ValidationError('Please use a different username.')
+
+    def validate_email(self, email):
+        user = User.query.filter_by(email=email.data).first()
+        if user is not None:
+            raise ValidationError('Please use a different email address.')
+
+
+class AdminEditUserForm(FlaskForm):
+    """Form for admin to edit an existing user"""
+    username = StringField('Username', validators=[DataRequired(), Length(min=3, max=64)])
+    email = StringField('Email', validators=[DataRequired(), Email(), Length(max=120)])
+    password = PasswordField('New Password (leave blank to keep current)', validators=[Optional(), Length(min=6)])
+    password2 = PasswordField(
+        'Repeat New Password',
+        validators=[EqualTo('password')]
+    )
+    is_admin = BooleanField('Admin Privileges')
+    submit = SubmitField('Save Changes')
+
+    def __init__(self, original_username, original_email, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.original_username = original_username
+        self.original_email = original_email
+
+    def validate_username(self, username):
+        if username.data != self.original_username:
+            user = User.query.filter_by(username=username.data).first()
+            if user is not None:
+                raise ValidationError('Please use a different username.')
+
+    def validate_email(self, email):
+        if email.data != self.original_email:
+            user = User.query.filter_by(email=email.data).first()
+            if user is not None:
+                raise ValidationError('Please use a different email address.')
