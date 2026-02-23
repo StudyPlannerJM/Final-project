@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Study Planner{% endblock %}
+
+{% block head_extra %}
+<style>
+    .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .users-table-wrapper {
+        background: var(--card-bg, #fff);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,.08);
+        overflow-x: auto;
+    }
+
+    .users-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: .95rem;
+    }
+
+    .users-table thead tr {
+        background: var(--primary-color, #6750a4);
+        color: #fff;
+    }
+
+    .users-table th {
+        padding: .75rem 1rem;
+        text-align: left;
+        color: #fff;
+    }
+
+    .users-table td {
+        padding: .75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color, #e9ecef);
+        color: #000;
+    }
+
+    .users-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .users-table tbody tr:hover {
+        background: var(--hover-bg, #f5f0ff);
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        padding: .2rem .6rem;
+        border-radius: 20px;
+        font-size: .78rem;
+        font-weight: 600;
+    }
+
+    .badge-admin {
+        background: #ede7f6;
+        color: #6200ea;
+    }
+
+    .badge-user {
+        background: #e3f2fd;
+        color: #1565c0;
+    }
+
+    .action-cell {
+        display: flex;
+        gap: .5rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-icon {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        padding: .35rem .75rem;
+        border-radius: 6px;
+        font-size: .82rem;
+        font-weight: 500;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        transition: opacity .2s;
+    }
+
+    .btn-icon:hover { opacity: .85; }
+
+    .btn-edit   { background: #e3f2fd; color: #1565c0; }
+    .btn-delete { background: #fce4ec; color: #c62828; }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--muted-color, #888);
+    }
+
+    .empty-state i { font-size: 3rem; margin-bottom: 1rem; display: block; }
+</style>
+{% endblock %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="admin-header">
+    <p style="margin:0; color: var(--muted-color, #888);">
+        Total users: <strong>{{ users | length }}</strong>
+    </p>
+    <a href="{{ url_for('admin.create_user') }}" class="btn btn-primary">
+        <i class="fas fa-user-plus"></i> Add New User
+    </a>
+</div>
+
+<div class="users-table-wrapper">
+    {% if users %}
+    <table class="users-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>
+                    <i class="fas fa-user-circle" style="margin-right:.4rem; opacity:.6;"></i>
+                    {{ user.username }}
+                    {% if user.id == current_user.id %}
+                        <small style="color: var(--muted-color, #888);">(you)</small>
+                    {% endif %}
+                </td>
+                <td>{{ user.email }}</td>
+                <td>
+                    {% if user.is_admin %}
+                        <span class="badge badge-admin"><i class="fas fa-shield-alt"></i> Admin</span>
+                    {% else %}
+                        <span class="badge badge-user"><i class="fas fa-user"></i> User</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="action-cell">
+                        <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn-icon btn-edit">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        {% if user.id != current_user.id %}
+                        <form action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="post"
+                              onsubmit="return confirm('Delete user \'{{ user.username }}\'? This action cannot be undone.');">
+                            <button type="submit" class="btn-icon btn-delete">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-users"></i>
+        <p>No users found.</p>
+        <a href="{{ url_for('admin.create_user') }}" class="btn btn-primary">Add the first user</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

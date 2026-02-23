@@ -51,6 +51,12 @@
                     <a href="{{ url_for('ai_planner.generator') }}" class="nav-link"><i
                             class="fas fa-brain"></i><span>AI Plan Generator</span></a>
                 </li>
+                {% if current_user.is_authenticated and current_user.is_admin %}
+                <li class="nav-item">
+                    <a href="{{ url_for('admin.manage_users') }}" class="nav-link"><i
+                            class="fas fa-users-cog"></i><span>Manage Users</span></a>
+                </li>
+                {% endif %}
                 <li class="nav-item">
                     <a href="{{ url_for('main.settings') }}" class="nav-link"><i
                             class="fas fa-cog"></i><span>Settings</span></a>

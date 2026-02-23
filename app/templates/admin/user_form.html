@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Study Planner{% endblock %}
+
+{% block head_extra %}
+<style>
+    .form-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 2rem;
+        max-width: 560px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.08);
+        color: #000;
+    }
+
+    .form-card h2 {
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        font-size: 1.25rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: .4rem;
+        font-size: .9rem;
+        color: #000;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="password"] {
+        width: 100%;
+        padding: .55rem .85rem;
+        border: 1px solid var(--border-color, #ddd);
+        border-radius: 8px;
+        font-size: .95rem;
+        background: #fff !important;
+        color: #000 !important;
+        box-sizing: border-box;
+        transition: border-color .2s;
+    }
+
+    /* Override browser autofill dark styling */
+    .form-group input:-webkit-autofill,
+    .form-group input:-webkit-autofill:hover,
+    .form-group input:-webkit-autofill:focus {
+        -webkit-text-fill-color: #000 !important;
+        -webkit-box-shadow: 0 0 0px 1000px #fff inset !important;
+        box-shadow: 0 0 0px 1000px #fff inset !important;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: var(--primary-color, #6750a4);
+    }
+
+    .form-check {
+        display: flex;
+        align-items: center;
+        gap: .6rem;
+        margin-bottom: 1.25rem;
+        color: #000;
+    }
+
+    .form-check input[type="checkbox"] {
+        width: 1.1rem;
+        height: 1.1rem;
+        accent-color: var(--primary-color, #6750a4);
+    }
+
+    .field-error {
+        color: #c62828;
+        font-size: .82rem;
+        margin-top: .3rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: .75rem;
+        margin-top: 1.75rem;
+        flex-wrap: wrap;
+    }
+</style>
+{% endblock %}
+
+{% block page_title %}{{ title }}{% if action == 'edit' and user %} — {{ user.username }}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="form-card" style="margin: 0 auto;">
+    <form method="post" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="form-group">
+            {{ form.username.label }}
+            {{ form.username(class="") }}
+            {% for error in form.username.errors %}
+                <div class="field-error">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.email.label }}
+            {{ form.email(class="") }}
+            {% for error in form.email.errors %}
+                <div class="field-error">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.password.label }}
+            {{ form.password(class="") }}
+            {% for error in form.password.errors %}
+                <div class="field-error">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.password2.label }}
+            {{ form.password2(class="") }}
+            {% for error in form.password2.errors %}
+                <div class="field-error">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-check">
+            {{ form.is_admin() }}
+            {{ form.is_admin.label }}
+        </div>
+
+        <div class="form-actions">
+            {{ form.submit(class="btn btn-primary") }}
+            <a href="{{ url_for('admin.manage_users') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
