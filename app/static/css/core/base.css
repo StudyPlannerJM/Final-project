@@ -12,7 +12,36 @@ body {
     min-height: 100vh;
     transition: background-color 0.3s ease, color 0.3s ease;
     /* Modern gradient background */
-    background-color: var(--bg-color-primary);
+    background: var(--dashboard-gradient);
+    .dashboard-bg-shape {
+        position: absolute;
+        z-index: 0;
+        border-radius: 50%;
+        filter: blur(60px);
+        opacity: 0.25;
+        pointer-events: none;
+    }
+    .dashboard-bg-shape.shape1 {
+        width: 400px;
+        height: 400px;
+        background: var(--dashboard-shape1);
+        top: -120px;
+        left: -120px;
+    }
+    .dashboard-bg-shape.shape2 {
+        width: 300px;
+        height: 300px;
+        background: var(--dashboard-shape2);
+        bottom: 60px;
+        right: -100px;
+    }
+    .dashboard-bg-shape.shape3 {
+        width: 200px;
+        height: 200px;
+        background: var(--dashboard-shape3);
+        top: 60%;
+        left: 60vw;
+    }
     position: relative;
     overflow-x: hidden;
 }
@@ -26,6 +55,8 @@ body {
 }
 
 .main-content {
+        position: relative;
+        z-index: 1;
     flex-grow: 1;
     padding: 20px;
     transition: all 0.3s ease;

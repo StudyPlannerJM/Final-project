@@ -15,11 +15,11 @@
     --sidebar-bg: #2c3e50;
     --sidebar-text: #ecf0f1;
     --sidebar-hover: #34495e;
-    /* Dashboard soft background */
-    --dashboard-gradient: linear-gradient(120deg, #f8fafc 0%, #e0e7ff 100%);
-    --dashboard-shape1: #6c63ff;
-    --dashboard-shape2: #ff9800;
-    --dashboard-shape3: #e53935;
+    /* Dashboard vivid background */
+    --dashboard-gradient: linear-gradient(120deg, #f8fafc 0%, #a5b4fc 100%);
+    --dashboard-shape1: #7c3aed;
+    --dashboard-shape2: #f59e42;
+    --dashboard-shape3: #ff3366;
 }
 
 body.dark-theme {
@@ -34,9 +34,9 @@ body.dark-theme {
     --accent-color: #6cb6ff;
     --sidebar-bg: #212b36;
     --sidebar-hover: #2c3e50;
-    /* Dashboard soft background for dark mode */
+    /* Dashboard vivid background for dark mode */
     --dashboard-gradient: linear-gradient(120deg, #232946 0%, #3a3c6c 100%);
-    --dashboard-shape1: #8f9bff;
+    --dashboard-shape1: #a78bfa;
     --dashboard-shape2: #ffb86b;
     --dashboard-shape3: #ff5c8a;
 }
