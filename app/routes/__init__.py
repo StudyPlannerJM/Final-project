@@ -9,6 +9,7 @@ from .pomodoro import pomodoro_bp
 from .calendar_routes import calendar_bp
 from .summarizer import summarizer_bp
 from .ai_planner import ai_planner_bp
+from .admin import admin_bp
 
 __all__ = [
     'auth_bp',
@@ -18,5 +19,6 @@ __all__ = [
     'pomodoro_bp',
     'calendar_bp',
     'summarizer_bp',
-    'ai_planner_bp'
+    'ai_planner_bp',
+    'admin_bp'
 ]
