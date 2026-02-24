@@ -18,19 +18,22 @@
             </ul>
         {% endif %}
     {% endwith %}
-    <h2>{{ title }}</h2>
+    <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 1.2rem;">
+        <img src="{{ url_for('static', filename='img/study_hub_logo.svg') }}" alt="Study Hub Logo" style="width:100px; height:75px; margin-bottom: 0.5rem;">
+        <h2 style="margin-bottom: 0;">{{ title }}</h2>
+    </div>
     <form action="" method="post" novalidate>
         {{ form.hidden_tag() }}
-        <p>
-            {{ form.email.label }}<br>
-            {{ form.email(size=32) }}
+        <div class="form-group">
+            <label for="email">{{ form.email.label.text }}</label>
+            {{ form.email(class_="form-control", id="email", size=32) }}
             {% for error in form.email.errors %}<span style="color: red;">[{{ error }}]</span>{% endfor %}
-        </p>
-        <p>
-            {{ form.password.label }}<br>
-            {{ form.password(size=32) }}
+        </div>
+        <div class="form-group">
+            <label for="password">{{ form.password.label.text }}</label>
+            {{ form.password(class_="form-control", id="password", size=32) }}
             {% for error in form.password.errors %}<span style="color: red;">[{{ error }}]</span>{% endfor %}
-        </p>
+        </div>
         <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
         <p>{{ form.submit() }}</p>
     </form>

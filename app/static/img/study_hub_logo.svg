@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 90" width="100" height="75">
+  <!-- Kanban board -->
+  <rect x="10" y="15" width="30" height="60" rx="5" fill="#e3eafc" stroke="#2a5298" stroke-width="2"/>
+  <rect x="45" y="15" width="30" height="60" rx="5" fill="#e3eafc" stroke="#2a5298" stroke-width="2"/>
+  <rect x="80" y="15" width="30" height="60" rx="5" fill="#e3eafc" stroke="#2a5298" stroke-width="2"/>
+  <!-- Kanban cards -->
+  <rect x="15" y="22" width="20" height="10" rx="2" fill="#b3c6f7"/>
+  <rect x="15" y="38" width="20" height="10" rx="2" fill="#b3c6f7"/>
+  <rect x="50" y="22" width="20" height="10" rx="2" fill="#b3c6f7"/>
+  <rect x="85" y="22" width="20" height="10" rx="2" fill="#b3c6f7"/>
+  <!-- Pomodoro timer (tomato) -->
+  <ellipse cx="60" cy="80" rx="10" ry="7" fill="#e74c3c" stroke="#b92d1f" stroke-width="2"/>
+  <rect x="57" y="68" width="6" height="6" rx="2" fill="#27ae60"/>
+  <!-- Calendar icon -->
+  <rect x="90" y="2" width="18" height="14" rx="2" fill="#fff" stroke="#2a5298" stroke-width="1.5"/>
+  <rect x="90" y="7" width="18" height="9" fill="#e3eafc"/>
+  <rect x="92" y="10" width="3" height="3" fill="#2a5298"/>
+  <rect x="97" y="10" width="3" height="3" fill="#2a5298"/>
+  <rect x="102" y="10" width="3" height="3" fill="#2a5298"/>
+  <!-- AI sparkle -->
+  <polygon points="60,10 62,14 66,15 62,16 60,20 58,16 54,15 58,14" fill="#ffd700"/>
+  <!-- Flashcard -->
+  <rect x="5" y="2" width="18" height="12" rx="2" fill="#fff" stroke="#2a5298" stroke-width="1.5"/>
+  <rect x="7" y="5" width="14" height="2" fill="#b3c6f7"/>
+  <rect x="7" y="9" width="10" height="2" fill="#b3c6f7"/>
+</svg>
