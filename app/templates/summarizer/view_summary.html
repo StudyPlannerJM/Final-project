@@ -12,14 +12,15 @@
 {% block page_title %}{{ title }}{% endblock %}
 
 {% block content %}
+    {% include 'components/delete_modal.html' %}
     <div class="view-summary-container">
         <div class="view-summary-header">
             <a href="{{ url_for('summarizer.index') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Back to Summaries
             </a>
             <div class="header-actions">
-                <form action="{{ url_for('summarizer.delete', summary_id=summary.id) }}" method="POST" style="display:inline;">
-                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this summary?');">
+                <form action="{{ url_for('summarizer.delete', summary_id=summary.id) }}" method="POST" style="display:inline;" class="delete-summary-form">
+                    <button type="button" class="btn btn-danger open-delete-modal" data-summary-title="{{ summary.title }}">
                         <i class="fas fa-trash"></i> Delete
                     </button>
                 </form>
@@ -76,4 +77,43 @@
 
 {% block body_extra %}
 <script src="{{ url_for('static', filename='js/view-summary.js') }}"></script>
+<script>
+// Delete Modal Logic for View Summary
+document.addEventListener('DOMContentLoaded', function() {
+    let targetForm = null;
+    const deleteModal = document.getElementById('deleteModal');
+    const deleteModalMessage = document.getElementById('deleteModalMessage');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const closeDeleteModalBtn = deleteModal.querySelector('.modal-close');
+    function openDeleteModal(message, form) {
+        deleteModal.style.display = 'flex';
+        deleteModalMessage.textContent = message;
+        targetForm = form;
+    }
+    function closeDeleteModal() {
+        deleteModal.style.display = 'none';
+        targetForm = null;
+    }
+    document.querySelectorAll('.open-delete-modal').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            const form = btn.closest('form');
+            const title = btn.getAttribute('data-summary-title') || 'this summary';
+            openDeleteModal(`Are you sure you want to delete \"${title}\"?`, form);
+        });
+    });
+    confirmDeleteBtn.addEventListener('click', function() {
+        if (targetForm) {
+            targetForm.submit();
+        }
+        closeDeleteModal();
+    });
+    closeDeleteModalBtn.addEventListener('click', closeDeleteModal);
+    // Allow closing modal by clicking outside dialog
+    deleteModal.addEventListener('click', function(e) {
+        if (e.target === deleteModal) closeDeleteModal();
+    });
+    // Expose for inline close button
+    window.closeDeleteModal = closeDeleteModal;
+});
+</script>
 {% endblock %}
