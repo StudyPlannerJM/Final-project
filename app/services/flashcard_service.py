@@ -3,7 +3,7 @@ Flashcard service for business logic related to flashcards
 """
 
 from app import db
-from app.models import Flashcard, Deck, User
+from app.models import Flashcard, User
 from app.exceptions import (
     ValidationError, AuthorizationError, NotFoundError
 )
@@ -132,7 +132,7 @@ class FlashcardService:
         # Update deck if provided
         if deck_id is not None:
             # Validate deck exists and user owns it
-            deck = DeckService.get_deck_by_id(deck_id, user_id)
+            DeckService.get_deck_by_id(deck_id, user_id)
             flashcard.deck_id = deck_id
         
         db.session.commit()

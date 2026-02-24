@@ -174,7 +174,7 @@ def add():
             try:
                 deck = DeckService.get_deck_by_id(deck_id, current_user.id)
                 form.deck.data = deck
-            except:
+            except Exception:
                 pass
     
     if form.validate_on_submit():

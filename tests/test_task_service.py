@@ -4,7 +4,7 @@ import pytest
 from datetime import datetime, timedelta, timezone
 from app.services.task_service import TaskService
 from app.exceptions import ValidationError, AuthorizationError, NotFoundError
-from app.models import Task, User
+from app.models import Task
 
 
 class TestTaskService:
@@ -25,7 +25,7 @@ class TestTaskService:
         assert task.description == "Test description"
         assert task.user_id == test_user.id
         assert task.status == 'todo'
-        assert task.is_complete == False
+        assert not task.is_complete
     
     def test_create_task_with_category(self, db_session, test_user, test_category):
         """Test task creation with category"""
@@ -120,7 +120,7 @@ class TestTaskService:
         )
         
         assert updated_task.status == 'doing'
-        assert updated_task.is_complete == False
+        assert not updated_task.is_complete
         
         # Update to done
         completed_task = TaskService.update_task_status(
@@ -130,7 +130,7 @@ class TestTaskService:
         )
         
         assert completed_task.status == 'done'
-        assert completed_task.is_complete == True
+        assert completed_task.is_complete
     
     def test_update_task_status_unauthorized(self, db_session, test_user, test_user_2):
         """Test status update by unauthorized user"""
@@ -190,7 +190,7 @@ class TestTaskService:
     def test_get_user_tasks_filtered(self, db_session, test_user):
         """Test getting tasks filtered by status"""
         # Create tasks with different statuses
-        task1 = TaskService.create_task(test_user.id, "Task 1", "Desc")
+        TaskService.create_task(test_user.id, "Task 1", "Desc")
         task2 = TaskService.create_task(test_user.id, "Task 2", "Desc")
         task3 = TaskService.create_task(test_user.id, "Task 3", "Desc")
         

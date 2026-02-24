@@ -285,7 +285,7 @@ def generate_summary(text, max_sentences=10):
         if sentence and sentence[0].islower():
             sentence = sentence[0].upper() + sentence[1:]
         # Add period if missing
-        if sentence and not sentence[-1] in '.!?':
+        if sentence and sentence[-1] not in '.!?':
             sentence += '.'
         summary_bullets.append(f"• {sentence}")
     

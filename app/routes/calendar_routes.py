@@ -30,7 +30,7 @@ def authorize_google():
 @login_required
 def oauth2callback():
     """Handle Google's redirect after user authorizes"""
-    state = session.get('state')  # Verify CSRF protection
+    session.get('state')  # Verify CSRF protection
 
     flow = get_google_auth_flow()
     flow.fetch_token(authorization_response=request.url)
@@ -125,7 +125,7 @@ def schedule():
     if date_param:
         try:
             target_date = datetime.strptime(date_param, '%Y-%m-%d')
-        except:
+        except Exception: 
             target_date = datetime.now()
     else:
         target_date = datetime.now()
@@ -161,7 +161,7 @@ def api_calendar_events():
     
     try:
         target_date = datetime.strptime(date_str, '%Y-%m-%d')
-    except Exception as e:
+    except Exception:
         return jsonify({'success': False, 'error': 'Invalid date format'}), 400
 
     # Calculate date range based on view type using service
@@ -194,7 +194,7 @@ def api_week_events():
     date_str = request.args.get('date', datetime.now().strftime('%Y-%m-%d'))
     try:
         target_date = datetime.strptime(date_str, '%Y-%m-%d')
-    except:
+    except Exception:
         return {'success': False, 'error': 'Invalid date format'}, 400
 
     try:

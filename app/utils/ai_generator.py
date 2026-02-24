@@ -3,7 +3,6 @@
 # Uses Google Gemini AI to generate personalized study plans
 # ==============================================================================
 
-import os
 try:
     from google import genai
 except ImportError:

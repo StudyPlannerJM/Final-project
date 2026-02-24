@@ -231,7 +231,7 @@ def update_calendar_event(service, event_id, task):
         }
         
         # STEP 5: Send the updated event back to Google Calendar
-        updated_event = service.events().update(
+        service.events().update(
             calendarId='primary',  # Which calendar
             eventId=event_id,  # Which event to update
             body=event  # The updated event data

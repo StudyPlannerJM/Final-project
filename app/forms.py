@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import (
     DateTimeLocalField, SelectField, StringField, PasswordField,
-    BooleanField, SubmitField, TextAreaField, IntegerField, FloatField
+    BooleanField, SubmitField, TextAreaField, IntegerField
 )
 from wtforms.validators import (
     DataRequired, Email, EqualTo, ValidationError, Optional, NumberRange, Length

@@ -4,7 +4,6 @@ Summary service for business logic related to document summaries
 
 import os
 from werkzeug.utils import secure_filename
-from werkzeug.datastructures import FileStorage
 from app import db
 from app.models import Summary, User
 from app.exceptions import (
