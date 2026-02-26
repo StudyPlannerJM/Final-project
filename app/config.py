@@ -16,10 +16,14 @@ class Config:
     GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
 
     # Database
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
+    _database_url = os.environ.get(
         'DATABASE_URL',
         'sqlite:///complete_study_planner.db'
     )
+    # Render provides postgres:// but SQLAlchemy requires postgresql://
+    if _database_url.startswith('postgres://'):
+        _database_url = _database_url.replace('postgres://', 'postgresql://', 1)
+    SQLALCHEMY_DATABASE_URI = _database_url
 
     # Session
     SESSION_COOKIE_NAME = 'study_planner_session'
