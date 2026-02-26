@@ -1,8 +1,6 @@
 import io
 import datetime
 from types import SimpleNamespace
-
-
 from app.exceptions import NotFoundError, AuthorizationError
 
 
