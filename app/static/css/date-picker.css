@@ -1,0 +1,249 @@
+/* =============================================================================
+   CUSTOM DATE / TIME PICKER
+   Wraps native date/time inputs with a styled trigger + popup panel
+   that includes Clear, Cancel and OK buttons.
+   ============================================================================= */
+
+/* Native input is kept in the DOM for form submission but hidden visually.
+   !important overrides form.css selectors that target input types by specificity. */
+.dp-native-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
+    border: 0 !important;
+}
+
+.dp-wrapper {
+    display: block;
+}
+
+/* ── Trigger button ─────────────────────────────────────────────────────── */
+.dp-trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 11px 15px;
+    background: #f8fafc;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 0.95rem;
+    color: #2c3e50;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.dp-trigger:hover {
+    border-color: #4285f4;
+    background: #fff;
+}
+
+.dp-trigger.dp-open {
+    border-color: #4285f4;
+    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.12);
+    background: #fff;
+}
+
+.dp-trigger-icon {
+    color: #4285f4;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.dp-trigger-text {
+    flex: 1;
+    color: #9aa0a6;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dp-trigger-text.dp-has-value {
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.dp-trigger-caret {
+    color: #9aa0a6;
+    font-size: 0.75rem;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.dp-trigger.dp-open .dp-trigger-caret {
+    transform: rotate(180deg);
+}
+
+/* ── Popup panel — position:fixed is set by JS so it escapes overflow containers ── */
+.dp-popup {
+    display: none;
+    min-width: 220px;
+}
+
+.dp-popup.dp-open {
+    display: block;
+}
+
+.dp-popup-inner {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1.1rem 1.25rem 1rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
+    min-width: 220px;
+}
+
+.dp-popup-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #6c757d;
+    margin: 0 0 0.65rem 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dp-popup-label i {
+    color: #4285f4;
+}
+
+/* Native input rendered inside the popup */
+.dp-temp-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: #2c3e50;
+    background: #f8fafc;
+    box-sizing: border-box;
+    font-family: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dp-temp-input:focus {
+    outline: none;
+    border-color: #4285f4;
+    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.12);
+    background: #fff;
+}
+
+/* ── Action row (Clear / Cancel / OK) ───────────────────────────────────── */
+.dp-popup-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.85rem;
+    gap: 8px;
+}
+
+.dp-popup-actions .dp-right {
+    display: flex;
+    gap: 8px;
+}
+
+.dp-btn-clear {
+    background: none;
+    border: none;
+    font-size: 0.8rem;
+    color: #9aa0a6;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    font-family: inherit;
+    transition: color 0.15s;
+}
+
+.dp-btn-clear:hover {
+    color: #e53935;
+}
+
+.dp-btn-cancel {
+    padding: 0.42rem 0.9rem;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    background: #fff;
+    color: #555;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-family: inherit;
+    transition: background 0.15s;
+}
+
+.dp-btn-cancel:hover {
+    background: #f5f5f5;
+}
+
+.dp-btn-ok {
+    padding: 0.42rem 1rem;
+    border-radius: 6px;
+    border: none;
+    background: #4285f4;
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: inherit;
+    transition: background 0.15s;
+}
+
+.dp-btn-ok:hover {
+    background: #3367d6;
+}
+
+/* ── Dark-theme overrides ───────────────────────────────────────────────── */
+body.dark-theme .dp-trigger {
+    background: var(--bg-color-tertiary);
+    border-color: var(--border-color);
+    color: var(--text-color-primary);
+}
+
+body.dark-theme .dp-trigger:hover,
+body.dark-theme .dp-trigger.dp-open {
+    border-color: var(--primary-color);
+    background: var(--bg-color-secondary);
+}
+
+body.dark-theme .dp-trigger-text.dp-has-value {
+    color: var(--text-color-primary);
+}
+
+body.dark-theme .dp-popup-inner {
+    background: var(--bg-color-secondary);
+    border-color: var(--border-color);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+body.dark-theme .dp-temp-input {
+    background: var(--bg-color-tertiary);
+    border-color: var(--border-color);
+    color: var(--text-color-primary);
+}
+
+body.dark-theme .dp-temp-input:focus {
+    background: var(--bg-color-secondary);
+    border-color: var(--primary-color);
+}
+
+body.dark-theme .dp-btn-cancel {
+    background: var(--bg-color-tertiary);
+    border-color: var(--border-color);
+    color: var(--text-color-primary);
+}
+
+body.dark-theme .dp-btn-cancel:hover {
+    background: var(--bg-color-primary);
+}

@@ -25,7 +25,12 @@
 }
 
 .form-group input[type="text"],
-.form-group textarea {
+.form-group input[type="datetime-local"],
+.form-group input[type="date"],
+.form-group input[type="time"],
+.form-group select,
+.form-group textarea,
+.form-group .form-control {
     width: 100%;
     padding: 12px 15px;
     font-size: 0.95rem;
@@ -33,17 +38,28 @@
     border-radius: 6px;
     background-color: #fff;
     color: var(--text-color-primary);
+    box-sizing: border-box;
     transition: border-color 0.3s ease, background-color 0.3s ease;
 }
 
 body.dark-theme .form-group input[type="text"],
-body.dark-theme .form-group textarea {
+body.dark-theme .form-group input[type="datetime-local"],
+body.dark-theme .form-group input[type="date"],
+body.dark-theme .form-group input[type="time"],
+body.dark-theme .form-group select,
+body.dark-theme .form-group textarea,
+body.dark-theme .form-group .form-control {
     background-color: var(--bg-color-primary);
     color: var(--text-color-primary);
 }
 
 .form-group input[type="text"]:focus,
-.form-group textarea:focus {
+.form-group input[type="datetime-local"]:focus,
+.form-group input[type="date"]:focus,
+.form-group input[type="time"]:focus,
+.form-group select:focus,
+.form-group textarea:focus,
+.form-group .form-control:focus {
     border-color: var(--accent-color);
     outline: none;
 }

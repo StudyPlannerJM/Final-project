@@ -5,6 +5,7 @@
 
 {% block head_extra %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/edit-task.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/date-picker.css') }}">
 {% endblock %}
 
 {% block page_title %}{{ title }}{% endblock %}
@@ -65,4 +66,5 @@
     const deleteTaskUrl = "{{ url_for('tasks.delete', task_id=task.id) }}";
 </script>
 <script src="{{ url_for('static', filename='js/edit-task.js') }}"></script>
+<script src="{{ url_for('static', filename='js/date-picker.js') }}"></script>
 {% endblock %}

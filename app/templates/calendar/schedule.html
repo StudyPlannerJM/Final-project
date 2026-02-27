@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/schedule/schedule-month-view.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/schedule/schedule-components.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/schedule/schedule-responsive.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/date-picker.css') }}">
 {% endblock %}
 
 {% block page_title %}Calendar{% endblock %}
@@ -309,4 +310,8 @@
 
 <script type="module" src="{{ url_for('static', filename='js/schedule.js') }}"></script>
 </div>
+{% endblock %}
+
+{% block body_extra %}
+<script src="{{ url_for('static', filename='js/date-picker.js') }}"></script>
 {% endblock %}

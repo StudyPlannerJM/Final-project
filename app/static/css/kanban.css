@@ -175,3 +175,55 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* =============================================================================
+   DARK MODE
+   ============================================================================= */
+body.dark-theme .kanban-container {
+    background-color: var(--bg-color-primary);
+}
+
+body.dark-theme .kanban-container h2 {
+    color: var(--text-color-primary);
+}
+
+body.dark-theme .kanban-container > p {
+    color: var(--text-color-secondary);
+}
+
+body.dark-theme .kanban-column {
+    background-color: var(--bg-color-secondary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .column-content.drag-over {
+    background-color: var(--bg-color-tertiary);
+    border-color: var(--primary-color);
+}
+
+body.dark-theme .task-card {
+    background: var(--bg-color-tertiary);
+    border-color: var(--border-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    color: var(--text-color-primary);
+}
+
+body.dark-theme .task-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-theme .task-card-header h4 {
+    color: var(--text-color-primary);
+}
+
+body.dark-theme .task-description {
+    color: var(--text-color-secondary);
+}
+
+body.dark-theme .task-actions {
+    border-top-color: var(--border-color);
+}
+
+body.dark-theme .add-task-button {
+    border-top-color: var(--border-color);
+}
