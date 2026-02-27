@@ -1,5 +1,4 @@
 import pytest
-
 from app.services.study_plan_service import StudyPlanService
 from app.models import StudyPlan
 from app.exceptions import ValidationError, NotFoundError, AuthorizationError

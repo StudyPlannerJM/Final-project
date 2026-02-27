@@ -1,7 +1,5 @@
 import datetime
-
 import pytest
-
 from app.services.pomodoro_service import PomodoroService
 from app.models import PomodoroSession, StudySession, Task
 from app.exceptions import ValidationError, NotFoundError, AuthorizationError

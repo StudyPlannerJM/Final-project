@@ -1,11 +1,8 @@
 import io
 from werkzeug.datastructures import FileStorage
-from types import SimpleNamespace
-
 import pytest
-
 from app.services.summary_service import SummaryService
-from app.models import Summary, User
+from app.models import Summary
 from app.exceptions import ValidationError, NotFoundError, AuthorizationError
 
 
