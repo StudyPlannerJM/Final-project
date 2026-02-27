@@ -54,16 +54,18 @@ function setIcon(iconClass) {
 }
 
 /**
- * Confirm before deleting a deck
+ * Confirm before deleting a deck — uses the custom Study Planner modal
  * @param {number} deckId - The ID of the deck to delete
  */
 function confirmDeleteDeck(deckId) {
-    if (confirm('Are you sure you want to delete this deck? All flashcards in this deck will be moved to the default deck.')) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/flashcards/delete_deck/${deckId}`;
-        document.body.appendChild(form);
-        form.submit();
+    deckToDelete = deckId;
+    const msgEl = document.getElementById('deleteModalMessage');
+    if (msgEl) {
+        msgEl.textContent = 'Are you sure you want to delete this deck? All flashcards in this deck will be moved to the default deck.';
+    }
+    const modal = document.getElementById('deleteModal');
+    if (modal) {
+        modal.style.display = 'flex';
     }
 }
 

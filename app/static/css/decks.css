@@ -171,6 +171,55 @@
     gap: 0.5rem;
 }
 
+/* Force readable input colours inside the white card regardless of theme */
+.form-card .form-control {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 0.95rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    background-color: #f8fafc;
+    color: #2c3e50;
+    font-family: inherit;
+    resize: vertical;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-card .form-control:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+    background-color: #fff;
+}
+
+/* Override dark-theme inheritance — keep the card's inputs always light */
+body.dark-theme .form-card .form-control,
+body.dark-theme .form-card input[type="text"],
+body.dark-theme .form-card textarea {
+    background-color: #f8fafc;
+    color: #2c3e50;
+    border-color: #ced4da;
+}
+
+body.dark-theme .form-card .form-control:focus,
+body.dark-theme .form-card input[type="text"]:focus,
+body.dark-theme .form-card textarea:focus {
+    background-color: #fff;
+    border-color: #3498db;
+}
+
+.form-card .form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #6c757d;
+}
+
+
 .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -334,4 +383,94 @@
     .deck-actions .btn {
         width: 100%;
     }
+}
+
+/* =============================================================================
+   DARK MODE
+   ============================================================================= */
+body.dark-theme .decks-header {
+    border-bottom-color: var(--border-color);
+}
+
+body.dark-theme .decks-header h2 {
+    color: var(--text-color-primary);
+}
+
+body.dark-theme .deck-card {
+    background: var(--bg-color-secondary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .deck-card:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-theme .deck-header {
+    border-bottom-color: var(--border-color);
+}
+
+body.dark-theme .deck-icon {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-theme .deck-info h3 {
+    color: var(--text-color-primary);
+}
+
+body.dark-theme .deck-description {
+    color: var(--text-color-secondary);
+}
+
+body.dark-theme .text-muted {
+    color: var(--text-color-tertiary) !important;
+}
+
+body.dark-theme .deck-stats .stat {
+    color: var(--text-color-secondary);
+}
+
+body.dark-theme .deck-actions {
+    background-color: var(--bg-color-tertiary);
+    border-top-color: var(--border-color);
+}
+
+body.dark-theme .empty-state {
+    color: var(--text-color-tertiary);
+}
+
+body.dark-theme .icon-suggestions {
+    background-color: var(--bg-color-tertiary);
+}
+
+body.dark-theme .icon-suggestions > label {
+    color: var(--text-color-primary);
+}
+
+body.dark-theme .current-icon-display {
+    background: var(--bg-color-secondary);
+    border-color: var(--primary-color);
+}
+
+body.dark-theme .current-icon-display > span {
+    color: var(--text-color-secondary);
+}
+
+body.dark-theme .icon-category {
+    border-bottom-color: var(--border-color);
+}
+
+body.dark-theme .icon-category h4 {
+    color: var(--text-color-secondary);
+}
+
+body.dark-theme .icon-btn {
+    background: var(--bg-color-secondary);
+    border-color: var(--border-color);
+    color: var(--text-color-secondary);
+}
+
+body.dark-theme .icon-btn:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #fff;
 }

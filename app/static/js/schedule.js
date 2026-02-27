@@ -137,6 +137,75 @@ async function fetchUpcomingEvents() {
 // =============================================================================
 
 /**
+ * Show a branded Study Planner confirm modal.
+ * Returns a Promise<boolean> — true if the user confirmed, false if cancelled.
+ * @param {string} title       - Modal heading
+ * @param {string} message     - Body message
+ * @param {string} iconClass   - FontAwesome icon class (e.g. 'fas fa-calendar-times')
+ * @param {string} confirmText - Label for the confirm button
+ * @param {string} confirmColor - Background colour for the confirm button
+ */
+function showStudyConfirmModal(
+    title       = 'Confirm Action',
+    message     = 'Are you sure you want to proceed?',
+    iconClass   = 'fas fa-exclamation-triangle',
+    confirmText = 'Confirm',
+    confirmColor = '#e53935'
+) {
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = [
+            'position:fixed', 'inset:0', 'background:rgba(0,0,0,0.55)',
+            'display:flex', 'align-items:center', 'justify-content:center',
+            'z-index:9999', 'animation:fadeIn .15s ease'
+        ].join(';');
+
+        overlay.innerHTML = `
+            <div style="background:var(--card-bg,#fff);border-radius:14px;padding:2rem 2.25rem;
+                        max-width:420px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,.25);
+                        text-align:center;">
+                <div style="font-size:2.75rem;margin-bottom:.75rem;color:${confirmColor};">
+                    <i class="${iconClass}"></i>
+                </div>
+                <h3 style="margin:0 0 .5rem;font-size:1.15rem;color:var(--text-color,#1a1a2e);">
+                    ${title}
+                </h3>
+                <p style="margin:0 0 1.5rem;color:var(--muted-color,#666);font-size:.93rem;line-height:1.5;">
+                    ${message}
+                </p>
+                <div style="display:flex;gap:.75rem;justify-content:center;">
+                    <button id="scmCancel"
+                        style="padding:.55rem 1.4rem;border-radius:8px;
+                               border:1px solid var(--border-color,#ddd);
+                               background:var(--card-bg,#fff);
+                               color:var(--text-color,#333);
+                               cursor:pointer;font-size:.88rem;">
+                        Cancel
+                    </button>
+                    <button id="scmConfirm"
+                        style="padding:.55rem 1.4rem;border-radius:8px;border:none;
+                               background:${confirmColor};color:#fff;
+                               cursor:pointer;font-size:.88rem;font-weight:600;">
+                        ${confirmText}
+                    </button>
+                </div>
+            </div>`;
+
+        document.body.appendChild(overlay);
+
+        const cleanup = (result) => {
+            overlay.style.opacity = '0';
+            overlay.style.transition = 'opacity .12s ease';
+            setTimeout(() => { document.body.removeChild(overlay); resolve(result); }, 120);
+        };
+
+        overlay.querySelector('#scmConfirm').addEventListener('click', () => cleanup(true));
+        overlay.querySelector('#scmCancel').addEventListener('click',  () => cleanup(false));
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) cleanup(false); });
+    });
+}
+
+/**
  * Show a notification message to the user
  * @param {string} message - Message to display
  * @param {string} type - Type: 'success', 'error', 'info'
@@ -467,8 +536,15 @@ function initializeEventHandlers() {
     });
 
     document.querySelectorAll('.remove-task').forEach(button => {
-        button.addEventListener('click', function () {
-            if (!confirm('Remove this task from Google Calendar?')) return;
+        button.addEventListener('click', async function () {
+            const confirmed = await showStudyConfirmModal(
+                'Remove from Google Calendar',
+                'Remove this task from your Google Calendar? It will stay in the Study Planner but won\'t appear on your calendar.',
+                'fas fa-calendar-times',
+                'Yes, Remove',
+                '#e53935'
+            );
+            if (!confirmed) return;
 
             const taskId = this.getAttribute('data-task-id');
 
