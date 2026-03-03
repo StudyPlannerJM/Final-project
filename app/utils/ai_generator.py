@@ -8,6 +8,7 @@ try:
 except ImportError:
     genai = None  # Will handle this in the functions
 from flask import current_app
+from markupsafe import escape, Markup  # For XSS protection
 
 
 def configure_gemini_api():
@@ -132,13 +133,13 @@ FORMATTING RULES:
 def format_plan_for_display(plan_content):
     """
     Format the AI-generated plan for better HTML display
-    with proper markdown conversion
+    with proper markdown conversion and XSS protection
     
     Args:
         plan_content (str): Raw plan content from AI with markdown
     
     Returns:
-        str: Formatted HTML content
+        str: Formatted HTML content (safely escaped)
     """
     import re
     
@@ -172,7 +173,7 @@ def format_plan_for_display(plan_content):
                 in_numbered_list = False
             header_text = stripped[2:].strip()
             formatted_lines.append(
-                f'<h2 class="plan-section-header">{header_text}</h2>'
+                Markup(f'<h2 class="plan-section-header">{escape(header_text)}</h2>')
             )
         
         # Subheaders (## Subheader)
@@ -185,13 +186,15 @@ def format_plan_for_display(plan_content):
                 in_numbered_list = False
             header_text = stripped[3:].strip()
             formatted_lines.append(
-                f'<h3 class="plan-subsection-header">{header_text}</h3>'
+                Markup(f'<h3 class="plan-subsection-header">{escape(header_text)}</h3>')
             )
         
         # Numbered list items (1. , 2. , etc.)
         elif re.match(r'^\d+\.\s+', stripped):
             item_text = re.sub(r'^\d+\.\s+', '', stripped)
-            # Format **bold** and *italic*
+            # Escape first for XSS protection
+            item_text = escape(item_text)
+            # Then format **bold** and *italic* on the escaped text
             item_text = re.sub(
                 r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', item_text
             )
@@ -205,7 +208,7 @@ def format_plan_for_display(plan_content):
                     in_list = False
                 formatted_lines.append('<ol class="plan-numbered-list">')
                 in_numbered_list = True
-            formatted_lines.append(f'<li>{item_text}</li>')
+            formatted_lines.append(Markup(f'<li>{item_text}</li>'))
         
         # Bullet points (- item or * item)
         elif stripped.startswith('- ') or stripped.startswith('* '):
@@ -214,7 +217,9 @@ def format_plan_for_display(plan_content):
                 in_numbered_list = False
             
             item_text = stripped[2:].strip()
-            # Format **bold** and *italic*
+            # Escape first for XSS protection
+            item_text = escape(item_text)
+            # Then format **bold** and *italic* on the escaped text
             item_text = re.sub(
                 r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', item_text
             )
@@ -225,7 +230,7 @@ def format_plan_for_display(plan_content):
             if not in_list:
                 formatted_lines.append('<ul class="plan-list">')
                 in_list = True
-            formatted_lines.append(f'<li>{item_text}</li>')
+            formatted_lines.append(Markup(f'<li>{item_text}</li>'))
         
         # Regular paragraph text
         else:
@@ -236,14 +241,16 @@ def format_plan_for_display(plan_content):
                 formatted_lines.append('</ol>')
                 in_numbered_list = False
             
-            # Format **bold** and *italic*
+            # Escape first for XSS protection
+            text = escape(stripped)
+            # Then format **bold** and *italic* on the escaped text
             text = re.sub(
-                r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', stripped
+                r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', text
             )
             text = re.sub(
                 r'(?<!\*)\*(?!\*)([^*]+)\*(?!\*)', r'<em>\1</em>', text
             )
-            formatted_lines.append(f'<p class="plan-paragraph">{text}</p>')
+            formatted_lines.append(Markup(f'<p class="plan-paragraph">{text}</p>'))
     
     # Close any open lists
     if in_list:

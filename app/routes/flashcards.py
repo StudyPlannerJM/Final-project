@@ -1,7 +1,6 @@
 """
 Flashcards Blueprint - Deck and flashcard management routes
 """
-import os
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
 from app.forms import DeckForm, FlashcardForm
@@ -293,7 +292,12 @@ def generate_from_study_plan(plan_id):
             flash('Google Generative AI library is not installed.', 'danger')
             return redirect(url_for('ai_planner.view_plan', plan_id=plan_id))
         
-        api_key = os.getenv('GEMINI_API_KEY', 'AIzaSyCbDUdL0WUWP20lS4rZM4bqGBSmUqoj54o')
+        # Get API key from config (NEVER hardcode API keys!)
+        api_key = current_app.config.get('GEMINI_API_KEY')
+        if not api_key:
+            flash('Gemini API key is not configured. Please set GEMINI_API_KEY in your .env file.', 'danger')
+            return redirect(url_for('ai_planner.view_plan', plan_id=plan_id))
+        
         client = genai.Client(api_key=api_key)
         
         prompt = f"""Based on the following study plan for {plan.subject}, generate {num_cards} flashcards 
