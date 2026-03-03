@@ -12,10 +12,16 @@
 {% block content %}
     <div class="pomodoro-container">
         <div class="timer-settings">
-            <button id="time-1" class="btn-time" style="background-color: #ffc107; border-color: #ffc107;">1 min (Test)</button>
             <button id="time-25" class="btn-time active">25 min</button>
             <button id="time-45" class="btn-time">45 min</button>
             <button id="time-60" class="btn-time">60 min</button>
+        </div>
+        <div class="custom-time-section">
+            <label for="custom-time-input">Custom Time (minutes):</label>
+            <div class="custom-time-input-group">
+                <input type="number" id="custom-time-input" min="1" max="180" placeholder="e.g., 30">
+                <button id="set-custom-time" class="btn-custom-time">Set</button>
+            </div>
         </div>
         <div class="timer-display" id="timer-display">25:00</div>
         <div class="timer-controls">

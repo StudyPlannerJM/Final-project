@@ -87,24 +87,12 @@
             </div>
         </div>
 
-        <!-- My Calendars Section (Optional) -->
-        <div class="my-calendars">
-            <h4>My Calendars</h4>
-            <label class="calendar-toggle">
-                <input type="checkbox" checked data-calendar="main">
-                <span class="color-indicator personal"></span>
-                <span>Personal</span>
-            </label>
-            <label class="calendar-toggle">
-                <input type="checkbox" checked data-calendar="work">
-                <span class="color-indicator work"></span>
-                <span>Work</span>
-            </label>
-            <label class="calendar-toggle">
-                <input type="checkbox" checked data-calendar="study">
-                <span class="color-indicator study"></span>
-                <span>Study</span>
-            </label>
+        <!-- Upcoming Events Section -->
+        <div class="sidebar-upcoming">
+            <h4><i class="fas fa-clock"></i> Upcoming Events</h4>
+            <div class="upcoming-events-list" id="upcomingEventsList">
+                <!-- JavaScript will populate upcoming events here -->
+            </div>
         </div>
     </aside>
 
@@ -182,14 +170,6 @@
                     </div>
                     {% endfor %}
                 </div>
-            </div>
-        </div>
-
-        <!-- Upcoming Events Section (Below Calendar) -->
-        <div class="upcoming-section">
-            <h3><i class="fas fa-clock"></i> Upcoming Events (Next 7 Days)</h3>
-            <div class="upcoming-events-list" id="upcomingEventsList">
-                <!-- JavaScript will populate upcoming events here -->
             </div>
         </div>
     </main>

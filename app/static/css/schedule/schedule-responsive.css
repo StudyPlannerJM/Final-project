@@ -61,7 +61,25 @@
         padding: 3px 5px;
     }
     
-    .upcoming-events-list {
-        grid-template-columns: 1fr;
+    /* Keep sidebar upcoming events scrollable on mobile */
+    .sidebar-upcoming .upcoming-events-list {
+        display: flex !important;
+        flex-direction: column;
+        max-height: 300px;
+        min-height: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .sidebar-upcoming .upcoming-events-list {
+        max-height: 250px;
+    }
+    
+    .sidebar-upcoming .upcoming-event-card {
+        padding: 8px;
+    }
+    
+    .sidebar-upcoming h4 {
+        font-size: 0.85rem;
     }
 }
