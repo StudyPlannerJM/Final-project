@@ -12,6 +12,7 @@ class TestConfigureGeminiAPI:
     def test_configure_with_valid_api_key(self, app):
         """Test API configuration with valid key"""
         with app.app_context():
+            app.config['GEMINI_API_KEY'] = 'test-api-key-123'
             with patch('app.utils.ai_generator.genai') as mock_genai:
                 mock_client = Mock()
                 mock_genai.Client.return_value = mock_client
