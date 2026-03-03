@@ -20,7 +20,7 @@ def test_create_deck_valid_and_duplicate(db_session, test_user):
 
 def test_get_user_decks_and_get_by_id(db_session, test_user, test_user_2):
     d1 = DeckService.create_deck(test_user.id, 'A')
-    d2 = DeckService.create_deck(test_user.id, 'B')
+    DeckService.create_deck(test_user.id, 'B')
 
     decks = DeckService.get_user_decks(test_user.id)
     assert any(d.name == 'A' for d in decks)
