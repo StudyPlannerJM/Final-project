@@ -1,6 +1,4 @@
 import pytest
-from types import SimpleNamespace
-
 from app.services.flashcard_service import FlashcardService
 from app.exceptions import ValidationError, NotFoundError, AuthorizationError
 from app.models import Deck, Flashcard

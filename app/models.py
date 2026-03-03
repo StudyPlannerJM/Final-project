@@ -18,6 +18,13 @@ class User(UserMixin, db.Model):
     
     tasks = db.relationship('Task', backref='author', lazy='dynamic')
 
+    def __init__(self, username=None, email=None, is_admin=False, **kwargs):
+        """Initialize a user with optional parameters"""
+        super().__init__(**kwargs)
+        self.username = username
+        self.email = email
+        self.is_admin = is_admin
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
