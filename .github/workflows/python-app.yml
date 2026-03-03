@@ -29,7 +29,10 @@ jobs:
         pip install ruff
         ruff check .
 
-    - name: Run tests
+    - name: Run tests with coverage
+      env:
+        SECRET_KEY: test-secret-key-for-ci
+        DATABASE_URL: "sqlite:///:memory:"
       run: |
-        pip install pytest
-        pytest
+        pip install pytest pytest-cov
+        pytest --cov=app --cov-report=term --cov-report=html -q

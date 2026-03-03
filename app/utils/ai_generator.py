@@ -193,7 +193,7 @@ def format_plan_for_display(plan_content):
         elif re.match(r'^\d+\.\s+', stripped):
             item_text = re.sub(r'^\d+\.\s+', '', stripped)
             # Escape first for XSS protection
-            item_text = escape(item_text)
+            item_text = str(escape(item_text))
             # Then format **bold** and *italic* on the escaped text
             item_text = re.sub(
                 r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', item_text
@@ -218,7 +218,7 @@ def format_plan_for_display(plan_content):
             
             item_text = stripped[2:].strip()
             # Escape first for XSS protection
-            item_text = escape(item_text)
+            item_text = str(escape(item_text))
             # Then format **bold** and *italic* on the escaped text
             item_text = re.sub(
                 r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', item_text
@@ -242,7 +242,7 @@ def format_plan_for_display(plan_content):
                 in_numbered_list = False
             
             # Escape first for XSS protection
-            text = escape(stripped)
+            text = str(escape(stripped))
             # Then format **bold** and *italic* on the escaped text
             text = re.sub(
                 r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', text
