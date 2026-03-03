@@ -8,10 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const resetBtn = document.getElementById('reset-timer');
         const sessionCountSpan = document.getElementById('session-count');
         const timerStatusSpan = document.getElementById('timer-status');
-        const time1Btn = document.getElementById('time-1');
         const time25Btn = document.getElementById('time-25');
         const time45Btn = document.getElementById('time-45');
         const time60Btn = document.getElementById('time-60');
+        const customTimeInput = document.getElementById('custom-time-input');
+        const setCustomTimeBtn = document.getElementById('set-custom-time');
 
     let timer;
     let isRunning = false;
@@ -53,8 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Update active button state
             const durationMinutes = workDuration / 60;
             document.querySelectorAll('.btn-time').forEach(btn => btn.classList.remove('active'));
-            if (durationMinutes === 1) time1Btn.classList.add('active');
-            else if (durationMinutes === 25) time25Btn.classList.add('active');
+            if (durationMinutes === 25) time25Btn.classList.add('active');
             else if (durationMinutes === 45) time45Btn.classList.add('active');
             else if (durationMinutes === 60) time60Btn.classList.add('active');
         }
@@ -175,16 +175,52 @@ document.addEventListener('DOMContentLoaded', () => {
         event.target.classList.add('active');
     }
 
+    // Custom time setter
+    function setCustomTime() {
+        const customMinutes = parseInt(customTimeInput.value);
+        
+        if (!customMinutes || customMinutes < 1 || customMinutes > 180) {
+            alert('Please enter a valid time between 1 and 180 minutes.');
+            return;
+        }
+        
+        if (isRunning) {
+            alert('Please pause the timer before changing duration.');
+            return;
+        }
+        
+        workDuration = customMinutes * 60;
+        timeLeft = workDuration;
+        currentSessionDuration = customMinutes;
+        isBreak = false;
+        if (timerStatusSpan) timerStatusSpan.textContent = 'Ready';
+        saveTimerState();
+        updateDisplay();
+        
+        // Remove active state from all preset buttons
+        document.querySelectorAll('.btn-time').forEach(btn => btn.classList.remove('active'));
+        
+        // Clear custom input after setting
+        customTimeInput.value = '';
+    }
+    
     // Restore state first
     restoreTimerState();
     
     if (startBtn) startBtn.addEventListener('click', startTimer);
     if (pauseBtn) pauseBtn.addEventListener('click', pauseTimer);
     if (resetBtn) resetBtn.addEventListener('click', resetTimer);
-    if (time1Btn) time1Btn.addEventListener('click', () => setWorkDuration(1));
     if (time25Btn) time25Btn.addEventListener('click', () => setWorkDuration(25));
     if (time45Btn) time45Btn.addEventListener('click', () => setWorkDuration(45));
     if (time60Btn) time60Btn.addEventListener('click', () => setWorkDuration(60));
+    if (setCustomTimeBtn) setCustomTimeBtn.addEventListener('click', setCustomTime);
+    if (customTimeInput) {
+        customTimeInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                setCustomTime();
+            }
+        });
+    }
 
     // Function to save completed Pomodoro session to database
     function savePomodoroSession(durationMinutes) {
