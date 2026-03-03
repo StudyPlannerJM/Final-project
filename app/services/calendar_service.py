@@ -121,7 +121,8 @@ class CalendarService:
                     calendar_events = get_events_for_date_range(service, start_date, end_date)
                     calendar_connected = True
                 except Exception as e:
-                    print(f"Error fetching calendar events: {e}")
+                    from flask import current_app
+                    current_app.logger.error(f"Error fetching calendar events: {e}")
                     calendar_connected = False
 
         # Fetch local tasks for the date range

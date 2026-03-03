@@ -11,7 +11,7 @@ from google_auth_oauthlib.flow import Flow  # Manages the OAuth2 login flow
 from googleapiclient.discovery import build  # Creates the Google Calendar API service
 from googleapiclient.errors import HttpError  # Catches errors from Google API
 from datetime import datetime, timedelta, timezone  # For handling dates and times
-from flask import url_for  # Generates URLs for my Flask app
+from flask import url_for, current_app  # Generates URLs for my Flask app
 
 # IMPORTANT: Allow OAuth2 to work over HTTP for local development
 # In production with HTTPS, you can remove this line
@@ -47,10 +47,15 @@ def get_google_auth_flow():
     Returns:
         Flow object: Used to redirect user to Google login page
     """
+    # Use configured redirect URI from config, or fall back to dynamic URL
+    redirect_uri = current_app.config.get('GOOGLE_OAUTH_REDIRECT_URI')
+    if not redirect_uri:
+        redirect_uri = url_for('calendar.oauth2callback', _external=True)
+    
     flow = Flow.from_client_secrets_file(
         CLIENT_SECRET_FILE,  # My app's credentials
         scopes=SCOPES,  # What permissions I'm asking for
-        redirect_uri=url_for('calendar.oauth2callback', _external=True)  # Where Google sends user back
+        redirect_uri=redirect_uri  # Where Google sends user back
     )
     return flow
 
@@ -99,8 +104,9 @@ def get_calendar_service(user):
         return service
     
     except Exception as e:
-        # If anything goes wrong (bad token, network error, etc.), print error and return None
-        print(f"Error creating calendar service: {e}")
+        # If anything goes wrong (bad token, network error, etc.), log error and return None
+        from flask import current_app
+        current_app.logger.error(f"Error creating calendar service: {e}")
         return None
     
 # ==============================================================================
@@ -172,7 +178,8 @@ def create_calendar_event(service, task):
     
     except HttpError as error:
         # If Google returns an error (network issue, auth problem, etc.)
-        print(f"An error occurred: {error}")
+        from flask import current_app
+        current_app.logger.error(f"Error creating calendar event: {error}")
         return None  # Return None to indicate failure
 
 def update_calendar_event(service, event_id, task):
@@ -241,7 +248,8 @@ def update_calendar_event(service, event_id, task):
     
     except HttpError as error:
         # If something goes wrong (network issue, event not found, etc.)
-        print(f"An error occurred: {error}")
+        from flask import current_app
+        current_app.logger.error(f"Error updating calendar event: {error}")
         return False  # Indicate failure
     
 def delete_calendar_event(service, event_id):
@@ -272,7 +280,8 @@ def delete_calendar_event(service, event_id):
     
     except HttpError as error:
         # Error could mean: event already deleted, network issue, or permission problem
-        print(f"An error occurred: {error}")
+        from flask import current_app
+        current_app.logger.error(f"Error deleting calendar event: {error}")
         return False
     
 def get_upcoming_events(service, max_results=10):
@@ -342,7 +351,8 @@ def get_upcoming_events(service, max_results=10):
     
     except Exception as error:
         # If something goes wrong (network issue, auth problem, expired token, etc.)
-        print(f"Error fetching events: {error}")
+        from flask import current_app
+        current_app.logger.error(f"Error fetching calendar events: {error}")
         return []  # Return empty list instead of crashing
     
 def get_events_for_date_range(service, start_date, end_date):
@@ -390,7 +400,8 @@ def get_events_for_date_range(service, start_date, end_date):
 
         return formatted_events
     except Exception as e:
-        print(f"Error fetching events: {e}")
+        from flask import current_app
+        current_app.logger.error(f"Error fetching upcoming events: {e}")
         return []
     
 def get_week_events(service, target_date=None):
