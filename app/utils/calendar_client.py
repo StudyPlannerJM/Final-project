@@ -104,8 +104,9 @@ def get_calendar_service(user):
         return service
     
     except Exception as e:
-        # If anything goes wrong (bad token, network error, etc.), print error and return None
-        print(f"Error creating calendar service: {e}")
+        # If anything goes wrong (bad token, network error, etc.), log error and return None
+        from flask import current_app
+        current_app.logger.error(f"Error creating calendar service: {e}")
         return None
     
 # ==============================================================================
@@ -177,7 +178,8 @@ def create_calendar_event(service, task):
     
     except HttpError as error:
         # If Google returns an error (network issue, auth problem, etc.)
-        print(f"An error occurred: {error}")
+        from flask import current_app
+        current_app.logger.error(f"Error creating calendar event: {error}")
         return None  # Return None to indicate failure
 
 def update_calendar_event(service, event_id, task):
@@ -246,7 +248,8 @@ def update_calendar_event(service, event_id, task):
     
     except HttpError as error:
         # If something goes wrong (network issue, event not found, etc.)
-        print(f"An error occurred: {error}")
+        from flask import current_app
+        current_app.logger.error(f"Error updating calendar event: {error}")
         return False  # Indicate failure
     
 def delete_calendar_event(service, event_id):
@@ -277,7 +280,8 @@ def delete_calendar_event(service, event_id):
     
     except HttpError as error:
         # Error could mean: event already deleted, network issue, or permission problem
-        print(f"An error occurred: {error}")
+        from flask import current_app
+        current_app.logger.error(f"Error deleting calendar event: {error}")
         return False
     
 def get_upcoming_events(service, max_results=10):
@@ -347,7 +351,8 @@ def get_upcoming_events(service, max_results=10):
     
     except Exception as error:
         # If something goes wrong (network issue, auth problem, expired token, etc.)
-        print(f"Error fetching events: {error}")
+        from flask import current_app
+        current_app.logger.error(f"Error fetching calendar events: {error}")
         return []  # Return empty list instead of crashing
     
 def get_events_for_date_range(service, start_date, end_date):
@@ -395,7 +400,8 @@ def get_events_for_date_range(service, start_date, end_date):
 
         return formatted_events
     except Exception as e:
-        print(f"Error fetching events: {e}")
+        from flask import current_app
+        current_app.logger.error(f"Error fetching upcoming events: {e}")
         return []
     
 def get_week_events(service, target_date=None):
