@@ -30,6 +30,15 @@ class Config:
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
 
+    # OAuth/Google Calendar
+    # For local development, use http://localhost:5000 or http://127.0.0.1:5000
+    # For production, use your actual domain with https
+    SERVER_URL = os.environ.get('SERVER_URL', 'http://localhost:5000')
+    GOOGLE_OAUTH_REDIRECT_URI = os.environ.get(
+        'GOOGLE_OAUTH_REDIRECT_URI',
+        f"{SERVER_URL}/calendar/oauth2callback"
+    )
+
 class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_ECHO = False  # Set to True to see SQL queries
