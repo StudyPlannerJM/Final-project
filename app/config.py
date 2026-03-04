@@ -18,7 +18,7 @@ class Config:
     # Database
     _database_url = os.environ.get(
         'DATABASE_URL',
-        'sqlite:///complete_study_planner.db'
+        'sqlite:///braindump.db'
     )
     # Render provides postgres:// but SQLAlchemy requires postgresql://
     if _database_url.startswith('postgres://'):
@@ -26,7 +26,7 @@ class Config:
     SQLALCHEMY_DATABASE_URI = _database_url
 
     # Session
-    SESSION_COOKIE_NAME = 'study_planner_session'
+    SESSION_COOKIE_NAME = 'braindump_session'
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
 

@@ -1,6 +1,6 @@
 # Testing Guide
 
-This directory contains tests for the Study Planner application.
+This directory contains tests for the BrainDump application.
 
 ## Test Structure
 
