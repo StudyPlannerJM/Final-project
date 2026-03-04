@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ title }} - Study Planner{% endblock %}
+{% block title %}{{ title }} - BrainDump{% endblock %}
 
 {% block head_extra %}
 <style>
@@ -222,7 +222,7 @@
     function openAdminDeleteModal(username, formId) {
         _pendingAdminDeleteForm = document.getElementById(formId);
         document.getElementById('adminDeleteMessage').textContent =
-            'You are about to remove "' + username + '" from the Study Planner.';
+            'You are about to remove "' + username + '" from BrainDump.';
         const modal = document.getElementById('adminDeleteModal');
         modal.style.display = 'flex';
     }
