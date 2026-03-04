@@ -160,7 +160,8 @@ def create_calendar_event(service, task):
             'reminders': {
                 'useDefault': False,  # Don't use calendar's default reminders
                 'overrides': [
-                    {'method': 'popup', 'minutes': 30},  # Popup reminder 30 minutes before
+                    {'method': 'email', 'minutes': 1440},  # Email reminder 1 day before
+                    {'method': 'popup', 'minutes': 60},    # Popup reminder 1 hour before
                 ],
             },
         }
@@ -235,6 +236,13 @@ def update_calendar_event(service, event_id, task):
         event['end'] = {
             'dateTime': end_time.isoformat(),
             'timeZone': 'UTC',
+        }
+        event['reminders'] = {
+            'useDefault': False,
+            'overrides': [
+                {'method': 'email', 'minutes': 1440},  # Email reminder 1 day before
+                {'method': 'popup', 'minutes': 60},    # Popup reminder 1 hour before
+            ],
         }
         
         # STEP 5: Send the updated event back to Google Calendar
