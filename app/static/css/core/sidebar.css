@@ -16,30 +16,42 @@
 }
 
 .sidebar-header { 
-    padding: 20px; 
+    padding: 16px 20px; 
     text-align: center; 
     border-bottom: 1px solid var(--border-color); 
 }
 
-.sidebar-header h2 { 
-    margin: 0; 
-    font-size: 1.5em; 
-    white-space: nowrap; 
-    overflow: hidden; 
-    text-overflow: ellipsis; 
+.sidebar-logo-link {
+    display: block;
+    line-height: 0;
 }
 
-.sidebar.collapsed .sidebar-header h2 { 
-    font-size: 0; 
+.sidebar-logo {
+    max-width: 220px;
+    width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    transition: opacity 0.3s ease;
 }
 
-.sidebar-header h2 i { 
-    margin-right: 10px; 
+.sidebar-logo-icon {
+    width: 36px;
+    height: 36px;
+    display: none;
+    margin: 0 auto;
+    /* Show only the icon portion (left side) of the logo image */
+    object-fit: cover;
+    object-position: left center;
+    transition: opacity 0.3s ease;
 }
 
-.sidebar.collapsed .sidebar-header h2 i { 
-    margin-right: 0; 
-    font-size: 1.5em; 
+.sidebar.collapsed .sidebar-logo {
+    display: none;
+}
+
+.sidebar.collapsed .sidebar-logo-icon {
+    display: block;
 }
 
 .nav-menu { 

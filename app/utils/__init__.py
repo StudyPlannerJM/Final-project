@@ -1,5 +1,5 @@
 """
-Utility modules for the Study Planner application
+Utility modules for the BrainDump application
 """
 from .ai_generator import generate_study_plan, format_plan_for_display
 from .document_processor import (

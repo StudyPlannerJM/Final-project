@@ -1,4 +1,4 @@
-# 🚀 Setup Guide - Study Planner
+# 🚀 Setup Guide - BrainDump
 
 ## For first-time setup
 

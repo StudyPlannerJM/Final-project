@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }} - Study Planner</title>
+    <title>{{ title }} - BrainDump</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/login_register.css') }}">
 </head>
 <body>
@@ -18,7 +18,7 @@
         {% endif %}
     {% endwith %}
     <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 1.2rem;">
-        <img src="{{ url_for('static', filename='img/study_hub_logo.svg') }}" alt="Study Hub Logo" style="width:100px; height:75px; margin-bottom: 0.5rem;">
+        <img src="{{ url_for('static', filename='img/braindump-logo-full.png') }}" alt="BrainDump" style="width:200px; height:auto; margin-bottom: 0.5rem;">
         <h2 style="margin-bottom: 0;">{{ title }}</h2>
     </div>
     <form action="" method="post" novalidate>

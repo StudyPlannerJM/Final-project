@@ -137,7 +137,7 @@ async function fetchUpcomingEvents() {
 // =============================================================================
 
 /**
- * Show a branded Study Planner confirm modal.
+ * Show a branded BrainDump confirm modal.
  * Returns a Promise<boolean> — true if the user confirmed, false if cancelled.
  * @param {string} title       - Modal heading
  * @param {string} message     - Body message
@@ -539,7 +539,7 @@ function initializeEventHandlers() {
         button.addEventListener('click', async function () {
             const confirmed = await showStudyConfirmModal(
                 'Remove from Google Calendar',
-                'Remove this task from your Google Calendar? It will stay in the Study Planner but won\'t appear on your calendar.',
+                'Remove this task from your Google Calendar? It will stay in BrainDump but won\'t appear on your calendar.',
                 'fas fa-calendar-times',
                 'Yes, Remove',
                 '#e53935'

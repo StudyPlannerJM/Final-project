@@ -1,7 +1,7 @@
 /**
  * Custom Date / Time Picker
  * Enhances native date, time, and datetime-local inputs with a branded
- * Study Planner popup that includes Clear, Cancel and an OK confirm button.
+ * BrainDump popup that includes Clear, Cancel and an OK confirm button.
  *
  * Usage: include this script on any page with date/time inputs.
  * All <input type="date|time|datetime-local"> are enhanced automatically.

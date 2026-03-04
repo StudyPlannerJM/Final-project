@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Study Planner{% endblock %}</title>
+    <title>{% block title %}BrainDump{% endblock %}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Core CSS Files -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/core/variables.css') }}">
@@ -26,7 +26,9 @@
     <div class="wrapper">
         <nav class="sidebar">
             <div class="sidebar-header">
-                <h2><i class="fas fa-graduation-cap"></i> Study Planner</h2>
+                <a href="/" class="sidebar-logo-link">
+                    <img src="{{ url_for('static', filename='img/braindump-logo.png') }}" alt="BrainDump" class="sidebar-logo">
+                </a>
             </div>
             <ul class="nav-menu">
                 <li class="nav-item">

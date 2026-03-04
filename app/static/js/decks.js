@@ -54,7 +54,7 @@ function setIcon(iconClass) {
 }
 
 /**
- * Confirm before deleting a deck — uses the custom Study Planner modal
+ * Confirm before deleting a deck — uses the custom BrainDump modal
  * @param {number} deckId - The ID of the deck to delete
  */
 function confirmDeleteDeck(deckId) {
