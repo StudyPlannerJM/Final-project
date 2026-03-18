@@ -1,43 +1,66 @@
 .admin-user-form-card {
-    background: #fff;
-    border-radius: 12px;
+    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    border: 1px solid rgba(52, 152, 219, 0.2);
+    border-radius: 14px;
     padding: 2rem;
-    max-width: 560px;
+    max-width: 720px;
     margin: 0 auto;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 12px 34px rgba(26, 39, 61, 0.08);
     color: #000;
 }
 
-.admin-user-form-card h2 {
-    margin-top: 0;
+.admin-form-header {
     margin-bottom: 1.5rem;
-    font-size: 1.25rem;
+    padding: 0.25rem 0 1rem;
+    border-bottom: 1px solid rgba(52, 152, 219, 0.2);
+}
+
+.admin-form-header h3 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text-color-primary, #1f2a37);
+}
+
+.admin-form-header p {
+    margin: 0.45rem 0 0;
+    font-size: 0.92rem;
+    color: var(--text-color-secondary, #5b6677);
+    line-height: 1.45;
+}
+
+.admin-user-form-card .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem 1rem;
 }
 
 .admin-user-form-card .form-group {
-    margin-bottom: 1.25rem;
+    margin-bottom: 0.9rem;
 }
 
 .admin-user-form-card .form-group label {
     display: block;
     font-weight: 600;
-    margin-bottom: 0.4rem;
-    font-size: 0.9rem;
-    color: #000;
+    margin-bottom: 0.45rem;
+    font-size: 0.85rem;
+    letter-spacing: 0.2px;
+    color: var(--text-color-secondary, #5b6677);
 }
 
 .admin-user-form-card .form-group input[type="text"],
 .admin-user-form-card .form-group input[type="email"],
 .admin-user-form-card .form-group input[type="password"] {
     width: 100%;
-    padding: 0.55rem 0.85rem;
-    border: 1px solid var(--border-color, #ddd);
-    border-radius: 8px;
+    min-height: 44px;
+    padding: 0.65rem 0.85rem;
+    border: 1.5px solid var(--border-color, #d4dbe5);
+    border-radius: 10px;
     font-size: 0.95rem;
     background: #fff !important;
     color: #000 !important;
     box-sizing: border-box;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .admin-user-form-card .form-group input:-webkit-autofill,
@@ -50,40 +73,87 @@
 
 .admin-user-form-card .form-group input:focus {
     outline: none;
-    border-color: var(--primary-color, #6750a4);
+    border-color: var(--primary-color, #3498db);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
 }
 
 .admin-user-form-card .form-check {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    margin-bottom: 1.25rem;
-    color: #000;
+    gap: 0.7rem;
+    margin: 0.35rem 0 1rem;
+    padding: 0.8rem 0.9rem;
+    border: 1px solid rgba(52, 152, 219, 0.22);
+    border-radius: 10px;
+    background: rgba(52, 152, 219, 0.06);
+    color: var(--text-color-primary, #1f2a37);
 }
 
 .admin-user-form-card .form-check input[type="checkbox"] {
-    width: 1.1rem;
-    height: 1.1rem;
-    accent-color: var(--primary-color, #6750a4);
+    width: 1.15rem;
+    height: 1.15rem;
+    accent-color: var(--primary-color, #3498db);
+}
+
+.admin-user-form-card .form-check label {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 600;
 }
 
 .admin-user-form-card .field-error {
     color: #c62828;
-    font-size: 0.82rem;
-    margin-top: 0.3rem;
+    font-size: 0.8rem;
+    margin-top: 0.35rem;
 }
 
 .admin-user-form-card .form-actions {
     display: flex;
     gap: 0.75rem;
-    margin-top: 1.75rem;
+    margin-top: 1.4rem;
     flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.admin-user-form-card .form-actions .btn {
+    min-height: 44px;
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-user-form-card .form-actions .btn-primary {
+    box-shadow: 0 6px 16px rgba(52, 152, 219, 0.28);
+}
+
+.admin-user-form-card .form-actions .btn-primary:hover {
+    transform: translateY(-1px);
+}
+
+.admin-user-form-card .form-actions .btn-secondary {
+    border: 1px solid var(--border-color, #d4dbe5);
+    background: #fff;
+    color: var(--text-color-primary, #1f2a37);
 }
 
 @media (max-width: 600px) {
     .admin-user-form-card {
         padding: 1.1rem;
         border-radius: 10px;
+    }
+
+    .admin-form-header {
+        margin-bottom: 1rem;
+        padding-bottom: 0.8rem;
+    }
+
+    .admin-user-form-card .form-grid {
+        grid-template-columns: 1fr;
+        gap: 0;
     }
 
     .admin-user-form-card .form-actions .btn {

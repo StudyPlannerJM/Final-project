@@ -11,9 +11,21 @@
 
 {% block content %}
 <div class="admin-user-form-card">
+    <div class="admin-form-header">
+        <h3>{{ title }}</h3>
+        <p>
+            {% if action == 'edit' and user %}
+            Update account details and permissions for this user.
+            {% else %}
+            Create a new user account and assign permissions.
+            {% endif %}
+        </p>
+    </div>
+
     <form method="post" novalidate>
         {{ form.hidden_tag() }}
 
+        <div class="form-grid">
         <div class="form-group">
             {{ form.username.label }}
             {{ form.username(class="") }}
@@ -44,6 +56,7 @@
             {% for error in form.password2.errors %}
                 <div class="field-error">{{ error }}</div>
             {% endfor %}
+        </div>
         </div>
 
         <div class="form-check">
