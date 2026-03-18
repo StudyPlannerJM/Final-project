@@ -1,63 +1,230 @@
-// Get all draggable task cards
 const taskCards = document.querySelectorAll('.task-card');
-// Get all droppable columns
 const columns = document.querySelectorAll('.column-content');
+const TOUCH_DRAG_THRESHOLD = 10;
+const AUTO_SCROLL_EDGE_PX = 90;
+const AUTO_SCROLL_STEP = 16;
 
-// ===== DRAG START =====
-taskCards.forEach(card => {
-    card.addEventListener('dragstart', (e) => {
-        // Store the task ID being dragged
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('taskId', card.dataset.taskId);
-        // Visual feedback - fade out the card
-        card.classList.add('dragging');
-    });
+let activeTouchDrag = null;
 
-    // Visual feedback when drag ends
-    card.addEventListener('dragend', (e) => {
-        card.classList.remove('dragging');
-        // Remove highlight from all columns
-        columns.forEach(col => col.classList.remove('drag-over'));
-    });
+taskCards.forEach((card) => {
+    registerDesktopDrag(card);
+    registerTouchDrag(card);
 });
 
-// ===== DRAG OVER COLUMNS =====
-columns.forEach(column => {
-    // Allow dropping on the column
+columns.forEach((column) => {
     column.addEventListener('dragover', (e) => {
-        e.preventDefault(); // Necessary to allow drop
+        e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
-        // Visual feedback - highlight the column
         column.classList.add('drag-over');
     });
 
-    // Remove highlight when dragging leaves the column
     column.addEventListener('dragleave', (e) => {
-        // Only remove if leaving the column itself, not child elements
         if (e.target === column) {
             column.classList.remove('drag-over');
         }
     });
 
-    // Handle dropping the task
     column.addEventListener('drop', (e) => {
         e.preventDefault();
         column.classList.remove('drag-over');
 
-        // Get the task ID being dropped
         const taskId = e.dataTransfer.getData('taskId');
-        // Get the new status from the column's data attribute
         const newStatus = column.dataset.status;
-
-        // Find the task card element
         const taskCard = document.querySelector(`[data-task-id="${taskId}"]`);
 
         if (taskCard) {
-            // Send update to backend
             updateTaskStatus(taskId, newStatus, taskCard);
         }
     });
 });
+
+function registerDesktopDrag(card) {
+    card.addEventListener('dragstart', (e) => {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('taskId', card.dataset.taskId);
+        card.classList.add('dragging');
+    });
+
+    card.addEventListener('dragend', () => {
+        card.classList.remove('dragging');
+        clearColumnHighlights();
+    });
+}
+
+function registerTouchDrag(card) {
+    card.addEventListener('touchstart', onTouchStart, { passive: true });
+    card.addEventListener('touchmove', onTouchMove, { passive: false });
+    card.addEventListener('touchend', onTouchEnd);
+    card.addEventListener('touchcancel', cancelTouchDrag);
+
+    function onTouchStart(e) {
+        if (isInteractiveElement(e.target)) {
+            return;
+        }
+
+        const touch = e.changedTouches[0];
+        const rect = card.getBoundingClientRect();
+
+        activeTouchDrag = {
+            card,
+            taskId: card.dataset.taskId,
+            startX: touch.clientX,
+            startY: touch.clientY,
+            lastX: touch.clientX,
+            lastY: touch.clientY,
+            offsetX: touch.clientX - rect.left,
+            offsetY: touch.clientY - rect.top,
+            width: rect.width,
+            isDragging: false
+        };
+    }
+
+    function onTouchMove(e) {
+        if (!activeTouchDrag || activeTouchDrag.card !== card) {
+            return;
+        }
+
+        const touch = e.changedTouches[0];
+        activeTouchDrag.lastX = touch.clientX;
+        activeTouchDrag.lastY = touch.clientY;
+
+        const dx = touch.clientX - activeTouchDrag.startX;
+        const dy = touch.clientY - activeTouchDrag.startY;
+
+        if (!activeTouchDrag.isDragging) {
+            if (Math.hypot(dx, dy) < TOUCH_DRAG_THRESHOLD) {
+                return;
+            }
+
+            beginTouchDrag(activeTouchDrag);
+        }
+
+        e.preventDefault();
+        moveDraggedCard(activeTouchDrag, touch.clientX, touch.clientY);
+        highlightDropColumn(touch.clientX, touch.clientY);
+        autoScrollDuringDrag(touch.clientX, touch.clientY);
+    }
+
+    function onTouchEnd(e) {
+        if (!activeTouchDrag || activeTouchDrag.card !== card) {
+            return;
+        }
+
+        const dragState = activeTouchDrag;
+        activeTouchDrag = null;
+
+        if (!dragState.isDragging) {
+            return;
+        }
+
+        e.preventDefault();
+
+        const dropColumn = getColumnFromPoint(dragState.lastX, dragState.lastY);
+        finishTouchDrag(dragState.card);
+
+        if (!dropColumn) {
+            return;
+        }
+
+        const newStatus = dropColumn.dataset.status;
+        updateTaskStatus(dragState.taskId, newStatus, dragState.card);
+    }
+}
+
+function beginTouchDrag(dragState) {
+    const { card, width } = dragState;
+    dragState.isDragging = true;
+    card.classList.add('dragging', 'touch-dragging');
+    card.style.width = `${width}px`;
+    card.style.position = 'fixed';
+    card.style.zIndex = '1300';
+    card.style.pointerEvents = 'none';
+}
+
+function moveDraggedCard(dragState, clientX, clientY) {
+    const { card, offsetX, offsetY } = dragState;
+    card.style.left = `${clientX - offsetX}px`;
+    card.style.top = `${clientY - offsetY}px`;
+}
+
+function finishTouchDrag(card) {
+    card.classList.remove('dragging', 'touch-dragging');
+    card.style.position = '';
+    card.style.left = '';
+    card.style.top = '';
+    card.style.width = '';
+    card.style.zIndex = '';
+    card.style.pointerEvents = '';
+    clearColumnHighlights();
+}
+
+function cancelTouchDrag() {
+    if (!activeTouchDrag) {
+        return;
+    }
+
+    const dragState = activeTouchDrag;
+    activeTouchDrag = null;
+
+    if (dragState.isDragging) {
+        finishTouchDrag(dragState.card);
+    }
+}
+
+function highlightDropColumn(clientX, clientY) {
+    clearColumnHighlights();
+    const targetColumn = getColumnFromPoint(clientX, clientY);
+
+    if (targetColumn) {
+        targetColumn.classList.add('drag-over');
+    }
+}
+
+function getColumnFromPoint(clientX, clientY) {
+    const element = document.elementFromPoint(clientX, clientY);
+    if (!element) {
+        return null;
+    }
+
+    const directContent = element.closest('.column-content');
+    if (directContent) {
+        return directContent;
+    }
+
+    const columnContainer = element.closest('.kanban-column');
+    return columnContainer ? columnContainer.querySelector('.column-content') : null;
+}
+
+function autoScrollDuringDrag(clientX, clientY) {
+    if (clientY < AUTO_SCROLL_EDGE_PX) {
+        window.scrollBy(0, -AUTO_SCROLL_STEP);
+    } else if (window.innerHeight - clientY < AUTO_SCROLL_EDGE_PX) {
+        window.scrollBy(0, AUTO_SCROLL_STEP);
+    }
+
+    const hoveredColumn = getColumnFromPoint(clientX, clientY);
+    if (!hoveredColumn) {
+        return;
+    }
+
+    const rect = hoveredColumn.getBoundingClientRect();
+    const withinTopEdge = clientY - rect.top;
+    const withinBottomEdge = rect.bottom - clientY;
+
+    if (withinTopEdge > 0 && withinTopEdge < 56) {
+        hoveredColumn.scrollTop -= AUTO_SCROLL_STEP;
+    } else if (withinBottomEdge > 0 && withinBottomEdge < 56) {
+        hoveredColumn.scrollTop += AUTO_SCROLL_STEP;
+    }
+}
+
+function clearColumnHighlights() {
+    columns.forEach((col) => col.classList.remove('drag-over'));
+}
+
+function isInteractiveElement(element) {
+    return Boolean(element.closest('a, button, input, textarea, select, label'));
+}
 
 // ===== BACKEND COMMUNICATION =====
 /**
@@ -67,6 +234,11 @@ columns.forEach(column => {
  * @param {Element} taskCard - The DOM element of the task
  */
 function updateTaskStatus(taskId, newStatus, taskCard) {
+    const currentStatus = taskCard.closest('.column-content')?.dataset.status;
+    if (currentStatus === newStatus) {
+        return;
+    }
+
     // Construct the URL for the backend route
     const url = `/tasks/update_status/${taskId}/${newStatus}`;
 
