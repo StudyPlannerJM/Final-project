@@ -130,9 +130,19 @@ input[type="submit"]:hover {
     color: #721c24;
 }
 
+.flashes .danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
 .flashes .success {
     background-color: #d4edda;
     color: #155724;
+}
+
+.flashes .info {
+    background-color: #d1ecf1;
+    color: #0c5460;
 }
 
 /* Error messages */

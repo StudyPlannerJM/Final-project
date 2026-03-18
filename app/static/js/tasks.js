@@ -3,11 +3,11 @@ let taskIdToDelete = null;
 
 function showDeleteModal(taskId) {
     taskIdToDelete = taskId;
-    document.getElementById('deleteModal').style.display = 'flex';
+    document.getElementById('deleteModal').hidden = false;
 }
 
 function closeDeleteModal() {
-    document.getElementById('deleteModal').style.display = 'none';
+    document.getElementById('deleteModal').hidden = true;
     taskIdToDelete = null;
 }
 
@@ -27,4 +27,18 @@ document.addEventListener('click', function(event) {
     if (event.target === modal) {
         closeDeleteModal();
     }
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const modal = document.getElementById('deleteModal');
+    if (modal) {
+        modal.hidden = true;
+    }
+
+    document.querySelectorAll('.task-category[data-category-color]').forEach(function (categoryBadge) {
+        const color = categoryBadge.getAttribute('data-category-color');
+        if (color) {
+            categoryBadge.style.setProperty('--category-color', color);
+        }
+    });
 });

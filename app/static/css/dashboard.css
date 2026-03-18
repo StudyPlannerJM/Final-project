@@ -245,12 +245,103 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    .dashboard-container {
+        padding: 12px;
+    }
+
+    .welcome-section {
+        margin-bottom: 20px;
+    }
+
+    .welcome-section h1 {
+        font-size: 1.5rem;
+    }
+
+    .welcome-subtitle {
+        font-size: 1rem;
+    }
+
+    .section {
+        margin-bottom: 28px;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        margin-bottom: 14px;
+    }
+
     .stats-grid,
     .stats-grid.four-cols {
         grid-template-columns: 1fr;
+        gap: 12px;
     }
-    
+
+    .stat-card {
+        padding: 16px;
+        gap: 12px;
+    }
+
+    .stat-icon {
+        font-size: 2rem;
+    }
+
+    .stat-content h3 {
+        font-size: 1.6rem;
+    }
+
     .quick-actions {
         grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .action-btn {
+        justify-content: flex-start;
+        padding: 14px 16px;
+    }
+
+    .task-item {
+        flex-wrap: wrap;
+        align-items: flex-start;
+        padding: 14px;
+        gap: 10px;
+    }
+
+    .task-info {
+        min-width: 0;
+    }
+
+    .task-info h4 {
+        word-break: break-word;
+    }
+
+    .task-meta {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .task-edit-btn {
+        margin-left: auto;
+    }
+}
+
+@media (max-width: 520px) {
+    .welcome-section h1 {
+        font-size: 1.3rem;
+    }
+
+    .stat-content h3 {
+        font-size: 1.35rem;
+    }
+
+    .task-item {
+        display: grid;
+        grid-template-columns: auto 1fr;
+    }
+
+    .task-edit-btn {
+        grid-column: 1 / -1;
+        width: 100%;
+        text-align: center;
+        margin-left: 0;
     }
 }

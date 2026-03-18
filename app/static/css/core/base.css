@@ -46,6 +46,31 @@ body {
     overflow-x: hidden;
 }
 
+img,
+svg,
+video,
+canvas,
+iframe {
+    max-width: 100%;
+    height: auto;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.main-content h1,
+.main-content h2,
+.main-content h3,
+.main-content h4,
+.main-content p,
+.main-content span,
+.main-content a,
+.main-content small,
+.main-content li {
+    overflow-wrap: anywhere;
+}
+
 /* Decorative blurred shapes for dashboard background */
 
 /* Layout */
@@ -169,4 +194,69 @@ body {
     font-size: 1.5em; 
     cursor: pointer; 
     padding: 5px; 
+}
+
+@media (max-width: 992px) {
+    .greeting-text {
+        font-size: 0.95em;
+    }
+
+    .header-left h1 {
+        font-size: 1.5em;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        padding: 14px;
+    }
+
+    .top-header {
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .header-left {
+        width: 100%;
+    }
+
+    .header-left h1 {
+        font-size: 1.25em;
+        margin-left: 12px;
+    }
+
+    .header-right {
+        width: 100%;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .user-greeting {
+        padding: 6px 10px;
+        gap: 6px;
+    }
+
+    .user-avatar {
+        margin-right: 0;
+    }
+
+    .styled-logout-btn {
+        padding: 7px 12px;
+    }
+}
+
+@media (max-width: 520px) {
+    .greeting-text {
+        display: none;
+    }
+
+    .styled-logout-btn {
+        padding: 7px 10px;
+        font-size: 0.9em;
+    }
+
+    .top-header {
+        margin-bottom: 14px;
+    }
 }

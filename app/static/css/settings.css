@@ -237,3 +237,64 @@
 .about-project-note i {
     color: var(--primary-color);
 }
+
+@media (max-width: 900px) {
+    .settings-wrapper {
+        flex-direction: column;
+    }
+
+    .settings-nav {
+        flex: 1 1 auto;
+    }
+
+    .settings-nav ul {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .settings-nav li {
+        flex: 1 1 180px;
+    }
+
+    .settings-nav a {
+        margin-bottom: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .settings-wrapper {
+        gap: 14px;
+    }
+
+    .settings-section {
+        padding: 16px;
+    }
+
+    .about-hero {
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .about-title {
+        font-size: 1.3rem;
+    }
+
+    .about-version {
+        margin-left: 0;
+    }
+
+    .about-feature {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .about-creators {
+        flex-direction: column;
+    }
+
+    .about-creator-card {
+        width: 100%;
+    }
+}

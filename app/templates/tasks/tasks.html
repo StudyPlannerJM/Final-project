@@ -5,7 +5,8 @@
 
 {% block page_title %}Tasks{% endblock %}
 
-{% block extra_css %}
+{% block head_extra %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/kanban.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tasks.css') }}">
 {% endblock %}
 
@@ -36,7 +37,7 @@
                                 </p>
                             {% endif %}
                             {% if task.task_category %}
-                            <span class="task-category" style="--category-color: {{ task.task_category.color }}; background-color: var(--category-color);">
+                            <span class="task-category" data-category-color="{{ task.task_category.color }}">
                                 {% if task.task_category.icon %}{{ task.task_category.icon }}{% endif %}
                                 {{ task.task_category.name }}
                             </span>
@@ -74,7 +75,7 @@
                                 </p>
                             {% endif %}
                            {% if task.task_category %}
-                            <span class="task-category" style="--category-color: {{ task.task_category.color }}; background-color: var(--category-color);">
+                            <span class="task-category" data-category-color="{{ task.task_category.color }}">
                                 {% if task.task_category.icon %}{{ task.task_category.icon }}{% endif %}
                                 {{ task.task_category.name }}
                             </span>
@@ -112,7 +113,7 @@
                                 </p>
                             {% endif %}
                             {% if task.task_category %}
-                            <span class="task-category" style="--category-color: {{ task.task_category.color }}; background-color: var(--category-color);">
+                            <span class="task-category" data-category-color="{{ task.task_category.color }}">
                                 {% if task.task_category.icon %}{{ task.task_category.icon }}{% endif %}
                                 {{ task.task_category.name }}
                             </span>
@@ -132,7 +133,7 @@
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" class="modal-overlay" style="display: none;">
+    <div id="deleteModal" class="modal-overlay" hidden>
         <div class="modal-dialog delete-modal">
             <div class="modal-header">
                 <h3>Confirm Delete</h3>

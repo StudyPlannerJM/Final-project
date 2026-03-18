@@ -333,3 +333,41 @@
 .delete-modal .btn-danger:hover {
     background-color: #c82333;
 }
+
+@media (max-width: 768px) {
+    .task-item {
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .task-actions {
+        width: 100%;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 600px) {
+    .delete-modal {
+        width: calc(100% - 24px);
+    }
+
+    .delete-modal .modal-header,
+    .delete-modal .modal-body,
+    .delete-modal .modal-footer {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .delete-modal .modal-footer {
+        flex-direction: column-reverse;
+        justify-content: stretch;
+    }
+
+    .delete-modal .modal-footer .btn,
+    .delete-modal .modal-footer button {
+        width: 100%;
+        margin-right: 0;
+    }
+}

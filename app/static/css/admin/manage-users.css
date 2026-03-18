@@ -1,0 +1,241 @@
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.admin-user-count {
+    margin: 0;
+    color: var(--muted-color, #888);
+}
+
+.users-table-wrapper {
+    background: var(--card-bg, #fff);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow-x: auto;
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.users-table thead tr {
+    background: var(--primary-color, #6750a4);
+    color: #fff;
+}
+
+.users-table th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    color: #fff;
+}
+
+.users-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color, #e9ecef);
+    color: #000;
+}
+
+.users-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.users-table tbody tr:hover {
+    background: var(--hover-bg, #f5f0ff);
+}
+
+.user-icon {
+    margin-right: 0.4rem;
+    opacity: 0.6;
+}
+
+.self-indicator {
+    color: var(--muted-color, #888);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.badge-admin {
+    background: #ede7f6;
+    color: #6200ea;
+}
+
+.badge-user {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.action-cell {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.btn-icon:hover {
+    opacity: 0.85;
+}
+
+.btn-edit {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.btn-delete {
+    background: #fce4ec;
+    color: #c62828;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--muted-color, #888);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.admin-delete-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.admin-delete-modal.open {
+    display: flex;
+}
+
+.admin-delete-dialog {
+    background: var(--card-bg, #fff);
+    border-radius: 14px;
+    padding: 2rem 2.25rem;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+    text-align: center;
+}
+
+.admin-delete-icon {
+    font-size: 2.75rem;
+    margin-bottom: 0.75rem;
+    color: #c62828;
+}
+
+.admin-delete-title {
+    margin: 0 0 0.5rem;
+    font-size: 1.15rem;
+    color: var(--text-color, #1a1a2e);
+}
+
+.admin-delete-message {
+    margin: 0 0 0.4rem;
+    color: var(--muted-color, #555);
+    font-size: 0.93rem;
+    line-height: 1.5;
+}
+
+.admin-delete-note {
+    margin: 0 0 1.5rem;
+    font-size: 0.83rem;
+    color: var(--muted-color, #888);
+}
+
+.admin-delete-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.admin-delete-btn {
+    padding: 0.55rem 1.4rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.88rem;
+}
+
+.admin-delete-btn.cancel {
+    border: 1px solid var(--border-color, #ddd);
+    background: var(--card-bg, #fff);
+    color: var(--text-color, #333);
+}
+
+.admin-delete-btn.confirm {
+    border: none;
+    background: #c62828;
+    color: #fff;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .admin-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .users-table-wrapper {
+        padding: 0.9rem;
+    }
+
+    .users-table {
+        min-width: 680px;
+    }
+
+    .users-table th,
+    .users-table td {
+        padding: 0.6rem 0.7rem;
+    }
+
+    .action-cell {
+        min-width: 160px;
+    }
+}
+
+@media (max-width: 520px) {
+    .admin-delete-dialog {
+        width: calc(100% - 24px);
+        padding: 1.25rem 1rem;
+    }
+
+    .admin-delete-actions {
+        flex-direction: column;
+    }
+
+    .admin-delete-btn {
+        width: 100%;
+    }
+}

@@ -1,87 +1,47 @@
-@media (prefers-color-scheme: dark) {
-    body, .kanban-container {
-        background: #181a1b !important;
-        color: #f1f1f1 !important;
-    }
-    .kanban-board {
-        background: #23272a;
-        border-radius: 12px;
-        box-shadow: 0 2px 16px rgba(0,0,0,0.7);
-    }
-    .kanban-column {
-        background: #23272a;
-        border: 1px solid #333;
-    }
-    .column-header {
-        background: #23272a;
-        color: #f1f1f1;
-        border-bottom: 1px solid #333;
-    }
-    .task-card {
-        background: #222327;
-        color: #f1f1f1;
-        border: 1px solid #333;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-    }
-    .task-card .task-description,
-    .task-card .task-due-date,
-    .task-category {
-        color: #b3b3b3;
-    }
-    .task-category {
-        border: 1px solid #444;
-    }
-    .add-task-button a,
-    .btn-primary {
-        background: #2d8cff;
-        color: #fff;
-        border: none;
-    }
-    .btn-secondary {
-        background: #444;
-        color: #fff;
-    }
-    .btn-danger {
-        background: #ff6b81;
-        color: #fff;
-    }
-    .btn:hover {
-        filter: brightness(1.1);
-    }
+.task-category {
+    background-color: var(--category-color, #e3f2fd);
 }
-@media (prefers-color-scheme: dark) {
-    .modal-overlay {
-        background: rgba(0, 0, 0, 0.7);
-    }
-    .delete-modal {
-        background: #181a1b;
-        color: #f1f1f1;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.7);
-    }
-    .delete-modal .modal-header {
-        border-bottom: 1px solid #333;
-    }
-    .delete-modal .modal-header h3 {
-        color: #ff6b81;
-    }
-    .delete-modal .modal-close {
-        color: #bbb;
-    }
-    .delete-modal .modal-close:hover {
-        color: #fff;
-    }
-    .delete-modal .modal-body {
-        color: #f1f1f1;
-    }
-    .warning-icon {
-        color: #ffd966;
-    }
-    .warning-text {
-        color: #ff6b81;
-    }
-    .delete-modal .modal-footer {
-        border-top: 1px solid #333;
-    }
+
+body.dark-theme .modal-overlay {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+body.dark-theme .delete-modal {
+    background: var(--bg-color-secondary);
+    color: var(--text-color-primary);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+}
+
+body.dark-theme .delete-modal .modal-header {
+    border-bottom: 1px solid var(--border-color);
+}
+
+body.dark-theme .delete-modal .modal-header h3 {
+    color: #ff6b81;
+}
+
+body.dark-theme .delete-modal .modal-close {
+    color: var(--text-color-secondary);
+}
+
+body.dark-theme .delete-modal .modal-close:hover {
+    color: #fff;
+}
+
+body.dark-theme .delete-modal .modal-body {
+    color: var(--text-color-primary);
+}
+
+body.dark-theme .warning-icon {
+    color: #ffd966;
+}
+
+body.dark-theme .warning-text {
+    color: #ff6b81;
+}
+
+body.dark-theme .delete-modal .modal-footer {
+    border-top: 1px solid var(--border-color);
 }
 /* Delete Modal Styles */
 .modal-overlay {
@@ -95,6 +55,10 @@
     align-items: center;
     justify-content: center;
     z-index: 1000;
+}
+
+.modal-overlay[hidden] {
+    display: none !important;
 }
 
 .delete-modal {
@@ -171,4 +135,24 @@
     display: flex;
     gap: 10px;
     justify-content: flex-end;
+}
+
+@media (max-width: 600px) {
+    .delete-modal {
+        width: calc(100% - 24px);
+    }
+
+    .delete-modal .modal-body {
+        padding: 20px 14px;
+    }
+
+    .delete-modal .modal-footer {
+        flex-direction: column-reverse;
+        padding: 12px 14px;
+    }
+
+    .delete-modal .modal-footer .btn {
+        width: 100%;
+        margin-right: 0;
+    }
 }

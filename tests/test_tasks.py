@@ -84,6 +84,14 @@ class TestTasksIndex:
         assert b'My Task' in response.data
         assert b'Other User Task' not in response.data
 
+    def test_index_loads_tasks_stylesheets(self, login_user):
+        """Test tasks page includes task-specific stylesheets"""
+        response = login_user.get('/tasks/')
+
+        assert response.status_code == 200
+        assert b'/static/css/kanban.css' in response.data
+        assert b'/static/css/tasks.css' in response.data
+
 
 class TestUpdateStatus:
     """Test update_status route (AJAX endpoint)"""
