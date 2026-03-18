@@ -45,6 +45,11 @@
     .day-date {
         font-size: 0.65rem;
     }
+
+    /* Mobile week header: avoid showing duplicated date (e.g., 16 + Mar 16) */
+    .week-days-header .day-date {
+        display: none;
+    }
     
     .week-header h2 {
         font-size: 1.2rem;
