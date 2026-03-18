@@ -41,7 +41,7 @@
 
             <div class="connection-actions">
                 {% if calendar_connected %}
-                    <form method="POST" action="{{ url_for('calendar.sync_existing_tasks') }}" style="margin-bottom: 8px;">
+                    <form method="POST" action="{{ url_for('calendar.sync_existing_tasks') }}" class="sync-existing-tasks-form">
                         <button type="submit" class="btn-sync-mini" title="Sync all unsynced tasks">
                             <i class="fas fa-sync-alt"></i> Sync All Tasks
                         </button>
@@ -136,7 +136,7 @@
         </div>
 
         <!-- Month Calendar Grid -->
-        <div class="month-calendar-grid" id="monthView" style="display: none;">
+        <div class="month-calendar-grid is-hidden" id="monthView">
             <div class="month-weekday-headers">
                 <div class="month-weekday">Mon</div>
                 <div class="month-weekday">Tue</div>
@@ -151,7 +151,7 @@
             </div>
         </div>
 
-        <div class="day-calendar-view" id="dayView" style="display: none;">
+        <div class="day-calendar-view is-hidden" id="dayView">
             <div class="day-header-large">
                 <h3 id="dayViewDateHeader">{{ target_date.strftime('%A, %B %d, %Y') }}</h3>
             </div>
@@ -216,7 +216,7 @@
                 <span class="detail-value" id="detailStatus"></span>
             </div>
 
-            <div class="detail-row" id="detailSyncedRow" style="display: none;">
+            <div class="detail-row is-hidden" id="detailSyncedRow">
                 <span class="detail-label"><i class="fas fa-sync"></i> Synced:</span>
                 <span class="detail-value" id="detailSynced"></span>
             </div>

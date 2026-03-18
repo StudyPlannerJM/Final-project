@@ -41,13 +41,13 @@ document.addEventListener('DOMContentLoaded', function() {
     function showSelectedFile(file) {
         fileName.textContent = file.name;
         dropZone.querySelector('.file-upload-content').style.display = 'none';
-        fileSelected.style.display = 'flex';
+        fileSelected.classList.remove('is-hidden');
         
         // Show OCR option for PDF files
         if (file.name.toLowerCase().endsWith('.pdf')) {
-            ocrOption.style.display = 'block';
+            ocrOption.classList.remove('is-hidden');
         } else {
-            ocrOption.style.display = 'none';
+            ocrOption.classList.add('is-hidden');
         }
     }
     
@@ -55,8 +55,8 @@ document.addEventListener('DOMContentLoaded', function() {
     removeFile.addEventListener('click', function() {
         fileInput.value = '';
         dropZone.querySelector('.file-upload-content').style.display = 'flex';
-        fileSelected.style.display = 'none';
-        ocrOption.style.display = 'none';
+        fileSelected.classList.add('is-hidden');
+        ocrOption.classList.add('is-hidden');
     });
     
     // Handle form submission

@@ -2,6 +2,14 @@
    REUSABLE COMPONENTS
    ================================================ */
 
+.is-hidden {
+    display: none !important;
+}
+
+.inline-form {
+    display: inline;
+}
+
 /* Task List */
 .task-list-section { 
     margin-top: 30px; 

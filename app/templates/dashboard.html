@@ -151,7 +151,7 @@
                     <h4>{{ task.title }}</h4>
                     <p class="task-meta">
                         {% if task.task_category %}
-                            <span class="task-category" style="--category-color: {{ task.task_category.color }};">
+                            <span class="task-category" data-category-color="{{ task.task_category.color }}">
                                 {{ task.task_category.name }}
                             </span>
                         {% endif %}

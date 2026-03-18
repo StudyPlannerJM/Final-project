@@ -298,11 +298,23 @@ async function navigateToDate(date, view = null) {
 // =============================================================================
 
 function renderCurrentView() {
+    const hideView = (element) => {
+        if (!element) return;
+        element.classList.add('is-hidden');
+        element.style.display = 'none';
+    };
+
+    const showView = (element, displayValue) => {
+        if (!element) return;
+        element.classList.remove('is-hidden');
+        element.style.display = displayValue;
+    };
+
     // Hide all views
-    domCache.weekView.style.display = 'none';
-    domCache.monthView.style.display = 'none';
-    domCache.dayView.style.display = 'none';
-    domCache.weekDaysHeader.style.display = 'none';
+    hideView(domCache.weekView);
+    hideView(domCache.monthView);
+    hideView(domCache.dayView);
+    hideView(domCache.weekDaysHeader);
 
     // Update view buttons
     document.querySelectorAll('.view-btn').forEach(btn => {
@@ -314,14 +326,14 @@ function renderCurrentView() {
 
     // Render active view
     if (activeView === 'week') {
-        domCache.weekView.style.display = 'grid';
-        domCache.weekDaysHeader.style.display = 'grid';
+        showView(domCache.weekView, 'grid');
+        showView(domCache.weekDaysHeader, 'grid');
         renderWeekView(currentDate, calendarEvents, tasks);
     } else if (activeView === 'month') {
-        domCache.monthView.style.display = 'block';
+        showView(domCache.monthView, 'block');
         renderMonthView(currentMonth, currentYear, currentDate, calendarEvents, tasks);
     } else if (activeView === 'day') {
-        domCache.dayView.style.display = 'block';
+        showView(domCache.dayView, 'block');
         renderDayView(currentDate, calendarEvents, tasks);
     }
 

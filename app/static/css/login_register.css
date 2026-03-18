@@ -57,6 +57,23 @@ h2 {
     color: #1e3c72;
 }
 
+.auth-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1.2rem;
+}
+
+.auth-logo {
+    width: 200px;
+    height: auto;
+    margin-bottom: 0.5rem;
+}
+
+.auth-title {
+    margin-bottom: 0;
+}
+
 /* Form elements */
 form p {
     margin-bottom: 1.2rem;
@@ -146,10 +163,11 @@ input[type="submit"]:hover {
 }
 
 /* Error messages */
-span[style*="color: red"] {
+.field-error {
     font-size: 0.85rem;
     display: block;
     margin-top: 0.3rem;
+    color: red;
 }
 
 /* Links */

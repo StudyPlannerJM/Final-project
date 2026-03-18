@@ -9,9 +9,9 @@
 </head>
 <body>
     <div class="container">
-    <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 1.2rem;">
-        <img src="{{ url_for('static', filename='img/braindump-logo-full-bg.png') }}" alt="BrainDump" style="width:200px; height:auto; margin-bottom: 0.5rem;">
-        <h2 style="margin-bottom: 0;">{{ title }}</h2>
+    <div class="auth-header">
+        <img src="{{ url_for('static', filename='img/braindump-logo-full-bg.png') }}" alt="BrainDump" class="auth-logo">
+        <h2 class="auth-title">{{ title }}</h2>
     </div>
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -27,12 +27,12 @@
         <div class="form-group">
             <label for="email">{{ form.email.label.text }}</label>
             {{ form.email(class_="form-control", id="email", size=32) }}
-            {% for error in form.email.errors %}<span style="color: red;">[{{ error }}]</span>{% endfor %}
+            {% for error in form.email.errors %}<span class="field-error">[{{ error }}]</span>{% endfor %}
         </div>
         <div class="form-group">
             <label for="password">{{ form.password.label.text }}</label>
             {{ form.password(class_="form-control", id="password", size=32) }}
-            {% for error in form.password.errors %}<span style="color: red;">[{{ error }}]</span>{% endfor %}
+            {% for error in form.password.errors %}<span class="field-error">[{{ error }}]</span>{% endfor %}
         </div>
         <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
         <p>{{ form.submit() }}</p>

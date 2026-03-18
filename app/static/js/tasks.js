@@ -21,19 +21,33 @@ function confirmDelete() {
     }
 }
 
-// Close modal when clicking outside
-document.addEventListener('click', function(event) {
-    const modal = document.getElementById('deleteModal');
-    if (event.target === modal) {
-        closeDeleteModal();
-    }
-});
-
 document.addEventListener('DOMContentLoaded', function () {
     const modal = document.getElementById('deleteModal');
     if (modal) {
         modal.hidden = true;
     }
+
+    const closeButtons = document.querySelectorAll('[data-task-delete-close]');
+    closeButtons.forEach(function (button) {
+        button.addEventListener('click', closeDeleteModal);
+    });
+
+    const confirmButton = document.getElementById('confirmDeleteBtn');
+    if (confirmButton) {
+        confirmButton.addEventListener('click', confirmDelete);
+    }
+
+    document.querySelectorAll('.delete-task-btn[data-task-id]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            showDeleteModal(button.getAttribute('data-task-id'));
+        });
+    });
+
+    document.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            closeDeleteModal();
+        }
+    });
 
     document.querySelectorAll('.task-category[data-category-color]').forEach(function (categoryBadge) {
         const color = categoryBadge.getAttribute('data-category-color');

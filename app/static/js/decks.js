@@ -7,7 +7,7 @@
  */
 function initializeColorPicker() {
     const colorInput = document.getElementById('color');
-    const preview = document.getElementById('color-preview');
+    const preview = document.getElementById('colorPreview');
     
     if (colorInput && preview) {
         // Set initial preview color
@@ -20,11 +20,27 @@ function initializeColorPicker() {
     }
 }
 
+function initializeDeckCardColors() {
+    document.querySelectorAll('.deck-card[data-color]').forEach((card) => {
+        const color = card.getAttribute('data-color');
+        if (!color) {
+            return;
+        }
+
+        const lightColor1 = color + '08';
+        const lightColor2 = color + '15';
+
+        card.style.setProperty('--deck-color', color);
+        card.style.setProperty('--deck-color-light1', lightColor1);
+        card.style.setProperty('--deck-color-light2', lightColor2);
+    });
+}
+
 /**
  * Set deck icon from suggestion buttons
  * @param {string} iconClass - Font Awesome icon class (e.g., 'fa-book')
  */
-function setIcon(iconClass) {
+function setIcon(iconClass, triggerButton) {
     const iconInput = document.getElementById('icon');
     if (iconInput) {
         iconInput.value = iconClass;
@@ -46,11 +62,22 @@ function setIcon(iconClass) {
             btn.style.color = '';
             btn.style.borderColor = '';
         });
-        
-        event.target.closest('.icon-btn').style.backgroundColor = '#3498db';
-        event.target.closest('.icon-btn').style.color = 'white';
-        event.target.closest('.icon-btn').style.borderColor = '#3498db';
+
+        if (triggerButton) {
+            triggerButton.style.backgroundColor = '#3498db';
+            triggerButton.style.color = 'white';
+            triggerButton.style.borderColor = '#3498db';
+        }
     }
+}
+
+function initializeIconButtons() {
+    document.querySelectorAll('.icon-btn[data-icon]').forEach((button) => {
+        button.addEventListener('click', function () {
+            const iconClass = button.getAttribute('data-icon');
+            setIcon(iconClass, button);
+        });
+    });
 }
 
 /**
@@ -141,5 +168,7 @@ function initializeDeleteButtons() {
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     initializeColorPicker();
+    initializeDeckCardColors();
+    initializeIconButtons();
     initializeDeleteButtons();
 });

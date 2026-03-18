@@ -1,15 +1,18 @@
 // AI Plan Generator - Form submission handler with loading indicator
 document.addEventListener('DOMContentLoaded', function() {
     const planForm = document.querySelector('.plan-form');
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const formSection = document.querySelector('.form-section');
+    const submitButton = document.querySelector('.btn-generate');
+    const progressFill = document.querySelector('.progress-bar-fill');
     
-    if (planForm) {
+    if (planForm && loadingIndicator && formSection && submitButton && progressFill) {
         planForm.addEventListener('submit', function() {
-            document.getElementById('loading-indicator').style.display = 'block';
-            document.querySelector('.form-section').style.opacity = '0.5';
-            document.querySelector('.btn-generate').disabled = true;
+            loadingIndicator.classList.remove('is-hidden');
+            formSection.style.opacity = '0.5';
+            submitButton.disabled = true;
             
             // Animate progress bar
-            const progressFill = document.querySelector('.progress-bar-fill');
             let width = 0;
             const interval = setInterval(() => {
                 if (width >= 90) {
