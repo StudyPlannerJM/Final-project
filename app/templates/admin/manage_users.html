@@ -59,23 +59,23 @@
         <tbody>
             {% for user in users %}
             <tr>
-                <td>{{ user.id }}</td>
-                <td>
+                <td data-label="ID">{{ user.id }}</td>
+                <td data-label="Username">
                     <i class="fas fa-user-circle user-icon"></i>
                     {{ user.username }}
                     {% if user.id == current_user.id %}
                         <small class="self-indicator">(you)</small>
                     {% endif %}
                 </td>
-                <td>{{ user.email }}</td>
-                <td>
+                <td data-label="Email">{{ user.email }}</td>
+                <td data-label="Role">
                     {% if user.is_admin %}
                         <span class="badge badge-admin"><i class="fas fa-shield-alt"></i> Admin</span>
                     {% else %}
                         <span class="badge badge-user"><i class="fas fa-user"></i> User</span>
                     {% endif %}
                 </td>
-                <td>
+                <td data-label="Actions" class="actions-col">
                     <div class="action-cell">
                         <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn-icon btn-edit">
                             <i class="fas fa-edit"></i> Edit
