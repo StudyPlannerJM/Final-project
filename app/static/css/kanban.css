@@ -22,6 +22,7 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
     max-width: 1400px;
+    align-items: start;
 }
 
 /* Individual Column Styling */
@@ -32,6 +33,7 @@
     display: flex;
     flex-direction: column;
     min-height: 600px;
+    min-width: 0;
 }
 
 .column-header {
@@ -63,6 +65,7 @@
     padding: 15px;
     overflow-y: auto;
     min-height: 400px;
+    max-height: calc(100vh - 320px);
     border: 2px dashed transparent;
     transition: all 0.3s ease;
 }
@@ -83,6 +86,7 @@
     cursor: move; /* Shows it's draggable */
     transition: all 0.2s ease;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    touch-action: pan-y;
 }
 
 .task-card:hover {
@@ -96,6 +100,12 @@
     transform: rotate(5deg);
 }
 
+.task-card.touch-dragging {
+    opacity: 0.92;
+    transform: scale(1.02);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.25);
+}
+
 .task-card-header {
     margin-bottom: 10px;
 }
@@ -104,6 +114,7 @@
     margin: 0;
     color: #333;
     font-size: 1.1em;
+    line-height: 1.35;
 }
 
 .task-description {
@@ -145,6 +156,10 @@
     padding: 6px 8px;
     font-size: 0.85em;
     min-width: fit-content;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Add Task Button */
@@ -168,11 +183,126 @@
     .kanban-board {
         grid-template-columns: repeat(2, 1fr);
     }
+
+    .column-content {
+        max-height: calc(100vh - 300px);
+    }
 }
 
 @media (max-width: 768px) {
+    .kanban-container {
+        padding: 12px;
+    }
+
+    .kanban-container h2 {
+        margin-bottom: 6px;
+        font-size: 1.25rem;
+    }
+
+    .kanban-container > p {
+        margin-bottom: 10px;
+    }
+
     .kanban-board {
         grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .kanban-column {
+        min-height: auto;
+        border-radius: 12px;
+    }
+
+    .column-header {
+        padding: 14px;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+    }
+
+    .column-header h3 {
+        font-size: 1rem;
+    }
+
+    .task-count {
+        font-size: 0.82rem;
+        padding: 4px 10px;
+    }
+
+    .column-content {
+        padding: 12px;
+        min-height: 0;
+        max-height: calc(100vh - 340px);
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .task-card {
+        padding: 12px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+
+    .task-card-header h4 {
+        font-size: 0.98rem;
+    }
+
+    .task-description {
+        font-size: 0.85rem;
+        margin: 7px 0;
+    }
+
+    .task-due-date {
+        font-size: 0.8rem;
+    }
+
+    .task-category {
+        font-size: 0.76rem;
+        padding: 3px 9px;
+    }
+
+    .task-actions {
+        gap: 6px;
+        margin-top: 10px;
+        padding-top: 8px;
+    }
+
+    .task-actions .btn {
+        min-height: 38px;
+        min-width: 38px;
+        border-radius: 10px;
+    }
+
+    .add-task-button {
+        padding: 12px;
+        position: sticky;
+        bottom: 0;
+        background: inherit;
+        z-index: 2;
+    }
+
+    .add-task-button .btn {
+        min-height: 42px;
+        border-radius: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .kanban-board {
+        gap: 10px;
+    }
+
+    .kanban-column {
+        min-height: auto;
+    }
+
+    .column-content {
+        max-height: calc(100vh - 322px);
+        padding: 10px;
+    }
+
+    .task-card {
+        padding: 10px;
     }
 }
 
