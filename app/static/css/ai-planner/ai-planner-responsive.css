@@ -61,15 +61,16 @@
     }
 
     .time-input-wrapper {
+        grid-template-columns: 1.25fr 0.75fr;
         gap: 8px;
     }
 
     .time-input-wrapper .time-number {
-        flex: 1.2;
+        min-width: 0;
     }
 
     .time-input-wrapper .time-unit {
-        flex: 1;
+        min-width: 0;
     }
 
     .error-message {
