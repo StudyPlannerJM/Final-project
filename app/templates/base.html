@@ -13,7 +13,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/core/forms.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/core/buttons.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/core/components.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/kanban.css') }}">
     {% block head_extra %}{% endblock %}
 </head>
 
@@ -70,6 +69,8 @@
                 </li>
             </ul>
         </nav>
+
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
         <main class="main-content">
             <header class="top-header">

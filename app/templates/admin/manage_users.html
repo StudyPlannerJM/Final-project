@@ -1,109 +1,10 @@
+<!doctype html>
 {% extends 'base.html' %}
 
 {% block title %}{{ title }} - BrainDump{% endblock %}
 
 {% block head_extra %}
-<style>
-    .admin-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-    }
-
-    .users-table-wrapper {
-        background: var(--card-bg, #fff);
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,.08);
-        overflow-x: auto;
-    }
-
-    .users-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: .95rem;
-    }
-
-    .users-table thead tr {
-        background: var(--primary-color, #6750a4);
-        color: #fff;
-    }
-
-    .users-table th {
-        padding: .75rem 1rem;
-        text-align: left;
-        color: #fff;
-    }
-
-    .users-table td {
-        padding: .75rem 1rem;
-        text-align: left;
-        border-bottom: 1px solid var(--border-color, #e9ecef);
-        color: #000;
-    }
-
-    .users-table tbody tr:last-child td {
-        border-bottom: none;
-    }
-
-    .users-table tbody tr:hover {
-        background: var(--hover-bg, #f5f0ff);
-    }
-
-    .badge {
-        display: inline-flex;
-        align-items: center;
-        gap: .3rem;
-        padding: .2rem .6rem;
-        border-radius: 20px;
-        font-size: .78rem;
-        font-weight: 600;
-    }
-
-    .badge-admin {
-        background: #ede7f6;
-        color: #6200ea;
-    }
-
-    .badge-user {
-        background: #e3f2fd;
-        color: #1565c0;
-    }
-
-    .action-cell {
-        display: flex;
-        gap: .5rem;
-        flex-wrap: wrap;
-    }
-
-    .btn-icon {
-        display: inline-flex;
-        align-items: center;
-        gap: .35rem;
-        padding: .35rem .75rem;
-        border-radius: 6px;
-        font-size: .82rem;
-        font-weight: 500;
-        border: none;
-        cursor: pointer;
-        text-decoration: none;
-        transition: opacity .2s;
-    }
-
-    .btn-icon:hover { opacity: .85; }
-
-    .btn-edit   { background: #e3f2fd; color: #1565c0; }
-    .btn-delete { background: #fce4ec; color: #c62828; }
-
-    .empty-state {
-        text-align: center;
-        padding: 3rem 1rem;
-        color: var(--muted-color, #888);
-    }
-
-    .empty-state i { font-size: 3rem; margin-bottom: 1rem; display: block; }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/manage-users.css') }}">
 {% endblock %}
 
 {% block page_title %}{{ title }}{% endblock %}
@@ -111,34 +12,23 @@
 {% block content %}
 
 <!-- ── Custom Confirm Modal ─────────────────────────────────────────────── -->
-<div id="adminDeleteModal"
-     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
-            align-items:center;justify-content:center;z-index:9999;">
-    <div style="background:var(--card-bg,#fff);border-radius:14px;padding:2rem 2.25rem;
-                max-width:420px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,.25);text-align:center;">
-        <div style="font-size:2.75rem;margin-bottom:.75rem;color:#c62828;">
+<div id="adminDeleteModal" class="admin-delete-modal">
+    <div class="admin-delete-dialog">
+        <div class="admin-delete-icon">
             <i class="fas fa-user-slash"></i>
         </div>
-        <h3 style="margin:0 0 .5rem;font-size:1.15rem;color:var(--text-color,#1a1a2e);">
+        <h3 class="admin-delete-title">
             Remove User Account
         </h3>
-        <p id="adminDeleteMessage"
-           style="margin:0 0 .4rem;color:var(--muted-color,#555);font-size:.93rem;line-height:1.5;"></p>
-        <p style="margin:0 0 1.5rem;font-size:.83rem;color:var(--muted-color,#888);">
+        <p id="adminDeleteMessage" class="admin-delete-message"></p>
+        <p class="admin-delete-note">
             All their tasks, study plans, and progress will be permanently removed.
         </p>
-        <div style="display:flex;gap:.75rem;justify-content:center;">
-            <button onclick="closeAdminDeleteModal()"
-                    style="padding:.55rem 1.4rem;border-radius:8px;
-                           border:1px solid var(--border-color,#ddd);
-                           background:var(--card-bg,#fff);color:var(--text-color,#333);
-                           cursor:pointer;font-size:.88rem;">
+        <div class="admin-delete-actions">
+            <button onclick="closeAdminDeleteModal()" class="admin-delete-btn cancel">
                 Cancel
             </button>
-            <button id="adminDeleteConfirmBtn"
-                    style="padding:.55rem 1.4rem;border-radius:8px;border:none;
-                           background:#c62828;color:#fff;
-                           cursor:pointer;font-size:.88rem;font-weight:600;">
+            <button id="adminDeleteConfirmBtn" class="admin-delete-btn confirm">
                 Delete Account
             </button>
         </div>
@@ -146,7 +36,7 @@
 </div>
 <!-- ──────────────────────────────────────────────────────────────────────── -->
 <div class="admin-header">
-    <p style="margin:0; color: var(--muted-color, #888);">
+    <p class="admin-user-count">
         Total users: <strong>{{ users | length }}</strong>
     </p>
     <a href="{{ url_for('admin.create_user') }}" class="btn btn-primary">
@@ -171,10 +61,10 @@
             <tr>
                 <td>{{ user.id }}</td>
                 <td>
-                    <i class="fas fa-user-circle" style="margin-right:.4rem; opacity:.6;"></i>
+                    <i class="fas fa-user-circle user-icon"></i>
                     {{ user.username }}
                     {% if user.id == current_user.id %}
-                        <small style="color: var(--muted-color, #888);">(you)</small>
+                        <small class="self-indicator">(you)</small>
                     {% endif %}
                 </td>
                 <td>{{ user.email }}</td>
@@ -224,11 +114,11 @@
         document.getElementById('adminDeleteMessage').textContent =
             'You are about to remove "' + username + '" from BrainDump.';
         const modal = document.getElementById('adminDeleteModal');
-        modal.style.display = 'flex';
+        modal.classList.add('open');
     }
 
     function closeAdminDeleteModal() {
-        document.getElementById('adminDeleteModal').style.display = 'none';
+        document.getElementById('adminDeleteModal').classList.remove('open');
         _pendingAdminDeleteForm = null;
     }
 

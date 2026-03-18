@@ -1,6 +1,18 @@
 /* Edit Task - Form Actions Styling */
 .form-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
     margin-top: 20px;
+}
+
+@media (max-width: 600px) {
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+        margin-right: 0;
+    }
 }

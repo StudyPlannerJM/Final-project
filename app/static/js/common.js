@@ -1,8 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     const themeToggleBtn = document.getElementById('theme-toggle');
     const sidebarToggleBtn = document.getElementById('sidebar-toggle');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
     const body = document.body;
     const sidebar = document.querySelector('.sidebar');
+    const mobileBreakpoint = window.matchMedia('(max-width: 768px)');
 
     // Theme Toggle
     if (themeToggleBtn) {
@@ -17,9 +19,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Sidebar Toggle
     if (sidebarToggleBtn && sidebar) {
+        const closeMobileSidebar = () => {
+            sidebar.classList.remove('open');
+            body.classList.remove('sidebar-open');
+        };
+
+        const syncSidebarMode = () => {
+            if (mobileBreakpoint.matches) {
+                sidebar.classList.remove('collapsed');
+            } else {
+                closeMobileSidebar();
+            }
+        };
+
         sidebarToggleBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
+            if (mobileBreakpoint.matches) {
+                const isOpen = sidebar.classList.toggle('open');
+                body.classList.toggle('sidebar-open', isOpen);
+            } else {
+                sidebar.classList.toggle('collapsed');
+            }
         });
+
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', closeMobileSidebar);
+        }
+
+        sidebar.querySelectorAll('.nav-link').forEach((link) => {
+            link.addEventListener('click', () => {
+                if (mobileBreakpoint.matches) {
+                    closeMobileSidebar();
+                }
+            });
+        });
+
+        if (mobileBreakpoint.addEventListener) {
+            mobileBreakpoint.addEventListener('change', syncSidebarMode);
+        } else {
+            mobileBreakpoint.addListener(syncSidebarMode);
+        }
+
+        syncSidebarMode();
     }
 
     // Floating Pomodoro Timer Widget
