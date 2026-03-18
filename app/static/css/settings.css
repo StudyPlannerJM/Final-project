@@ -72,6 +72,12 @@
     margin-bottom: 1rem;
 }
 
+.about-logo {
+    width: 180px;
+    height: auto;
+    margin-bottom: 0.5rem;
+}
+
 .about-hero-icon {
     width: 52px;
     height: 52px;

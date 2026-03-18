@@ -204,28 +204,163 @@
     .admin-header {
         flex-direction: column;
         align-items: stretch;
-        gap: 12px;
+        gap: 10px;
+        margin-bottom: 1rem;
+        padding: 12px;
+        border: 1px solid rgba(52, 152, 219, 0.2);
+        border-radius: 12px;
+        background: linear-gradient(180deg, rgba(52, 152, 219, 0.08) 0%, rgba(52, 152, 219, 0.02) 100%);
+    }
+
+    .admin-user-count {
+        font-size: 0.92rem;
+    }
+
+    .admin-header .btn {
+        width: 100%;
+        min-height: 44px;
+        justify-content: center;
+        font-weight: 700;
     }
 
     .users-table-wrapper {
-        padding: 0.9rem;
+        padding: 0.8rem;
+        border-radius: 12px;
+        overflow: visible;
     }
 
     .users-table {
-        min-width: 680px;
+        min-width: 0;
+        display: block;
     }
 
-    .users-table th,
+    .users-table thead {
+        display: none;
+    }
+
+    .users-table tbody {
+        display: grid;
+        gap: 10px;
+    }
+
+    .users-table tr {
+        display: block;
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 10px;
+        background: var(--bg-color-secondary, #fff);
+        padding: 10px;
+    }
+
     .users-table td {
-        padding: 0.6rem 0.7rem;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+        border-bottom: 1px dashed var(--border-color, #e9ecef);
+        padding: 8px 0;
+        font-size: 0.88rem;
+    }
+
+    .users-table td:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .users-table td::before {
+        content: attr(data-label);
+        flex: 0 0 84px;
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        color: var(--muted-color, #64748b);
+        padding-top: 2px;
+    }
+
+    .users-table tbody tr:hover {
+        background: var(--bg-color-secondary, #fff);
+    }
+
+    .user-icon {
+        margin-right: 0.35rem;
+    }
+
+    .self-indicator {
+        display: inline-block;
+        margin-left: 4px;
+        font-size: 0.75rem;
+    }
+
+    .actions-col {
+        align-items: flex-start;
+    }
+
+    .actions-col::before {
+        padding-top: 12px;
     }
 
     .action-cell {
-        min-width: 160px;
+        min-width: 0;
+        width: 100%;
+        gap: 8px;
+    }
+
+    .action-cell form {
+        flex: 1 1 calc(50% - 4px);
+    }
+
+    .btn-icon {
+        min-height: 40px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        justify-content: center;
+        padding: 8px 10px;
+    }
+
+    .action-cell .btn-edit,
+    .action-cell .btn-delete,
+    .action-cell form .btn-delete {
+        flex: 1 1 calc(50% - 4px);
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .empty-state {
+        padding: 2.2rem 0.9rem;
+    }
+
+    .empty-state i {
+        font-size: 2.3rem;
+        margin-bottom: 0.7rem;
     }
 }
 
 @media (max-width: 520px) {
+    .users-table td {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .users-table td::before {
+        flex: 0 0 auto;
+    }
+
+    .actions-col::before {
+        padding-top: 0;
+    }
+
+    .action-cell {
+        width: 100%;
+    }
+
+    .action-cell .btn-edit,
+    .action-cell .btn-delete,
+    .action-cell form,
+    .action-cell form .btn-delete {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+
     .admin-delete-dialog {
         width: calc(100% - 24px);
         padding: 1.25rem 1rem;

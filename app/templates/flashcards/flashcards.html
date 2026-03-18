@@ -25,9 +25,9 @@
         <div class="decks-grid">
             {% if decks %}
                 {% for deck in decks %}
-                    <div class="deck-card" data-color="{{ deck.color }}" style="border-left: 4px solid var(--deck-color);">
-                        <div class="deck-header" style="background: linear-gradient(135deg, var(--deck-color-light1), var(--deck-color-light2));">
-                            <div class="deck-icon" style="color: var(--deck-color);">
+                    <div class="deck-card" data-color="{{ deck.color }}">
+                        <div class="deck-header">
+                            <div class="deck-icon">
                                 <i class="fas {{ deck.icon or 'fa-folder' }}"></i>
                             </div>
                             <div class="deck-info">
@@ -102,7 +102,7 @@
         </div>
 
         {% if selected_deck %}
-            <div style="text-align: center; margin-bottom: 1.5rem;">
+            <div class="flashcards-back-link">
                 <a href="{{ url_for('flashcards.index') }}" class="btn btn-secondary btn-sm">
                     <i class="fas fa-arrow-left"></i> Back to All Decks
                 </a>
@@ -115,7 +115,7 @@
                     <div class="flashcard-wrapper">
                         <div class="flashcard-item" data-flashcard-id="{{ flashcard.id }}">
                             <!-- Deck indicator -->
-                            <div class="flashcard-deck-indicator" data-color="{{ flashcard.deck.color }}" style="background-color: var(--deck-indicator-color);">
+                            <div class="flashcard-deck-indicator" data-color="{{ flashcard.deck.color }}">
                                 <i class="fas {{ flashcard.deck.icon or 'fa-folder' }}"></i>
                                 <span>{{ flashcard.deck.name }}</span>
                             </div>

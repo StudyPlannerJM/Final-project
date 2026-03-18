@@ -44,7 +44,7 @@
                             {% endif %}
                             <div class="task-actions">
                                 <a href="{{ url_for('tasks.edit', task_id=task.id) }}" class="btn btn-sm btn-secondary task-action-btn task-action-edit" aria-label="Edit task" title="Edit task"><i class="fas fa-edit"></i></a>
-                                <button type="button" class="btn btn-sm btn-danger task-action-btn task-action-delete" onclick="showDeleteModal('{{ task.id }}')" aria-label="Delete task" title="Delete task"><i class="fas fa-trash"></i></button>
+                                <button type="button" class="btn btn-sm btn-danger task-action-btn task-action-delete delete-task-btn" data-task-id="{{ task.id }}" aria-label="Delete task" title="Delete task"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
                     {% endfor %}
@@ -82,7 +82,7 @@
                             {% endif %}
                             <div class="task-actions">
                                 <a href="{{ url_for('tasks.edit', task_id=task.id) }}" class="btn btn-sm btn-secondary task-action-btn task-action-edit" aria-label="Edit task" title="Edit task"><i class="fas fa-edit"></i></a>
-                                <button type="button" class="btn btn-sm btn-danger task-action-btn task-action-delete" onclick="showDeleteModal('{{ task.id }}')" aria-label="Delete task" title="Delete task"><i class="fas fa-trash"></i></button>
+                                <button type="button" class="btn btn-sm btn-danger task-action-btn task-action-delete delete-task-btn" data-task-id="{{ task.id }}" aria-label="Delete task" title="Delete task"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
                     {% endfor %}
@@ -120,7 +120,7 @@
                             {% endif %}
                             <div class="task-actions">
                                 <a href="{{ url_for('tasks.edit', task_id=task.id) }}" class="btn btn-sm btn-secondary task-action-btn task-action-edit" aria-label="Edit task" title="Edit task"><i class="fas fa-edit"></i></a>
-                                <button type="button" class="btn btn-sm btn-danger task-action-btn task-action-delete" onclick="showDeleteModal('{{ task.id }}')" aria-label="Delete task" title="Delete task"><i class="fas fa-trash"></i></button>
+                                <button type="button" class="btn btn-sm btn-danger task-action-btn task-action-delete delete-task-btn" data-task-id="{{ task.id }}" aria-label="Delete task" title="Delete task"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
                     {% endfor %}
@@ -137,7 +137,7 @@
         <div class="modal-dialog delete-modal">
             <div class="modal-header">
                 <h3>Confirm Delete</h3>
-                <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+                <button type="button" class="modal-close" data-task-delete-close>&times;</button>
             </div>
             <div class="modal-body">
                 <div class="warning-icon">
@@ -147,8 +147,8 @@
                 <p class="warning-text">This action cannot be undone.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
-                <button type="button" class="btn btn-danger" onclick="confirmDelete()">Yes, Delete</button>
+                <button type="button" class="btn btn-secondary" data-task-delete-close>Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Yes, Delete</button>
             </div>
         </div>
     </div>

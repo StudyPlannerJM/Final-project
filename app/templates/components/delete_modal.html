@@ -1,10 +1,10 @@
 <!doctype html>
 <!-- Reusable Delete Confirmation Modal -->
-<div id="deleteModal" class="modal-overlay" style="display: none;">
+<div id="deleteModal" class="modal-overlay is-hidden">
     <div class="modal-dialog delete-modal">
         <div class="modal-header">
             <h3>Confirm Delete</h3>
-            <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+            <button type="button" class="modal-close" data-delete-modal-close>&times;</button>
         </div>
         <div class="modal-body">
             <div class="warning-icon">
@@ -14,7 +14,7 @@
             <p class="warning-text">This action cannot be undone.</p>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+            <button type="button" class="btn btn-secondary" data-delete-modal-close>Cancel</button>
             <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Yes, Delete</button>
         </div>
     </div>

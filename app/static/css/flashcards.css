@@ -20,6 +20,11 @@
     color: var(--accent-color);
 }
 
+.flashcards-back-link {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
 .flashcards-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -296,31 +301,188 @@
 }
 
 @media (max-width: 768px) {
+    .flashcards-header {
+        background: linear-gradient(180deg, rgba(52, 152, 219, 0.09) 0%, rgba(52, 152, 219, 0.03) 100%);
+        border: 1px solid rgba(52, 152, 219, 0.18);
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 16px;
+    }
+
+    .flashcards-header .header-actions {
+        width: 100%;
+    }
+
+    .flashcards-header .header-actions .btn {
+        width: 100%;
+        min-height: 44px;
+        justify-content: center;
+    }
+
     .flashcards-list {
         grid-template-columns: 1fr;
-        gap: 20px;
+        gap: 14px;
+        padding: 0;
     }
     
     .flashcards-header {
         flex-direction: column;
-        gap: 15px;
+        gap: 12px;
         align-items: flex-start;
     }
 
     .flashcards-header h2 {
-        font-size: 1.5em;
+        font-size: 1.2rem;
+        line-height: 1.35;
+        gap: 10px;
+    }
+
+    .flashcards-back-link {
+        margin-bottom: 12px;
+    }
+
+    .flashcards-back-link .btn {
+        width: 100%;
+        min-height: 42px;
+        justify-content: center;
     }
 
     .flashcard-wrapper {
-        height: 320px;
+        min-height: 300px;
+        height: auto;
+        perspective: 1200px;
+    }
+
+    .flashcard-item,
+    .flashcard-content,
+    .flashcard-front,
+    .flashcard-back {
+        min-height: 300px;
+    }
+
+    .flashcard-inner {
+        padding: 18px 14px;
+    }
+
+    .flashcard-label {
+        font-size: 0.72rem;
+        letter-spacing: 1.1px;
+        margin-bottom: 12px;
+    }
+
+    .flashcard-question,
+    .flashcard-answer {
+        min-height: 112px;
+        max-height: 260px;
+        padding: 6px;
     }
 
     .flashcard-question h3 {
-        font-size: 1.2em;
+        font-size: 1.02rem;
+        line-height: 1.45;
     }
 
     .flashcard-answer p {
-        font-size: 1.05em;
+        font-size: 0.95rem;
+        line-height: 1.55;
+    }
+
+    .btn-flip {
+        width: 100%;
+        min-height: 42px;
+        border-radius: 10px;
+        font-size: 0.88rem;
+        padding: 10px 12px;
+    }
+
+    .btn-flip:hover {
+        transform: none;
+    }
+
+    .flashcard-actions {
+        height: auto;
+        padding: 10px;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .flashcard-actions .btn {
+        flex: 1 1 calc(50% - 4px);
+        min-height: 40px;
+        justify-content: center;
+        font-size: 0.82rem;
+        padding: 8px 10px;
+    }
+
+    .flashcard-actions .btn:hover {
+        transform: none;
+    }
+
+    .flashcard-deck-indicator {
+        font-size: 0.76rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 8px;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .empty-state {
+        padding: 32px 14px;
+        border-radius: 10px;
+    }
+
+    .empty-icon {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+    }
+
+    .empty-state p {
+        font-size: 0.95rem;
+        margin: 6px 0;
+    }
+
+    .empty-state p:first-of-type {
+        font-size: 1.05rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .flashcards-header {
+        padding: 10px;
+    }
+
+    .flashcards-header h2 {
+        font-size: 1.06rem;
+    }
+
+    .flashcard-wrapper,
+    .flashcard-item,
+    .flashcard-content,
+    .flashcard-front,
+    .flashcard-back {
+        min-height: 286px;
+    }
+
+    .flashcard-inner {
+        padding: 14px 12px;
+    }
+
+    .flashcard-question h3 {
+        font-size: 0.96rem;
+    }
+
+    .flashcard-answer p {
+        font-size: 0.9rem;
+    }
+
+    .flashcard-actions .btn {
+        flex: 1 1 100%;
+    }
+
+    .btn-flip {
+        font-size: 0.84rem;
     }
 }
 

@@ -52,7 +52,7 @@
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
                 <a href="{{ url_for('tasks.index') }}" class="btn btn-secondary">Cancel</a>
-                <button type="button" class="btn btn-danger" onclick="showDeleteModal()">Delete Task</button>
+                <button type="button" class="btn btn-danger open-delete-task-modal" data-delete-url="{{ url_for('tasks.delete', task_id=task.id) }}">Delete Task</button>
             </div>
         </form>
     </div>
@@ -61,10 +61,7 @@
 {% endblock %}
 
 {% block body_extra %}
-<script>
-    // Set the delete URL for the JavaScript module
-    const deleteTaskUrl = "{{ url_for('tasks.delete', task_id=task.id) }}";
-</script>
+<script src="{{ url_for('static', filename='js/delete-modal.js') }}"></script>
 <script src="{{ url_for('static', filename='js/edit-task.js') }}"></script>
 <script src="{{ url_for('static', filename='js/date-picker.js') }}"></script>
 {% endblock %}

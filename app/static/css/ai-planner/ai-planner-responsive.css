@@ -4,8 +4,194 @@
    ============================================================================== */
 
 @media (max-width: 768px) {
+    /* AI generator mobile layout */
+    .ai-planner-container {
+        padding: 0 2px;
+    }
+
+    .planner-header {
+        margin-bottom: 18px;
+        padding: 18px 14px;
+        border-radius: 10px;
+    }
+
+    .header-icon {
+        font-size: 2.1rem;
+        margin-bottom: 10px;
+    }
+
+    .planner-header h2 {
+        font-size: 1.3rem;
+        line-height: 1.3;
+        margin: 6px 0;
+    }
+
+    .planner-header .subtitle {
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin-top: 8px;
+    }
+
+    .form-section {
+        padding: 14px;
+        border-radius: 10px;
+        margin-bottom: 16px;
+    }
+
     .form-grid {
         grid-template-columns: 1fr;
+        gap: 14px;
+        margin-bottom: 16px;
+    }
+
+    #subject {
+        max-width: 100%;
+    }
+
+    .form-group label {
+        font-size: 0.86rem;
+        margin-bottom: 6px;
+    }
+
+    .form-control {
+        min-height: 44px;
+        font-size: 0.95rem;
+        padding: 10px 12px;
+        border-radius: 10px;
+    }
+
+    .time-input-wrapper {
+        grid-template-columns: 1.25fr 0.75fr;
+        gap: 8px;
+    }
+
+    .time-input-wrapper .time-number {
+        min-width: 0;
+    }
+
+    .time-input-wrapper .time-unit {
+        min-width: 0;
+    }
+
+    .error-message {
+        font-size: 0.8rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .btn-generate,
+    .btn-view-all {
+        width: 100%;
+        min-height: 46px;
+        border-radius: 11px;
+        padding: 11px 14px;
+        font-size: 0.95rem;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .btn-generate {
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-generate:hover,
+    .btn-view-all:hover {
+        transform: none;
+    }
+
+    #loading-indicator.loading-indicator {
+        margin: 14px 0;
+        padding: 16px 12px;
+        border-radius: 10px;
+    }
+
+    #loading-indicator.loading-indicator p {
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin: 10px 0;
+    }
+
+    #loading-indicator .spinner {
+        width: 40px;
+        height: 40px;
+        margin-bottom: 12px;
+    }
+
+    /* Recent plans section under generator */
+    .previous-plans-section {
+        margin-top: 20px;
+    }
+
+    .previous-plans-section h3 {
+        font-size: 1.05rem;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .plans-list {
+        gap: 10px;
+    }
+
+    .plan-card {
+        padding: 12px;
+        border-radius: 10px;
+    }
+
+    .plan-card:hover {
+        transform: none;
+    }
+
+    .plan-card-header {
+        align-items: flex-start;
+        gap: 6px;
+        margin-bottom: 10px;
+        flex-direction: column;
+    }
+
+    .plan-card-header h4 {
+        font-size: 1rem;
+        line-height: 1.35;
+    }
+
+    .plan-date {
+        font-size: 0.8rem;
+    }
+
+    .plan-info {
+        gap: 8px;
+    }
+
+    .plan-info span {
+        font-size: 0.82rem;
+    }
+
+    .plan-card-actions {
+        gap: 8px;
+    }
+
+    .btn-view {
+        min-height: 42px;
+        font-size: 0.9rem;
+        border-radius: 8px;
+    }
+
+    .btn-delete {
+        min-width: 44px;
+        min-height: 42px;
+        border-radius: 8px;
+        padding: 9px 12px;
+    }
+
+    .view-all-link {
+        margin-top: 12px;
+    }
+
+    .view-all-link a {
+        font-size: 0.9rem;
     }
     
     .plan-details-header {
@@ -25,5 +211,266 @@
     
     .plans-grid {
         grid-template-columns: 1fr;
+    }
+
+    /* View study plan mobile layout */
+    .view-plan-container {
+        padding: 0 2px;
+    }
+
+    .plan-details-header {
+        padding: 18px;
+        border-radius: 10px;
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+
+    .header-content h2 {
+        font-size: 1.35rem;
+        line-height: 1.3;
+        margin-bottom: 8px;
+        word-break: break-word;
+    }
+
+    .plan-meta {
+        gap: 8px;
+    }
+
+    .meta-item {
+        font-size: 0.85rem;
+        line-height: 1.4;
+    }
+
+    .header-actions {
+        gap: 8px;
+    }
+
+    .header-actions .btn {
+        min-height: 44px;
+        padding: 11px 14px;
+        border-radius: 10px;
+        font-size: 0.92rem;
+    }
+
+    .plan-parameters {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+    .param-card {
+        padding: 12px;
+        border-radius: 10px;
+        gap: 10px;
+    }
+
+    .param-icon {
+        font-size: 1.3rem;
+    }
+
+    .param-label {
+        font-size: 0.75rem;
+        margin-bottom: 2px;
+    }
+
+    .param-value {
+        font-size: 1rem;
+    }
+
+    /* Flashcard generation controls */
+    .flashcard-generation-section {
+        background: linear-gradient(180deg, rgba(52, 152, 219, 0.08) 0%, rgba(52, 152, 219, 0.02) 100%);
+        border: 1px solid rgba(52, 152, 219, 0.25);
+        border-radius: 12px;
+        padding: 14px;
+        margin-bottom: 16px;
+    }
+
+    .flashcard-generation-form {
+        width: 100%;
+    }
+
+    .flashcard-options {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        align-items: stretch;
+    }
+
+    .flashcard-options label {
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        color: var(--text-color-primary);
+        margin: 0;
+    }
+
+    .flashcard-select {
+        width: 100%;
+        min-height: 44px;
+        padding: 10px 12px;
+        border: 1.5px solid var(--border-color);
+        border-radius: 10px;
+        background-color: var(--bg-color-primary);
+        color: var(--text-color-primary);
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+
+    .flashcard-select:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.15);
+    }
+
+    .flashcard-options #flashcard-submit-btn {
+        width: 100%;
+        min-height: 46px;
+        border-radius: 10px;
+        justify-content: center;
+        font-size: 0.94rem;
+        font-weight: 700;
+        padding: 11px 14px;
+    }
+
+    .flashcard-options #flashcard-submit-btn i {
+        font-size: 0.95rem;
+    }
+
+    #flashcard-loading.loading-indicator {
+        margin: 12px 0 4px;
+        padding: 16px 12px;
+        border-radius: 10px;
+    }
+
+    #flashcard-loading.loading-indicator p {
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin: 10px 0;
+    }
+
+    .plan-content-section {
+        padding: 16px;
+        border-radius: 10px;
+        margin-bottom: 18px;
+    }
+
+    .content-header {
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+    }
+
+    .content-header h3 {
+        font-size: 1.05rem;
+        line-height: 1.35;
+    }
+
+    .plan-content {
+        font-size: 0.95rem;
+        line-height: 1.65;
+    }
+
+    .plan-section-header {
+        font-size: 1.15rem;
+        margin: 18px 0 10px;
+        padding-bottom: 8px;
+    }
+
+    .plan-subsection-header {
+        font-size: 1rem;
+        margin: 16px 0 8px;
+        padding-left: 10px;
+    }
+
+    .plan-list li,
+    .plan-numbered-list li {
+        padding: 9px 10px;
+        margin-bottom: 7px;
+        line-height: 1.5;
+    }
+
+    .plan-list li:hover,
+    .plan-numbered-list li:hover {
+        transform: none;
+    }
+
+    .plan-actions {
+        padding-top: 8px;
+    }
+
+    .plan-actions .btn {
+        width: 100%;
+        min-height: 44px;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .planner-header {
+        padding: 14px 12px;
+    }
+
+    .header-icon {
+        font-size: 1.9rem;
+    }
+
+    .planner-header h2 {
+        font-size: 1.15rem;
+    }
+
+    .planner-header .subtitle {
+        font-size: 0.84rem;
+    }
+
+    .form-section {
+        padding: 12px;
+    }
+
+    .form-control {
+        font-size: 0.9rem;
+    }
+
+    .btn-generate,
+    .btn-view-all {
+        font-size: 0.9rem;
+    }
+
+    #loading-indicator.loading-indicator p {
+        font-size: 0.86rem;
+    }
+
+    .plan-card-header h4 {
+        font-size: 0.95rem;
+    }
+
+    .plan-info span,
+    .view-all-link a {
+        font-size: 0.8rem;
+    }
+
+    .plan-details-header {
+        padding: 14px;
+    }
+
+    .header-content h2 {
+        font-size: 1.2rem;
+    }
+
+    .flashcard-generation-section {
+        padding: 12px;
+        border-radius: 10px;
+    }
+
+    .flashcard-options label {
+        font-size: 0.77rem;
+    }
+
+    .flashcard-select,
+    .flashcard-options #flashcard-submit-btn {
+        font-size: 0.9rem;
+    }
+
+    .plan-content {
+        font-size: 0.92rem;
     }
 }

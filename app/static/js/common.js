@@ -64,6 +64,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Floating Pomodoro Timer Widget
     initFloatingTimer();
+
+    // Apply task category colors from data attributes.
+    document.querySelectorAll('.task-category[data-category-color]').forEach((categoryBadge) => {
+        const color = categoryBadge.getAttribute('data-category-color');
+        if (color) {
+            categoryBadge.style.setProperty('--category-color', color);
+        }
+    });
 });
 
 function initFloatingTimer() {

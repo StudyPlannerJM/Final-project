@@ -25,7 +25,7 @@
             All their tasks, study plans, and progress will be permanently removed.
         </p>
         <div class="admin-delete-actions">
-            <button onclick="closeAdminDeleteModal()" class="admin-delete-btn cancel">
+            <button type="button" class="admin-delete-btn cancel" data-admin-delete-close>
                 Cancel
             </button>
             <button id="adminDeleteConfirmBtn" class="admin-delete-btn confirm">
@@ -59,32 +59,32 @@
         <tbody>
             {% for user in users %}
             <tr>
-                <td>{{ user.id }}</td>
-                <td>
+                <td data-label="ID">{{ user.id }}</td>
+                <td data-label="Username">
                     <i class="fas fa-user-circle user-icon"></i>
                     {{ user.username }}
                     {% if user.id == current_user.id %}
                         <small class="self-indicator">(you)</small>
                     {% endif %}
                 </td>
-                <td>{{ user.email }}</td>
-                <td>
+                <td data-label="Email">{{ user.email }}</td>
+                <td data-label="Role">
                     {% if user.is_admin %}
                         <span class="badge badge-admin"><i class="fas fa-shield-alt"></i> Admin</span>
                     {% else %}
                         <span class="badge badge-user"><i class="fas fa-user"></i> User</span>
                     {% endif %}
                 </td>
-                <td>
+                <td data-label="Actions" class="actions-col">
                     <div class="action-cell">
                         <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn-icon btn-edit">
                             <i class="fas fa-edit"></i> Edit
                         </a>
                         {% if user.id != current_user.id %}
                         <form id="delForm-{{ user.id }}" action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="post">
-                            <button type="button" class="btn-icon btn-delete"
-                                    onclick="openAdminDeleteModal('{{ user.username }}', 'delForm-{{ user.id }}')"
-                            >
+                            <button type="button" class="btn-icon btn-delete open-admin-delete-modal"
+                                    data-username="{{ user.username }}"
+                                    data-form-id="delForm-{{ user.id }}">
                                 <i class="fas fa-trash-alt"></i> Delete
                             </button>
                         </form>
@@ -106,29 +106,5 @@
 {% endblock %}
 
 {% block body_extra %}
-<script>
-    let _pendingAdminDeleteForm = null;
-
-    function openAdminDeleteModal(username, formId) {
-        _pendingAdminDeleteForm = document.getElementById(formId);
-        document.getElementById('adminDeleteMessage').textContent =
-            'You are about to remove "' + username + '" from BrainDump.';
-        const modal = document.getElementById('adminDeleteModal');
-        modal.classList.add('open');
-    }
-
-    function closeAdminDeleteModal() {
-        document.getElementById('adminDeleteModal').classList.remove('open');
-        _pendingAdminDeleteForm = null;
-    }
-
-    document.getElementById('adminDeleteConfirmBtn').addEventListener('click', function () {
-        if (_pendingAdminDeleteForm) _pendingAdminDeleteForm.submit();
-        closeAdminDeleteModal();
-    });
-
-    document.getElementById('adminDeleteModal').addEventListener('click', function (e) {
-        if (e.target === this) closeAdminDeleteModal();
-    });
-</script>
+<script src="{{ url_for('static', filename='js/admin/manage-users.js') }}"></script>
 {% endblock %}

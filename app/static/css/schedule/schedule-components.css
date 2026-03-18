@@ -84,6 +84,10 @@
     gap: 6px;
 }
 
+.sync-existing-tasks-form {
+    margin-bottom: 8px;
+}
+
 .no-events-message {
     text-align: center;
     padding: 40px 20px;

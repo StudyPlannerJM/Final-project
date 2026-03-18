@@ -20,9 +20,9 @@
     <div class="decks-grid">
         {% if decks %}
             {% for deck in decks %}
-                <div class="deck-card" style="--deck-color: {{ deck.color }}; border-left: 4px solid var(--deck-color);">
-                    <div class="deck-header" style="background: linear-gradient(135deg, var(--deck-color), var(--deck-color));">
-                        <div class="deck-icon" style="color: var(--deck-color);">
+                <div class="deck-card" data-color="{{ deck.color }}">
+                    <div class="deck-header">
+                        <div class="deck-icon">
                             <i class="fas {{ deck.icon or 'fa-layer-group' }}"></i>
                         </div>
                         <div class="deck-info">

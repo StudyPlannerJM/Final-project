@@ -4,31 +4,416 @@
    ============================================================================== */
 
 @media (max-width: 768px) {
+    /* Shared mobile rhythm */
+    .summaries-container,
+    .upload-container,
+    .view-summary-container {
+        padding: 0 2px;
+    }
+
+    /* List page header and actions */
+    .summarizer-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        margin-bottom: 16px;
+        padding: 12px;
+        border: 1px solid rgba(52, 152, 219, 0.18);
+        border-radius: 12px;
+        background: linear-gradient(180deg, rgba(52, 152, 219, 0.08) 0%, rgba(52, 152, 219, 0.02) 100%);
+    }
+
+    .summarizer-header h2 {
+        font-size: 1.25rem;
+        line-height: 1.35;
+        gap: 10px;
+    }
+
+    .summarizer-header .btn {
+        width: 100%;
+        min-height: 44px;
+        justify-content: center;
+        font-weight: 700;
+    }
+
     .summaries-grid {
         grid-template-columns: 1fr;
+        gap: 14px;
     }
-    
-    .summary-detail-header {
+
+    .summary-card {
+        border-radius: 12px;
+    }
+
+    .summary-card-header {
+        padding: 14px;
+        gap: 10px;
+    }
+
+    .file-type-badge {
+        width: 42px;
+        height: 42px;
+        font-size: 1.15rem;
+        border-radius: 9px;
+    }
+
+    .summary-title {
+        font-size: 1rem;
+        line-height: 1.4;
+    }
+
+    .summary-card-body {
+        padding: 12px 14px;
+    }
+
+    .summary-preview {
+        font-size: 0.9rem;
+        line-height: 1.55;
+        margin-bottom: 10px;
+    }
+
+    .summary-meta {
+        gap: 8px;
         flex-direction: column;
-        align-items: center;
-        text-align: center;
     }
-    
-    .summary-meta-info {
+
+    .meta-item {
+        font-size: 0.8rem;
+        line-height: 1.35;
+    }
+
+    .summary-card-actions {
+        padding: 10px 12px;
+        gap: 8px;
+        justify-content: stretch;
+        flex-wrap: wrap;
+    }
+
+    .summary-card-actions .btn {
+        flex: 1 1 calc(50% - 4px);
+        min-height: 40px;
+        justify-content: center;
+        font-size: 0.84rem;
+        padding: 8px 10px;
+    }
+
+    .summary-card-actions .delete-summary-form {
+        flex: 1 1 calc(50% - 4px);
+    }
+
+    .summary-card-actions .delete-summary-form .btn {
+        width: 100%;
+    }
+
+    .empty-state {
+        padding: 34px 14px;
+        border-radius: 10px;
+    }
+
+    .empty-state .empty-icon {
+        font-size: 2.7rem;
+        margin-bottom: 12px;
+    }
+
+    .empty-state h3 {
+        font-size: 1.1rem;
+        margin-bottom: 6px;
+    }
+
+    .empty-state p {
+        font-size: 0.92rem;
+        line-height: 1.5;
+        margin-bottom: 12px;
+    }
+
+    .empty-state .btn {
+        width: 100%;
+        min-height: 44px;
         justify-content: center;
     }
-    
-    .view-summary-header {
+
+    /* Upload page */
+    .upload-header {
         flex-direction: column;
-        gap: 15px;
+        align-items: stretch;
+        gap: 10px;
+        margin-bottom: 14px;
     }
-    
+
+    .upload-header h2 {
+        font-size: 1.15rem;
+        line-height: 1.35;
+        gap: 8px;
+    }
+
+    .upload-header .btn {
+        width: 100%;
+        min-height: 42px;
+        justify-content: center;
+    }
+
+    .upload-card {
+        padding: 14px;
+        border-radius: 12px;
+    }
+
+    .upload-form .form-group {
+        margin-bottom: 16px;
+    }
+
+    .upload-form label {
+        font-size: 0.88rem;
+        margin-bottom: 6px;
+    }
+
+    .upload-form .form-control {
+        min-height: 44px;
+        padding: 10px 12px;
+        font-size: 0.92rem;
+        border-radius: 10px;
+    }
+
+    .form-hint {
+        font-size: 0.78rem;
+        margin-top: 6px;
+        line-height: 1.45;
+    }
+
+    .file-upload-area {
+        padding: 24px 12px;
+        border-radius: 10px;
+    }
+
+    .upload-icon {
+        font-size: 2.15rem;
+        margin-bottom: 10px;
+    }
+
+    .upload-text {
+        font-size: 0.92rem;
+        line-height: 1.45;
+        margin-bottom: 6px;
+    }
+
+    .upload-hint {
+        font-size: 0.78rem;
+        line-height: 1.4;
+    }
+
+    .file-selected {
+        gap: 8px;
+        padding: 8px;
+    }
+
+    .file-selected .file-icon {
+        font-size: 1.45rem;
+    }
+
+    .file-selected .file-name {
+        font-size: 0.85rem;
+    }
+
+    .ocr-option {
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+    .checkbox-label {
+        gap: 8px;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+    }
+
+    .checkbox-text {
+        font-size: 0.88rem;
+    }
+
+    .btn-block {
+        min-height: 44px;
+        font-size: 0.95rem;
+        border-radius: 10px;
+    }
+
+    .supported-formats {
+        margin-top: 18px;
+        padding-top: 14px;
+    }
+
+    .supported-formats h4 {
+        font-size: 0.96rem;
+        margin-bottom: 10px;
+    }
+
     .format-list {
         flex-direction: column;
+        gap: 8px;
     }
-    
+
+    .format-item {
+        font-size: 0.84rem;
+        padding: 8px 10px;
+        border-radius: 8px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* View page */
+    .view-summary-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+
+    .view-summary-header .btn {
+        width: 100%;
+        min-height: 42px;
+        justify-content: center;
+    }
+
+    .view-summary-header .header-actions {
+        width: 100%;
+    }
+
+    .view-summary-header .header-actions .delete-summary-form,
+    .view-summary-header .header-actions .delete-summary-form .btn {
+        width: 100%;
+    }
+
+    .summary-detail-card {
+        border-radius: 12px;
+    }
+
+    .summary-detail-header {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+        padding: 14px;
+        gap: 12px;
+    }
+
+    .file-type-badge.large {
+        width: 54px;
+        height: 54px;
+        font-size: 1.45rem;
+    }
+
+    .summary-detail-info h1 {
+        font-size: 1.2rem;
+        line-height: 1.35;
+        margin-bottom: 8px;
+    }
+
+    .summary-meta-info {
+        justify-content: flex-start;
+        flex-direction: column;
+        gap: 8px;
+        font-size: 0.82rem;
+    }
+
+    .summary-content-tabs {
+        padding: 6px;
+        gap: 6px;
+        border-bottom: 1px solid var(--border-color);
+        background: rgba(0, 0, 0, 0.02);
+        flex-wrap: nowrap;
+    }
+
     .tab-btn {
-        padding: 12px 15px;
-        font-size: 0.9em;
+        flex: 1 1 50%;
+        justify-content: center;
+        text-align: center;
+        min-height: 40px;
+        padding: 10px 8px;
+        font-size: 0.82rem;
+        border-radius: 8px;
+        background: transparent;
+    }
+
+    .tab-btn.active {
+        background: rgba(74, 144, 226, 0.14);
+    }
+
+    .tab-btn.active::after {
+        display: none;
+    }
+
+    .tab-content {
+        padding: 12px;
+    }
+
+    .summary-text-box,
+    .original-text-box {
+        padding: 14px;
+        border-radius: 10px;
+    }
+
+    .summary-text-box h3,
+    .original-text-box h3 {
+        font-size: 1rem;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+    }
+
+    .summary-bullets {
+        font-size: 0.94rem;
+        line-height: 1.7;
+    }
+
+    .original-text {
+        font-size: 0.9rem;
+        line-height: 1.65;
+        max-height: 420px;
+        padding-right: 6px;
+    }
+
+    /* Remove hover motion on touch devices */
+    .summary-card:hover,
+    .btn:hover {
+        transform: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .summarizer-header {
+        padding: 10px;
+    }
+
+    .summarizer-header h2 {
+        font-size: 1.08rem;
+    }
+
+    .summary-card-actions .btn,
+    .summary-card-actions .delete-summary-form {
+        flex: 1 1 100%;
+    }
+
+    .upload-card {
+        padding: 12px;
+    }
+
+    .upload-header h2 {
+        font-size: 1.05rem;
+    }
+
+    .upload-text {
+        font-size: 0.86rem;
+    }
+
+    .summary-detail-info h1 {
+        font-size: 1.08rem;
+    }
+
+    .tab-btn {
+        font-size: 0.78rem;
+        padding: 9px 6px;
+    }
+
+    .summary-bullets,
+    .original-text {
+        font-size: 0.88rem;
     }
 }
