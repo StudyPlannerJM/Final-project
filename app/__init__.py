@@ -18,19 +18,30 @@ def create_app(config_name=None):
     if config_name is None:
         config_name = os.getenv('FLASK_ENV', 'development')
 
+    if config_name not in config:
+        raise ValueError(f"Unknown FLASK_ENV value: {config_name}")
+
     app.config.from_object(config[config_name])
+
+    if config_name == 'production':
+        db_uri = app.config.get('SQLALCHEMY_DATABASE_URI', '')
+        if not db_uri.startswith('postgresql://'):
+            raise ValueError(
+                'Production configuration requires DATABASE_URL '
+                'pointing to PostgreSQL'
+            )
 
     # Initialize extensions with the app
     db.init_app(app)
     login_manager.init_app(app)
     migrate.init_app(app, db)
-    
+
     from app.models import User
 
     @login_manager.user_loader
     def load_user(user_id):
         return db.session.get(User, int(user_id))
-    
+
     # Import blueprints here to avoid circular imports
     from app.routes import (
         auth_bp,
@@ -54,5 +65,5 @@ def create_app(config_name=None):
     app.register_blueprint(summarizer_bp)  # /summarizer
     app.register_blueprint(ai_planner_bp)  # /ai-planner
     app.register_blueprint(admin_bp)  # /admin
-    
+
     return app
