@@ -12,8 +12,9 @@
 @media (max-width: 768px) {
     .calendar-layout {
         grid-template-columns: 1fr;
-        padding: 10px;
+        padding: 0;
         gap: 15px;
+        min-height: auto !important;
     }
     
     .calendar-sidebar {
@@ -22,12 +23,27 @@
     
     .calendar-main {
         order: 1;
-        padding: 15px;
+        padding: 0;
+        min-height: auto !important;
+    }
+
+    /* Prevent white space below content on mobile by matching page background
+       and allowing the page height to be determined by content */
+    html, body {
+        min-height: auto !important;
+        height: auto !important;
+        background-color: var(--bg-color-primary);
+        overflow-y: auto;
     }
     
     .week-calendar-grid {
-        grid-template-columns: 50px repeat(7, 1fr);
+        grid-template-columns: 32px repeat(7, 1fr);
         max-height: 500px;
+    }
+
+    /* Make headers match the compact time column on mobile */
+    .week-days-header {
+        grid-template-columns: 32px repeat(7, 1fr);
     }
     
     .form-row {
@@ -50,6 +66,15 @@
     .week-days-header .day-date {
         display: none;
     }
+
+    /* On mobile, visually shorten weekday names to their first letter to save space */
+    .week-days-header .day-name {
+        display: inline-block;
+        width: 1ch;
+        overflow: hidden;
+        white-space: nowrap;
+        text-align: center;
+    }
     
     .week-header h2 {
         font-size: 1.2rem;
@@ -60,10 +85,66 @@
         gap: 15px;
         align-items: flex-start;
     }
+
+    /* Keep week navigation padded on mobile for usability */
+    .calendar-main .week-navigation {
+        padding: 12px 14px;
+        margin-bottom: 6px;
+        box-sizing: border-box;
+    }
     
+    /* Week view adjustments for mobile: slightly smaller text to free space */
     .event-block {
+        font-size: 0.8rem;
+        padding: 6px 8px;
+        line-height: 1.35;
+    }
+
+    /* Hide the time range on mobile to show only the description/title */
+    .event-block .event-time-range {
+        display: none !important;
+    }
+
+    /* Smaller description/title on mobile to save vertical space */
+    .event-block .event-title {
+        font-size: 0.72rem !important;
+        line-height: 1.25 !important;
+    }
+
+    .event-block .event-title {
+        display: block !important;
+        -webkit-line-clamp: unset !important;
+        line-clamp: unset !important;
+        -webkit-box-orient: unset !important;
+        overflow: visible !important;
+        white-space: normal !important;
+    }
+
+    .hour-slot {
+        min-height: 44px;
+        height: 44px;
+        padding: 6px 4px;
+        font-size: 0.75rem;
+    }
+
+    /* Shift hour labels to the extreme left to free horizontal space for day columns */
+    .time-column, .time-column-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding-left: 2px;
+        box-sizing: border-box;
+        width: 32px;
+        min-width: 32px;
+        max-width: 32px;
+    }
+
+    .time-slot {
         font-size: 0.65rem;
-        padding: 3px 5px;
+        justify-content: flex-start;
+        padding-left: 2px;
+        text-align: left;
+        width: 100%;
     }
     
     /* Keep sidebar upcoming events scrollable on mobile */
@@ -72,6 +153,65 @@
         flex-direction: column;
         max-height: 300px;
         min-height: auto;
+    }
+
+    /* Month view: make sure grid and cells shrink to viewport and avoid horizontal overflow */
+    .month-calendar-grid {
+        padding: 10px;
+        box-sizing: border-box;
+        overflow-x: hidden;
+        max-width: 100%;
+    }
+
+    .month-days-grid {
+        width: 100%;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 1px;
+        box-sizing: border-box;
+    }
+
+    .month-day-cell {
+        min-width: 0; /* allow grid items to shrink */
+        padding: 6px;
+        min-height: 72px;
+    }
+
+    /* Allow event items to wrap on very small screens instead of forcing a wider cell */
+    .month-event-item {
+        white-space: normal;
+        overflow: hidden;
+        word-break: break-word;
+        hyphens: auto;
+    }
+
+    /* Further tweaks for very small screens */
+    @media (max-width: 420px) {
+        .month-weekday {
+            padding: 6px 4px;
+            font-size: 0.72rem;
+        }
+
+        .month-day-number {
+            font-size: 0.85rem;
+        }
+
+        .month-day-cell {
+            padding: 4px;
+            min-height: 60px;
+        }
+
+        .month-days-grid, .month-weekday-headers {
+            box-sizing: border-box;
+            width: 100%;
+            max-width: 100%;
+        }
+    }
+}
+
+/* Hide mini calendar on mobile to save vertical space */
+@media (max-width: 768px) {
+    .mini-calendar {
+        display: none;
     }
 }
 
