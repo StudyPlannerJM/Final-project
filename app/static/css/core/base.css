@@ -222,6 +222,16 @@ iframe {
         touch-action: pan-y;
     }
 
+    /* Ensure the page height is determined by content on small screens
+       so scrolling doesn't reveal white areas beyond content */
+    html, body {
+        min-height: auto !important;
+        height: auto !important;
+        display: block !important;
+        background-color: var(--bg-color-primary);
+        overflow-y: auto;
+    }
+
     .wrapper,
     .main-content,
     .top-header,
