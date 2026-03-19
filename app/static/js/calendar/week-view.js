@@ -49,6 +49,7 @@ export function renderWeekView(currentDate, calendarEvents, tasks) {
         if (isToday) dayHeader.classList.add('today');
         if (isSelected) dayHeader.classList.add('selected');
 
+        // Use full weekday name by default (desktop). Mobile will visually shorten via CSS.
         dayHeader.innerHTML = `
             <span class="day-name">${day.toLocaleDateString('en-US', { weekday: 'long' })}</span>
             <span class="day-number">${day.getDate()}</span>
