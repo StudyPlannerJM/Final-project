@@ -1,6 +1,6 @@
 const taskCards = document.querySelectorAll('.task-card');
 const columns = document.querySelectorAll('.column-content');
-const TOUCH_DRAG_THRESHOLD = 10;
+const TOUCH_DRAG_THRESHOLD = 60;
 const AUTO_SCROLL_EDGE_PX = 90;
 const AUTO_SCROLL_STEP = 16;
 

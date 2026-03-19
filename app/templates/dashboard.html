@@ -168,3 +168,6 @@
     {% endif %}
 </div>
 {% endblock %}
+{% block body_extra %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
