@@ -73,6 +73,65 @@
         max-height: 300px;
         min-height: auto;
     }
+
+    /* Month view: make sure grid and cells shrink to viewport and avoid horizontal overflow */
+    .month-calendar-grid {
+        padding: 10px;
+        box-sizing: border-box;
+        overflow-x: hidden;
+        max-width: 100%;
+    }
+
+    .month-days-grid {
+        width: 100%;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 1px;
+        box-sizing: border-box;
+    }
+
+    .month-day-cell {
+        min-width: 0; /* allow grid items to shrink */
+        padding: 6px;
+        min-height: 72px;
+    }
+
+    /* Allow event items to wrap on very small screens instead of forcing a wider cell */
+    .month-event-item {
+        white-space: normal;
+        overflow: hidden;
+        word-break: break-word;
+        hyphens: auto;
+    }
+
+    /* Further tweaks for very small screens */
+    @media (max-width: 420px) {
+        .month-weekday {
+            padding: 6px 4px;
+            font-size: 0.72rem;
+        }
+
+        .month-day-number {
+            font-size: 0.85rem;
+        }
+
+        .month-day-cell {
+            padding: 4px;
+            min-height: 60px;
+        }
+
+        .month-days-grid, .month-weekday-headers {
+            box-sizing: border-box;
+            width: 100%;
+            max-width: 100%;
+        }
+    }
+}
+
+/* Hide mini calendar on mobile to save vertical space */
+@media (max-width: 768px) {
+    .mini-calendar {
+        display: none;
+    }
 }
 
 @media (max-width: 480px) {

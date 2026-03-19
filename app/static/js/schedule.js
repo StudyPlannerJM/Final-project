@@ -637,6 +637,46 @@ document.addEventListener('DOMContentLoaded', async function () {
         updateMiniCalendarHeader(currentMonth, currentYear);
         renderUpcomingEvents(upcomingCalendarEvents, upcomingTasks);
     }
+
+    // Mobile layout adjustments: move Google integration card above main calendar on mobile
+    (function setupMobileIntegrationCard() {
+        const integrationCard = document.querySelector('.calendar-integration-card');
+        const calendarMain = document.querySelector('.calendar-main');
+        const calendarSidebar = document.querySelector('.calendar-sidebar');
+        if (!integrationCard || !calendarMain || !calendarSidebar) return;
+
+        // Create a placeholder to restore the card to the sidebar on desktop
+        let placeholder = document.createElement('div');
+        placeholder.className = 'integration-placeholder';
+        integrationCard.parentNode.insertBefore(placeholder, integrationCard.nextSibling);
+
+        const mq = window.matchMedia('(max-width: 768px)');
+
+        function moveCardForMobile(matches) {
+            if (matches) {
+                // Move integration card to top of main area
+                if (!calendarMain.querySelector('.calendar-integration-card')) {
+                    calendarMain.insertBefore(integrationCard, calendarMain.firstChild);
+                }
+            } else {
+                // Restore to original place in sidebar
+                if (!calendarSidebar.contains(integrationCard)) {
+                    placeholder.parentNode.insertBefore(integrationCard, placeholder.nextSibling);
+                    placeholder.remove();
+                }
+            }
+        }
+
+        // Initial placement
+        moveCardForMobile(mq.matches);
+
+        // Listen to viewport changes
+        if (mq.addEventListener) {
+            mq.addEventListener('change', (e) => moveCardForMobile(e.matches));
+        } else if (mq.addListener) {
+            mq.addListener((e) => moveCardForMobile(e.matches));
+        }
+    })();
 });
 
 // Make modals available globally for imported modules
