@@ -37,6 +37,9 @@ def test_index_shows_last_three_sessions(db_session, auth_client, test_user):
     assert b'13 min' in data
     # oldest (10) should not be present
     assert b'10 min' not in data
+    # completion sound element is present on timer page
+    assert b'id="session-complete-sound"' in data
+    assert b'Finish_001.mp3' in data
 
 
 def test_sessions_page_shows_stats_and_sessions(db_session, auth_client, test_user, monkeypatch):

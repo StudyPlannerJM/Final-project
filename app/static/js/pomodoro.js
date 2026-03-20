@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const time60Btn = document.getElementById('time-60');
         const customTimeInput = document.getElementById('custom-time-input');
         const setCustomTimeBtn = document.getElementById('set-custom-time');
+        const sessionCompleteSound = document.getElementById('session-complete-sound');
 
     let timer;
     let isRunning = false;
@@ -87,6 +88,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleTimerComplete() {
+        if (sessionCompleteSound) {
+            sessionCompleteSound.currentTime = 0;
+            sessionCompleteSound.play().catch(error => {
+                console.warn('Session complete sound could not be played:', error);
+            });
+        }
+
         if (!isBreak) {
             sessionCount++;
             if (sessionCountSpan) sessionCountSpan.textContent = sessionCount;
