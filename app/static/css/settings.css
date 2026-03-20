@@ -227,6 +227,17 @@
     color: var(--text-color-secondary);
 }
 
+.creator-github {
+    font-size: 0.78rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    width: fit-content;
+}
+
+.creator-github:hover {
+    text-decoration: underline;
+}
+
 .about-project-note {
     font-size: 0.82rem;
     color: var(--text-color-secondary);

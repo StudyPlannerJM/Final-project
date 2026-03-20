@@ -61,22 +61,41 @@
     </div>
 
     <div class="flashcard-generation-section">
-        <form method="POST" action="{{ url_for('flashcards.generate_from_study_plan', plan_id=plan.id) }}" 
-              class="flashcard-generation-form"
-              id="flashcard-form">
-            <div class="flashcard-options">
-                <label for="num_cards">Number of flashcards:</label>
-                <select name="num_cards" id="num_cards" class="flashcard-select">
-                    <option value="5" selected>5 cards</option>
-                    <option value="10">10 cards</option>
-                    <option value="15">15 cards</option>
-                    <option value="20">20 cards</option>
-                </select>
-                <button type="submit" class="btn btn-primary" id="flashcard-submit-btn">
-                    <i class="fas fa-layer-group"></i> Generate Flashcards
-                </button>
-            </div>
-        </form>
+        <div class="planner-action-grid">
+            <form method="POST" action="{{ url_for('flashcards.generate_from_study_plan', plan_id=plan.id) }}" 
+                class="flashcard-generation-form planner-action-card"
+                  id="flashcard-form">
+                <div class="flashcard-options">
+                    <label for="num_cards">Number of flashcards:</label>
+                    <select name="num_cards" id="num_cards" class="flashcard-select">
+                        <option value="5" selected>5 cards</option>
+                        <option value="10">10 cards</option>
+                        <option value="15">15 cards</option>
+                        <option value="20">20 cards</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary" id="flashcard-submit-btn">
+                        <i class="fas fa-layer-group"></i> Generate Flashcards
+                    </button>
+                </div>
+            </form>
+
+            <form method="POST" action="{{ url_for('ai_planner.generate_tasks_from_plan', plan_id=plan.id) }}"
+                  class="flashcard-generation-form planner-action-card">
+                <div class="flashcard-options">
+                    <label for="num_tasks">Number of tasks:</label>
+                    <select name="num_tasks" id="num_tasks" class="flashcard-select">
+                        <option value="1" selected>1 task</option>
+                        <option value="2">2 tasks</option>
+                        <option value="3">3 tasks</option>
+                        <option value="4">4 tasks</option>
+                        <option value="5">5 tasks</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary plan-task-submit-btn">
+                        <i class="fas fa-tasks"></i> Create Tasks
+                    </button>
+                </div>
+            </form>
+        </div>
         
         <!-- Loading Indicator for Flashcards -->
         <div id="flashcard-loading" class="loading-indicator is-hidden">

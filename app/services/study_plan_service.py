@@ -2,12 +2,16 @@
 Study Plan service for business logic related to AI-generated study plans
 """
 
+from datetime import datetime, timedelta, timezone
+import re
+
 from app import db
-from app.models import StudyPlan, User
+from app.models import StudyPlan, User, Category
 from app.exceptions import (
     ValidationError, AuthorizationError, NotFoundError
 )
 from app.utils.ai_generator import generate_study_plan
+from app.services.task_service import TaskService
 
 
 class StudyPlanService:
@@ -165,3 +169,169 @@ class StudyPlanService:
             query = query.limit(limit)
         
         return query.all()
+
+    @staticmethod
+    def create_tasks_from_plan(plan, user_id, num_tasks=1):
+        """
+        Create simple tasks from an existing study plan.
+
+        Args:
+            plan: StudyPlan object
+            user_id: ID of the user creating tasks
+            num_tasks: Number of tasks to create
+
+        Returns:
+            List of created Task objects
+
+        Raises:
+            ValidationError: If inputs are invalid
+            AuthorizationError: If user doesn't own the plan
+        """
+        if not plan:
+            raise ValidationError("Study plan is required")
+
+        if plan.user_id != user_id:
+            raise AuthorizationError("You don't have permission to use this plan")
+
+        if not isinstance(num_tasks, int):
+            raise ValidationError("Number of tasks must be an integer")
+
+        if num_tasks < 1 or num_tasks > 5:
+            raise ValidationError("Number of tasks must be between 1 and 5")
+
+        candidates = StudyPlanService._extract_task_candidates(plan.plan_content)
+        selected = candidates[:num_tasks]
+
+        if not selected:
+            return []
+
+        category = StudyPlanService._get_or_create_plan_category(user_id, plan.subject)
+        due_dates = StudyPlanService._build_distributed_due_dates(plan, len(selected))
+
+        created_tasks = []
+        for idx, task_title in enumerate(selected):
+            due_date = due_dates[idx] if idx < len(due_dates) else None
+
+            task = TaskService.create_task(
+                user_id=user_id,
+                title=task_title,
+                description=f"Auto-created from study plan: {plan.subject}",
+                due_date=due_date,
+                category_id=category.id
+            )
+            created_tasks.append(task)
+
+        return created_tasks
+
+    @staticmethod
+    def _extract_task_candidates(plan_content):
+        """Extract actionable task titles from markdown-like plan content."""
+        if not plan_content:
+            return []
+
+        bullet_pattern = re.compile(r'^\s*(?:[-*•]|\d+[.)])\s+(.+)$')
+        checkbox_pattern = re.compile(r'^\s*[-*]\s*\[[ xX]\]\s+(.+)$')
+        timeline_pattern = re.compile(
+            r'^\s*(?:week|day|phase|milestone)\s*\d+\s*[:\-]\s*(.+)$',
+            re.IGNORECASE
+        )
+
+        tasks = []
+        seen = set()
+
+        for raw_line in plan_content.splitlines():
+            line = raw_line.strip()
+            if not line:
+                continue
+
+            if line.startswith('#'):
+                continue
+
+            match = checkbox_pattern.match(line)
+            if not match:
+                match = bullet_pattern.match(line)
+            if not match:
+                match = timeline_pattern.match(line)
+
+            if not match:
+                continue
+
+            normalized = StudyPlanService._normalize_task_text(match.group(1))
+            if not normalized:
+                continue
+
+            lookup_key = normalized.lower()
+            if lookup_key in seen:
+                continue
+
+            seen.add(lookup_key)
+            tasks.append(normalized)
+
+        return tasks
+
+    @staticmethod
+    def _normalize_task_text(text):
+        """Clean markdown artifacts and return a valid short task title."""
+        if not text:
+            return None
+
+        cleaned = text.strip()
+        cleaned = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', cleaned)
+        cleaned = re.sub(r'[`*_~>#]', '', cleaned)
+        cleaned = re.sub(r'\s+', ' ', cleaned)
+        cleaned = cleaned.strip(' .;:-')
+
+        if len(cleaned) < 3:
+            return None
+
+        if len(cleaned) > 100:
+            cleaned = cleaned[:100].rstrip()
+
+        return cleaned
+
+    @staticmethod
+    def _get_or_create_plan_category(user_id, subject):
+        """Get or create a category dedicated to generated study-plan tasks."""
+        category_name = f"Study Plan: {subject.strip()}"[:100]
+        category = Category.query.filter_by(user_id=user_id, name=category_name).first()
+        if category:
+            if category.icon == 'fa-graduation-cap':
+                category.icon = None
+                db.session.flush()
+            return category
+
+        category = Category(
+            name=category_name,
+            user_id=user_id,
+            is_default=False
+        )
+        db.session.add(category)
+        db.session.flush()
+        return category
+
+    @staticmethod
+    def _build_distributed_due_dates(plan, total_tasks):
+        """Distribute due dates from plan start to plan end."""
+        if total_tasks <= 0:
+            return []
+
+        start_date = plan.created_at or datetime.now(timezone.utc)
+        if start_date.tzinfo is None:
+            start_date = start_date.replace(tzinfo=timezone.utc)
+
+        unit_days = {
+            'days': 1,
+            'weeks': 7,
+            'months': 30,
+        }
+
+        duration_days = plan.time_value * unit_days.get(plan.time_unit, 0)
+        if duration_days <= 0:
+            return [None] * total_tasks
+
+        end_date = start_date + timedelta(days=duration_days)
+        if total_tasks == 1:
+            return [end_date]
+
+        step = (end_date - start_date) / total_tasks
+        return [start_date + (step * (idx + 1)) for idx in range(total_tasks)]

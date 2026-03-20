@@ -290,6 +290,15 @@
         width: 100%;
     }
 
+    .planner-action-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .planner-action-card {
+        padding: 10px;
+    }
+
     .flashcard-options {
         display: grid;
         grid-template-columns: 1fr;
@@ -324,6 +333,16 @@
     }
 
     .flashcard-options #flashcard-submit-btn {
+        width: 100%;
+        min-height: 46px;
+        border-radius: 10px;
+        justify-content: center;
+        font-size: 0.94rem;
+        font-weight: 700;
+        padding: 11px 14px;
+    }
+
+    .flashcard-options .plan-task-submit-btn {
         width: 100%;
         min-height: 46px;
         border-radius: 10px;
