@@ -68,11 +68,21 @@
     flex: 1;
 }
 
+/* Upcoming event cards: expand to fit content, no internal scrollbars */
+.upcoming-event-card {
+    box-sizing: border-box;
+    max-height: 3.9rem;
+    height: auto;
+    overflow: hidden;
+}
+
+
 .event-details h4 {
     margin: 0 0 8px 0;
     font-size: 0.95rem;
     font-weight: 600;
     color: var(--text-color);
+    white-space: normal; /* allow wrapping */
 }
 
 .event-location {
@@ -82,6 +92,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
+    white-space: normal;
 }
 
 .sync-existing-tasks-form {

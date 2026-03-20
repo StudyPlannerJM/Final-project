@@ -4,6 +4,7 @@
 // =============================================================================
 
 import { escapeHtml, getCategoryColor } from './utils.js';
+import { showCalendarEventDetails, showTaskDetails } from './event-modals.js';
 import { UPCOMING_EVENTS_DAYS_AHEAD } from './constants.js';
 
 /**
@@ -37,7 +38,10 @@ export function renderUpcomingEvents(upcomingCalendarEvents, upcomingTasks) {
                         end: event.end,
                         location: event.location || '',
                         type: 'calendar',
-                        date: eventDate
+                        date: eventDate,
+                        id: event.id || null,
+                        description: event.description || '',
+                        htmlLink: event.htmlLink || null
                     });
                 }
             }
@@ -58,7 +62,9 @@ export function renderUpcomingEvents(upcomingCalendarEvents, upcomingTasks) {
                         type: 'task',
                         status: task.status,
                         category: task.category,
-                        date: taskDate
+                        date: taskDate,
+                        id: task.id || null,
+                        description: task.description || ''
                     });
                 }
             }
@@ -111,5 +117,35 @@ export function renderUpcomingEvents(upcomingCalendarEvents, upcomingTasks) {
                 </div>
             `;
         }).join('');
+
+        // Attach click handlers to open the existing event/task modals
+        const cards = upcomingContainer.querySelectorAll('.upcoming-event-card');
+        cards.forEach((card, idx) => {
+            const ev = upcomingEvents[idx];
+            card.style.cursor = 'pointer';
+            card.addEventListener('click', () => {
+                if (ev.type === 'task') {
+                    // Build a task-like object expected by showTaskDetails
+                    const taskObj = {
+                        title: ev.title,
+                        description: ev.description || '',
+                        due_date: ev.start,
+                        category: ev.category || null,
+                        status: ev.status || null,
+                        id: ev.id || null
+                    };
+                    showTaskDetails(taskObj);
+                } else {
+                    const eventObj = {
+                        title: ev.title,
+                        description: ev.description || '',
+                        start: ev.start,
+                        end: ev.end || ev.start,
+                        location: ev.location || ''
+                    };
+                    showCalendarEventDetails(eventObj);
+                }
+            });
+        });
     }
 }
