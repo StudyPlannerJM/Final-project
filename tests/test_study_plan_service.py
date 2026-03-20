@@ -1,6 +1,7 @@
 import pytest
+from datetime import datetime, timezone
 from app.services.study_plan_service import StudyPlanService
-from app.models import StudyPlan
+from app.models import StudyPlan, Category
 from app.exceptions import ValidationError, NotFoundError, AuthorizationError
 
 
@@ -90,3 +91,85 @@ def test_delete_get_and_list_plans(db_session, test_user, test_user_2):
     StudyPlanService.delete_plan(p1.id, test_user.id)
     with pytest.raises(NotFoundError):
         StudyPlanService.get_plan(p1.id, test_user.id)
+
+
+def test_create_tasks_from_plan_success_with_due_date_distribution(db_session, test_user):
+    plan = StudyPlan(
+        user_id=test_user.id,
+        subject='Physics',
+        time_value=2,
+        time_unit='weeks',
+        knowledge_level='beginner',
+        plan_content='''
+## Milestones
+- Review Newton laws
+- Solve 20 practice problems
+- Summarize key formulas
+''',
+        created_at=datetime(2026, 3, 1, tzinfo=timezone.utc)
+    )
+    db_session.session.add(plan)
+    db_session.session.commit()
+
+    created = StudyPlanService.create_tasks_from_plan(plan, test_user.id, num_tasks=3)
+
+    assert len(created) == 3
+    assert all(task.user_id == test_user.id for task in created)
+    assert all(task.due_date is not None for task in created)
+    assert created[0].due_date < created[1].due_date < created[2].due_date
+
+    category = Category.query.filter_by(user_id=test_user.id, name='Study Plan: Physics').first()
+    assert category is not None
+    assert all(task.category_id == category.id for task in created)
+
+
+def test_create_tasks_from_plan_rejects_invalid_count(db_session, test_user):
+    plan = StudyPlan(
+        user_id=test_user.id,
+        subject='Math',
+        time_value=1,
+        time_unit='weeks',
+        knowledge_level='beginner',
+        plan_content='- Task one'
+    )
+    db_session.session.add(plan)
+    db_session.session.commit()
+
+    with pytest.raises(ValidationError):
+        StudyPlanService.create_tasks_from_plan(plan, test_user.id, num_tasks=0)
+
+    with pytest.raises(ValidationError):
+        StudyPlanService.create_tasks_from_plan(plan, test_user.id, num_tasks=6)
+
+
+def test_create_tasks_from_plan_authorization_check(db_session, test_user, test_user_2):
+    plan = StudyPlan(
+        user_id=test_user.id,
+        subject='Chemistry',
+        time_value=1,
+        time_unit='weeks',
+        knowledge_level='beginner',
+        plan_content='- Study atomic structure'
+    )
+    db_session.session.add(plan)
+    db_session.session.commit()
+
+    with pytest.raises(AuthorizationError):
+        StudyPlanService.create_tasks_from_plan(plan, test_user_2.id, num_tasks=1)
+
+
+def test_extract_task_candidates_uses_multiple_patterns():
+    plan_content = '''
+## Weekly Plan
+Week 1: Learn variables and loops
+- Build a small calculator app
+1. Practice 15 coding exercises
+* [ ] Review function examples
+'''
+
+    tasks = StudyPlanService._extract_task_candidates(plan_content)
+
+    assert 'Learn variables and loops' in tasks
+    assert 'Build a small calculator app' in tasks
+    assert 'Practice 15 coding exercises' in tasks
+    assert 'Review function examples' in tasks

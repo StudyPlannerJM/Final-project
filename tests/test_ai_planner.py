@@ -95,3 +95,83 @@ def test_delete_plan_success_and_error(monkeypatch, auth_client, test_user):
     resp = auth_client.post('/ai-planner/delete/1', follow_redirects=True)
     assert resp.status_code == 200
     assert b'Denied' in resp.data
+
+
+def test_generate_tasks_from_plan_success(monkeypatch, auth_client, test_user):
+    import datetime
+    sample = SimpleNamespace(
+        id=11,
+        user_id=test_user.id,
+        subject='Math',
+        plan_content='- One',
+        created_at=datetime.datetime.now(),
+        time_value=2,
+        time_unit='weeks',
+        knowledge_level='beginner'
+    )
+    monkeypatch.setattr('app.routes.ai_planner.StudyPlanService.get_plan', lambda pid, uid: sample)
+    monkeypatch.setattr('app.routes.ai_planner.format_plan_for_display', lambda c: '<p>x</p>')
+    monkeypatch.setattr(
+        'app.routes.ai_planner.StudyPlanService.create_tasks_from_plan',
+        lambda plan, user_id, num_tasks: [SimpleNamespace(id=1), SimpleNamespace(id=2)]
+    )
+
+    resp = auth_client.post('/ai-planner/generate_tasks/11', data={'num_tasks': '2'}, follow_redirects=True)
+    assert resp.status_code == 200
+    assert b'Created 2 task(s) from your study plan!' in resp.data
+
+
+def test_generate_tasks_from_plan_invalid_count(monkeypatch, auth_client, test_user):
+    import datetime
+    sample = SimpleNamespace(
+        id=13,
+        user_id=test_user.id,
+        subject='Math',
+        plan_content='- One',
+        created_at=datetime.datetime.now(),
+        time_value=2,
+        time_unit='weeks',
+        knowledge_level='beginner'
+    )
+    monkeypatch.setattr('app.routes.ai_planner.StudyPlanService.get_plan', lambda pid, uid: sample)
+    monkeypatch.setattr('app.routes.ai_planner.format_plan_for_display', lambda c: '<p>x</p>')
+
+    resp = auth_client.post('/ai-planner/generate_tasks/13', data={'num_tasks': 'abc'}, follow_redirects=True)
+    assert resp.status_code == 200
+    assert b'Number of tasks must be a valid number' in resp.data
+
+
+def test_generate_tasks_from_plan_no_candidates(monkeypatch, auth_client, test_user):
+    import datetime
+    sample = SimpleNamespace(
+        id=14,
+        user_id=test_user.id,
+        subject='Math',
+        plan_content='- One',
+        created_at=datetime.datetime.now(),
+        time_value=2,
+        time_unit='weeks',
+        knowledge_level='beginner'
+    )
+    monkeypatch.setattr('app.routes.ai_planner.StudyPlanService.get_plan', lambda pid, uid: sample)
+    monkeypatch.setattr('app.routes.ai_planner.format_plan_for_display', lambda c: '<p>x</p>')
+    monkeypatch.setattr(
+        'app.routes.ai_planner.StudyPlanService.create_tasks_from_plan',
+        lambda plan, user_id, num_tasks: []
+    )
+
+    resp = auth_client.post('/ai-planner/generate_tasks/14', data={'num_tasks': '5'}, follow_redirects=True)
+    assert resp.status_code == 200
+    assert b'No actionable items were found in this plan to create tasks.' in resp.data
+
+
+def test_generate_tasks_from_plan_handles_authorization(monkeypatch, auth_client):
+    def raise_auth(pid, uid):
+        from app.exceptions import AuthorizationError
+        raise AuthorizationError('Denied')
+
+    monkeypatch.setattr('app.routes.ai_planner.StudyPlanService.get_plan', raise_auth)
+
+    resp = auth_client.post('/ai-planner/generate_tasks/99', data={'num_tasks': '5'}, follow_redirects=True)
+    assert resp.status_code == 200
+    assert b'Denied' in resp.data

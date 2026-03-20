@@ -102,11 +102,24 @@
     width: 100%;
 }
 
-.flashcard-options {
-    display: flex;
-    align-items: center;
+.planner-action-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
-    flex-wrap: wrap;
+}
+
+.planner-action-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(52, 152, 219, 0.18);
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.flashcard-options {
+    display: grid;
+    grid-template-columns: minmax(120px, auto) minmax(120px, 1fr);
+    gap: 10px 12px;
+    align-items: center;
 }
 
 .flashcard-options label {
@@ -148,6 +161,8 @@
     color: #fff;
     box-shadow: 0 8px 20px rgba(47, 103, 227, 0.28);
     transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    grid-column: 1 / -1;
+    justify-content: center;
 }
 
 #flashcard-submit-btn:hover {
@@ -161,6 +176,30 @@
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
+}
+
+.plan-task-submit-btn {
+    min-height: 42px;
+    border-radius: 10px;
+    padding: 9px 18px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    background: linear-gradient(135deg, #2f9d67 0%, #218c5a 100%);
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(33, 140, 90, 0.28);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    grid-column: 1 / -1;
+    justify-content: center;
+}
+
+.plan-task-submit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(33, 140, 90, 0.34);
+    filter: brightness(1.03);
 }
 
 #flashcard-loading.loading-indicator {

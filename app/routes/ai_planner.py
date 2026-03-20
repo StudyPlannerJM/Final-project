@@ -1,7 +1,7 @@
 """
 AI Planner Blueprint - AI-powered study plan generation routes
 """
-from flask import Blueprint, render_template, redirect, url_for, flash, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, current_app, request
 from flask_login import login_required, current_user
 from app.forms import StudyPlanForm
 from app.services import StudyPlanService
@@ -102,3 +102,41 @@ def delete_plan(plan_id):
     except (NotFoundError, AuthorizationError) as e:
         flash(str(e), 'danger')
         return redirect(url_for('ai_planner.generator'))
+
+
+@ai_planner_bp.route('/generate_tasks/<int:plan_id>', methods=['POST'])
+@login_required
+def generate_tasks_from_plan(plan_id):
+    """Auto-create simple tasks from a generated study plan"""
+    try:
+        plan = StudyPlanService.get_plan(plan_id, current_user.id)
+
+        num_tasks_raw = request.form.get('num_tasks', '1')
+        try:
+            num_tasks = int(num_tasks_raw)
+        except (TypeError, ValueError):
+            raise ValidationError('Number of tasks must be a valid number')
+
+        created_tasks = StudyPlanService.create_tasks_from_plan(
+            plan=plan,
+            user_id=current_user.id,
+            num_tasks=num_tasks
+        )
+
+        if not created_tasks:
+            flash('No actionable items were found in this plan to create tasks.', 'warning')
+        else:
+            flash(f'Created {len(created_tasks)} task(s) from your study plan!', 'success')
+
+        return redirect(url_for('ai_planner.view_plan', plan_id=plan_id))
+
+    except (NotFoundError, AuthorizationError) as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('ai_planner.generator'))
+    except ValidationError as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('ai_planner.view_plan', plan_id=plan_id))
+    except Exception as e:
+        flash('Error creating tasks from study plan.', 'danger')
+        current_app.logger.error(f"Task Generation Error: {str(e)}")
+        return redirect(url_for('ai_planner.view_plan', plan_id=plan_id))
