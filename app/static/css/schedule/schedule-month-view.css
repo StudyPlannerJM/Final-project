@@ -34,13 +34,25 @@
     border: 1px solid var(--border-color);
 }
 
+/* Ensure the grid doesn't expand beyond its container */
+.month-days-grid {
+    width: 100%;
+    box-sizing: border-box;
+}
+
 .month-day-cell {
     background-color: var(--bg-color-secondary);
-    min-height: 100px;
+    height: 100px; /* fixed height to avoid adaptive/stretching */
+    max-height: 100px;
     padding: 8px;
+    box-sizing: border-box;
     position: relative;
     cursor: pointer;
     transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .month-day-cell:hover {
@@ -61,6 +73,7 @@
     font-size: 0.9rem;
     margin-bottom: 4px;
     color: var(--text-color-primary);
+    flex: 0 0 auto;
 }
 
 .month-day-cell.today .month-day-number {
@@ -79,6 +92,9 @@
     flex-direction: column;
     gap: 2px;
     margin-top: 4px;
+    /* constrain event area so long items don't grow the cell */
+    overflow: hidden;
+    flex: 1 1 auto;
 }
 
 .month-event-item {
@@ -90,6 +106,13 @@
     text-overflow: ellipsis;
     cursor: pointer;
     transition: all 0.2s ease;
+}
+
+/* Make sure event items stay within cell width */
+.month-event-item {
+    display: block;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .month-event-item:hover {

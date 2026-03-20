@@ -509,8 +509,13 @@ function initializeEventHandlers() {
                 const googleCalendarUrl = `https://calendar.google.com/calendar/u/0/r/eventedit/${encodedEventId}`;
                 window.open(googleCalendarUrl, '_blank');
             }
-        } else if (currentTaskId) {
-            window.location.href = `/tasks/edit/${currentTaskId}`;
+        } else {
+            // Prefer local currentTaskId, fallback to global exposed value
+            const fallbackTaskId = window.__currentTaskId || null;
+            const taskIdToOpen = currentTaskId || fallbackTaskId;
+            if (taskIdToOpen) {
+                window.location.href = `/tasks/edit/${taskIdToOpen}`;
+            }
         }
     });
 

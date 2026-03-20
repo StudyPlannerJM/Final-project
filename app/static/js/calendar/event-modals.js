@@ -55,6 +55,12 @@ export function showCalendarEventDetails(event) {
 
     // Show modal
     taskDetailsModal.classList.add('active');
+    // expose current event id/type for other modules (fallback)
+    try {
+        window.__currentEventId = event.id || null;
+        window.__isGoogleCalendarEvent = true;
+        window.__currentTaskId = null;
+    } catch (e) {}
 }
 
 /**
@@ -131,6 +137,12 @@ export function showTaskDetails(task) {
 
     // Show modal
     taskDetailsModal.classList.add('active');
+    // expose current task id/type for other modules (fallback)
+    try {
+        window.__currentTaskId = task.id || null;
+        window.__isGoogleCalendarEvent = false;
+        window.__currentEventId = null;
+    } catch (e) {}
 }
 
 /**
