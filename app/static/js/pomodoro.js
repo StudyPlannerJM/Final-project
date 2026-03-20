@@ -88,6 +88,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleTimerComplete() {
+        let completionMessage;
+
         if (sessionCompleteSound) {
             sessionCompleteSound.currentTime = 0;
             sessionCompleteSound.play().catch(error => {
@@ -96,17 +98,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (!isBreak) {
+            completionMessage = 'Pomodoro session complete! Time for a break.';
             sessionCount++;
             if (sessionCountSpan) sessionCountSpan.textContent = sessionCount;
             
             // Save Pomodoro session to database with the actual session duration
             savePomodoroSession(currentSessionDuration);
-            
-            alert('Pomodoro session complete! Time for a break.');
+
             timeLeft = 5 * 60; // 5-minute break
             isBreak = true;
         } else {
-            alert('Break over! Time to work again.');
+            completionMessage = 'Break over! Time to work again.';
             timeLeft = workDuration; // Return to selected work duration
             isBreak = false;
         }
@@ -114,6 +116,11 @@ document.addEventListener('DOMContentLoaded', () => {
         endTime = null;
         saveTimerState();
         updateDisplay();
+
+        // Delay the blocking popup briefly so the sound begins first.
+        setTimeout(() => {
+            alert(completionMessage);
+        }, 150);
     }
 
     function startTimer() {
