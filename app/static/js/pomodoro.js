@@ -88,8 +88,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleTimerComplete() {
-        let completionMessage;
-
         if (sessionCompleteSound) {
             sessionCompleteSound.currentTime = 0;
             sessionCompleteSound.play().catch(error => {
@@ -98,17 +96,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (!isBreak) {
-            completionMessage = 'Pomodoro session complete! Time for a break.';
             sessionCount++;
             if (sessionCountSpan) sessionCountSpan.textContent = sessionCount;
-            
             // Save Pomodoro session to database with the actual session duration
             savePomodoroSession(currentSessionDuration);
-
             timeLeft = 5 * 60; // 5-minute break
             isBreak = true;
         } else {
-            completionMessage = 'Break over! Time to work again.';
             timeLeft = workDuration; // Return to selected work duration
             isBreak = false;
         }
@@ -116,11 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         endTime = null;
         saveTimerState();
         updateDisplay();
-
-        // Delay the blocking popup briefly so the sound begins first.
-        setTimeout(() => {
-            alert(completionMessage);
-        }, 150);
+        // No standard alert or flash message
     }
 
     function startTimer() {
@@ -195,12 +185,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const customMinutes = parseInt(customTimeInput.value);
         
         if (!customMinutes || customMinutes < 1 || customMinutes > 180) {
-            alert('Please enter a valid time between 1 and 180 minutes.');
+            showNotification('Please enter a valid time between 1 and 180 minutes.', 'error');
             return;
         }
-        
+
         if (isRunning) {
-            alert('Please pause the timer before changing duration.');
+            showNotification('Please pause the timer before changing duration.', 'error');
             return;
         }
         
@@ -265,22 +255,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Function to show temporary notification
-    function showNotification(message) {
+    function showNotification(message, type = 'success') {
         const notification = document.createElement('div');
         notification.style.position = 'fixed';
         notification.style.top = '20px';
         notification.style.right = '20px';
-        notification.style.backgroundColor = '#28a745';
+        notification.style.backgroundColor = type === 'error' ? '#e74c3c' : '#28a745';
         notification.style.color = 'white';
-        notification.style.padding = '15px 20px';
-        notification.style.borderRadius = '8px';
-        notification.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+        notification.style.padding = '15px 24px';
+        notification.style.borderRadius = '10px';
+        notification.style.boxShadow = '0 4px 16px rgba(0,0,0,0.13)';
         notification.style.zIndex = '9999';
-        notification.style.fontSize = '14px';
-        notification.textContent = message;
-        
+        notification.style.fontSize = '15px';
+        notification.style.fontWeight = '600';
+        notification.style.letterSpacing = '0.02em';
+        notification.style.display = 'flex';
+        notification.style.alignItems = 'center';
+        notification.style.gap = '10px';
+        notification.innerHTML = type === 'error'
+            ? '<i class="fas fa-exclamation-circle" style="font-size:18px;"></i> ' + message
+            : '<i class="fas fa-check-circle" style="font-size:18px;"></i> ' + message;
+
         document.body.appendChild(notification);
-        
+
         setTimeout(() => {
             notification.style.opacity = '0';
             notification.style.transition = 'opacity 0.5s';
@@ -323,6 +320,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
+
+        // Close modal when clicking Cancel or X
+        const closeModalButtons = document.querySelectorAll('[data-delete-modal-close]');
+        closeModalButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                closeDeleteModal();
+            });
+        });
     }
     
     function showDeleteModal() {
@@ -331,17 +336,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (messageEl) {
             messageEl.textContent = 'Are you sure you want to delete this session?';
         }
-        
+
         const modal = document.getElementById('deleteModal');
         if (modal) {
+            modal.classList.remove('is-hidden');
             modal.style.display = 'flex';
         }
     }
-    
+
     window.closeDeleteModal = function() {
         const modal = document.getElementById('deleteModal');
         if (modal) {
-            modal.style.display = 'none';
+            modal.classList.add('is-hidden');
+            modal.style.display = '';
         }
         sessionToDelete = null;
     }

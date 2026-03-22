@@ -132,8 +132,6 @@
     border: 2px solid transparent;
     border-radius: 8px;
     transition: all 0.3s ease;
-    min-width: 90px;
-    min-height: 42px;
     font-weight: 600;
     transition: background-color 0.3s ease;
 }
