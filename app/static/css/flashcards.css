@@ -1,3 +1,26 @@
+.flashcard-deck-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.15em 0.8em;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 700;
+    color: #2c3e50;
+    background: var(--primary-color);
+    margin-bottom: 0.5rem;
+    box-shadow: 0 1px 4px rgba(44,62,80,0.08);
+    position: relative;
+    z-index: 1;
+    transition: background 0.2s, color 0.2s;
+}
+
+body.dark-theme .flashcard-deck-indicator {
+    background: var(--bg-color-secondary, #23272e);
+    color: var(--text-color-primary, #fff);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.18);
+    border: 1px solid var(--border-color, #444);
+}
 .flashcards-header {
     display: flex;
     justify-content: space-between;

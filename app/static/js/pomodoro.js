@@ -33,6 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
             sessionCount = state.sessionCount;
             isBreak = state.isBreak;
             currentSessionDuration = state.currentSessionDuration;
+            // Restore hasStarted
+            window.hasStarted = state.hasStarted || false;
             
             if (state.isRunning && state.endTime) {
                 // Calculate remaining time based on end timestamp
@@ -58,6 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (durationMinutes === 25) time25Btn.classList.add('active');
             else if (durationMinutes === 45) time45Btn.classList.add('active');
             else if (durationMinutes === 60) time60Btn.classList.add('active');
+        } else {
+            window.hasStarted = false;
         }
         
         if (sessionCountSpan) sessionCountSpan.textContent = sessionCount;
@@ -73,7 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
             sessionCount,
             isBreak,
             currentSessionDuration,
-            endTime
+            endTime,
+            hasStarted: window.hasStarted || false
         };
         localStorage.setItem('pomodoroState', JSON.stringify(state));
         
@@ -116,13 +121,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function startTimer() {
         if (isRunning) return;
         isRunning = true;
-        
+        window.hasStarted = true;
         // Set end time based on current timeLeft
         endTime = Date.now() + (timeLeft * 1000);
-        
         if (timerStatusSpan) timerStatusSpan.textContent = isBreak ? 'Break' : 'Working';
         saveTimerState();
-        
         timer = setInterval(() => {
             // Calculate time left based on end timestamp for accuracy
             const now = Date.now();
@@ -156,6 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sessionCount = 0;
         isBreak = false;
         endTime = null;
+        window.hasStarted = false;
         if (timerStatusSpan) timerStatusSpan.textContent = 'Ready';
         if (sessionCountSpan) sessionCountSpan.textContent = sessionCount;
         saveTimerState();

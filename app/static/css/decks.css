@@ -71,10 +71,30 @@
     background: rgba(255, 255, 255, 0.9);
 }
 
+
 .deck-info h3 {
     margin: 0 0 0.25rem 0;
-    color: #2c3e50;
     font-size: 1.25rem;
+}
+
+.deck-title-bg {
+    display: inline-block;
+    background: white;
+    color: #2c3e50;
+    padding: 0.25em 0.75em;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(44,62,80,0.08);
+    font-weight: 700;
+    position: relative;
+    z-index: 1;
+    transition: background 0.2s, color 0.2s;
+}
+
+body.dark-theme .deck-title-bg {
+    background: var(--bg-color-secondary, #23272e);
+    color: var(--text-color-primary, #fff);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.18);
+    border: 1px solid var(--border-color, #444);
 }
 
 .badge {
