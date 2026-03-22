@@ -60,12 +60,13 @@
                             <i class="fas fa-edit"></i> Edit
                         </a>
                         {% if not deck.is_default %}
-                            <button type="button" class="btn btn-sm btn-danger delete-deck-btn" 
-                                    data-deck-id="{{ deck.id }}" 
-                                    data-deck-name="{{ deck.name }}" 
-                                    data-flashcard-count="{{ deck.flashcard_count }}">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
+                            <form method="POST" action="{{ url_for('flashcards.delete_deck', deck_id=deck.id) }}" style="display:inline;">
+                                <button type="button" class="btn btn-sm btn-danger open-delete-modal"
+                                        data-delete-entity="deck"
+                                        data-delete-label="{{ deck.name }}">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
                         {% endif %}
                     </div>
                 </div>
@@ -84,4 +85,5 @@
 
 {% block body_extra %}
     <script src="{{ url_for('static', filename='js/decks.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/delete-modal.js') }}"></script>
 {% endblock %}
