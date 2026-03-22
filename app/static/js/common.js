@@ -130,25 +130,39 @@ function initFloatingTimer() {
             return;
         }
 
-        // Only show if timer is running
-        if (state.isRunning && state.endTime) {
-            createFloatingTimer();
-
-            // Calculate remaining time
-            const now = Date.now();
-            const remaining = Math.floor((state.endTime - now) / 1000);
-
-            if (remaining > 0) {
+        // Show only if timer has started and is running or paused with time left
+        let showFloating = false;
+        let display = '--:--';
+        let status = 'Ready';
+        let remaining = 0;
+        if (state.hasStarted) {
+            if (state.isRunning && state.endTime) {
+                // Running
+                const now = Date.now();
+                remaining = Math.floor((state.endTime - now) / 1000);
+                if (remaining > 0) {
+                    showFloating = true;
+                    const minutes = Math.floor(remaining / 60);
+                    const seconds = remaining % 60;
+                    display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    status = state.isBreak ? '☕ Break' : '📚 Working';
+                }
+            } else if (!state.isRunning && state.timeLeft > 0) {
+                // Paused (even if pause is clicked multiple times)
+                showFloating = true;
+                remaining = state.timeLeft;
                 const minutes = Math.floor(remaining / 60);
                 const seconds = remaining % 60;
-                const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                
-                floatingTimer.querySelector('.floating-timer-display').textContent = display;
-                floatingTimer.querySelector('.floating-timer-status').textContent = state.isBreak ? '☕ Break' : '📚 Working';
-            } else {
-                // Timer completed
-                removeFloatingTimer();
+                display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                status = 'Paused';
             }
+        }
+
+        // Only remove if timer is completed or no time left
+        if (showFloating && remaining > 0) {
+            createFloatingTimer();
+            floatingTimer.querySelector('.floating-timer-display').textContent = display;
+            floatingTimer.querySelector('.floating-timer-status').textContent = status;
         } else {
             removeFloatingTimer();
         }
@@ -160,10 +174,12 @@ function initFloatingTimer() {
 
         const state = JSON.parse(savedState);
         
-        // Calculate current time left
-        const now = Date.now();
-        const remaining = Math.floor((state.endTime - now) / 1000);
-        
+        // Only recalculate remaining if endTime is set (i.e., not already paused)
+        let remaining = state.timeLeft;
+        if (state.endTime) {
+            const now = Date.now();
+            remaining = Math.floor((state.endTime - now) / 1000);
+        }
         state.isRunning = false;
         state.timeLeft = remaining > 0 ? remaining : 0;
         state.endTime = null;

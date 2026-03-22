@@ -31,7 +31,7 @@
                                 <i class="fas {{ deck.icon or 'fa-folder' }}"></i>
                             </div>
                             <div class="deck-info">
-                                <h3>{{ deck.name }}</h3>
+                                <h3 class="deck-title-bg">{{ deck.name }}</h3>
                                 {% if deck.is_default %}
                                     <span class="badge badge-default">Default</span>
                                 {% endif %}
@@ -58,12 +58,13 @@
                                 <i class="fas fa-edit"></i> Edit
                             </a>
                             {% if not deck.is_default %}
-                                <button class="btn btn-danger btn-sm delete-deck-btn" 
-                                        data-deck-id="{{ deck.id }}" 
-                                        data-deck-name="{{ deck.name }}" 
-                                        data-flashcard-count="{{ deck.flashcard_count }}">
-                                    <i class="fas fa-trash"></i> Delete
-                                </button>
+                                <form method="POST" action="{{ url_for('flashcards.delete_deck', deck_id=deck.id) }}" style="display:inline;">
+                                    <button type="button" class="btn btn-danger btn-sm open-delete-modal"
+                                            data-delete-entity="deck"
+                                            data-delete-label="{{ deck.name }}">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </form>
                             {% endif %}
                         </div>
                     </div>
@@ -135,10 +136,14 @@
                                         <a href="{{ url_for('flashcards.edit', flashcard_id=flashcard.id) }}" class="btn btn-secondary btn-sm" title="Edit">
                                             <i class="fas fa-edit"></i> Edit
                                         </a>
-                                        <button type="button" class="btn btn-danger btn-sm delete-flashcard-btn" 
-                                                data-flashcard-id="{{ flashcard.id }}" title="Delete">
-                                            <i class="fas fa-trash"></i> Delete
-                                        </button>
+                                        <form method="POST" action="{{ url_for('flashcards.delete', flashcard_id=flashcard.id) }}" style="display:inline;">
+                                            <button type="button" class="btn btn-danger btn-sm open-delete-modal"
+                                                    data-delete-entity="flashcard"
+                                                    data-delete-label="{{ flashcard.question }}"
+                                                    title="Delete">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                                 <div class="flashcard-back">
@@ -155,10 +160,14 @@
                                         <a href="{{ url_for('flashcards.edit', flashcard_id=flashcard.id) }}" class="btn btn-secondary btn-sm" title="Edit">
                                             <i class="fas fa-edit"></i> Edit
                                         </a>
-                                        <button type="button" class="btn btn-danger btn-sm delete-flashcard-btn" 
-                                                data-flashcard-id="{{ flashcard.id }}" title="Delete">
-                                            <i class="fas fa-trash"></i> Delete
-                                        </button>
+                                        <form method="POST" action="{{ url_for('flashcards.delete', flashcard_id=flashcard.id) }}" style="display:inline;">
+                                            <button type="button" class="btn btn-danger btn-sm open-delete-modal"
+                                                    data-delete-entity="flashcard"
+                                                    data-delete-label="{{ flashcard.question }}"
+                                                    title="Delete">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
@@ -185,4 +194,5 @@
 
 {% block body_extra %}
     <script src="{{ url_for('static', filename='js/flashcard.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/delete-modal.js') }}"></script>
 {% endblock %}

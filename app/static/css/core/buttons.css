@@ -3,7 +3,7 @@
    ================================================ */
 
 .btn {
-    padding: 12px 20px;
+    padding: 10px 20px;
     font-size: 0.95rem;
     font-weight: 600;
     border: none;
@@ -43,7 +43,7 @@ body.dark-theme .btn-secondary:hover {
 }
 
 .btn-sm { 
-    padding: 5px 10px; 
+    padding: 10px 10px; 
     font-size: 0.8em; 
 }
 
