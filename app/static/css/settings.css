@@ -63,6 +63,78 @@
 }
 
 /* =============================================================================
+   PRIVACY AND LEGAL SECTION
+   ============================================================================= */
+.privacy-legal-intro {
+    color: var(--text-color-secondary);
+    line-height: 1.65;
+    margin: 0 0 1.2rem;
+}
+
+.privacy-legal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.privacy-legal-card {
+    background: var(--bg-color-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+.privacy-legal-card h3 {
+    margin: 0 0 0.7rem;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--text-color-primary);
+}
+
+.privacy-legal-card h3 i {
+    color: var(--primary-color);
+}
+
+.privacy-legal-card ul {
+    margin: 0;
+    padding-left: 1.15rem;
+    color: var(--text-color-secondary);
+}
+
+.privacy-legal-card li {
+    margin-bottom: 0.55rem;
+    line-height: 1.5;
+}
+
+.privacy-legal-card li:last-child {
+    margin-bottom: 0;
+}
+
+.privacy-legal-meta {
+    margin: 1rem 0 0;
+    font-size: 0.82rem;
+    color: var(--text-color-secondary);
+}
+
+.privacy-legal-meta a {
+    color: var(--primary-color);
+    text-decoration: none;
+    opacity: 0.75;
+    pointer-events: none;
+}
+
+.privacy-legal-meta a:hover {
+    text-decoration: underline;
+}
+
+.privacy-legal-separator {
+    margin: 0 0.4rem;
+    color: var(--border-color);
+}
+
+/* =============================================================================
    ABOUT SECTION
    ============================================================================= */
 .about-hero {
@@ -282,6 +354,10 @@
 @media (max-width: 768px) {
     .settings-wrapper {
         gap: 14px;
+    }
+
+    .privacy-legal-grid {
+        grid-template-columns: 1fr;
     }
 
     .settings-section {
