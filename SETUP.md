@@ -2,7 +2,7 @@
 
 ## For first-time setup
 
-### 1️⃣ Clone the repository
+### 1️⃣ Clone the repository Or download the ZIP file and extract it, then navigate to the project folder.
 ```bash
 git clone [REPOSITORY-URL]
 cd study-planner-project
@@ -29,7 +29,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 5️⃣ Configure environment variables
+### 5️⃣ Configure environment variables, if you have from zip file, you can skip this step, otherwise, create a `.env` file in the root directory of the project and add the following line:
 ```bash
 # Windows
 copy .env.example .env
