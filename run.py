@@ -3,10 +3,17 @@ from flask_migrate import Migrate  # type: ignore
 from app import create_app, db
 from app.models import User
 from werkzeug.security import generate_password_hash
+from sqlalchemy import inspect
 from sqlalchemy.exc import SQLAlchemyError
 
 app = create_app()
 migrate = Migrate(app, db)
+
+REQUIRED_TABLES = {
+    "user",
+    "task",
+    "flashcard",
+}
 
 
 def should_seed_default_users():
@@ -76,10 +83,37 @@ def seed_default_users_if_enabled():
     seed_default_users()
 
 
+def get_missing_required_tables():
+    with app.app_context():
+        inspector = inspect(db.engine)
+        existing_tables = set(inspector.get_table_names())
+    return sorted(REQUIRED_TABLES - existing_tables)
+
+
 @app.cli.command("seed-default-users")
 def seed_default_users_command():
     """Seed default admin and student users."""
     seed_default_users()
+
+
+@app.cli.command("verify-schema")
+def verify_schema_command():
+    """Fail if required tables are missing."""
+    try:
+        missing = get_missing_required_tables()
+    except SQLAlchemyError as exc:
+        raise SystemExit(
+            "Schema verification failed due to DB error: "
+            f"{exc}"
+        ) from exc
+
+    if missing:
+        raise SystemExit(
+            "Schema verification failed. Missing tables: "
+            f"{', '.join(missing)}"
+        )
+
+    print("Schema verification passed.")
 
 
 if __name__ == '__main__':
