@@ -2,21 +2,14 @@ services:
   - type: web
     name: study-planner
     env: python
-    buildCommand: "pip install -r requirements.txt && flask db upgrade"
-    startCommand: "python -m gunicorn run:app"
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "flask db upgrade && python -m gunicorn run:app"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
-        fromDatabase:
-          name: braindump-db
-          property: connectionString
+        sync: false
       - key: FLASK_ENV
         value: production
-
-databases:
-  - name: braindump-db
-    databaseName: braindump
-    user: braindump
