@@ -21,10 +21,7 @@ def should_seed_default_users():
     return os.environ.get('SEED_DEFAULT_USERS', 'true').lower() == 'true'
 
 
-def seed_default_users_if_enabled():
-    if not should_seed_default_users():
-        return
-
+def seed_default_users():
     with app.app_context():
         try:
             # Development-only bootstrap users by default.
@@ -73,10 +70,21 @@ def seed_default_users_if_enabled():
             )
 
 
-seed_default_users_if_enabled()
+def seed_default_users_if_enabled():
+    if not should_seed_default_users():
+        return
+    seed_default_users()
+
+
+@app.cli.command("seed-default-users")
+def seed_default_users_command():
+    """Seed default admin and student users."""
+    seed_default_users()
+
 
 if __name__ == '__main__':
     try:
+        seed_default_users_if_enabled()
         port = int(os.environ.get('PORT', 5000))
         app.run(host='0.0.0.0', port=port, debug=False)
     except KeyboardInterrupt:

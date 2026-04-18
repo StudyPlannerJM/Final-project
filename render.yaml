@@ -3,7 +3,7 @@ services:
     name: study-planner
     env: python
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "flask db upgrade && python -m gunicorn run:app"
+    startCommand: "python -m flask --app run.py db upgrade && python -m gunicorn run:app"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
