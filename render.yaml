@@ -3,7 +3,7 @@ services:
     name: study-planner
     env: python
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "python -m flask --app run.py db upgrade && python -m flask --app run.py verify-schema && python -m gunicorn run:app"
+    startCommand: "python scripts/render_start.py"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
@@ -13,3 +13,9 @@ services:
         sync: false
       - key: FLASK_ENV
         value: production
+      - key: SEED_DEFAULT_USERS_PRODUCTION
+        value: "false"
+      - key: MIGRATION_MAX_RETRIES
+        value: "6"
+      - key: MIGRATION_RETRY_SECONDS
+        value: "5"
