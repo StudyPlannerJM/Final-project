@@ -10,7 +10,9 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: brainddumpdb
+          property: connectionString
       - key: FLASK_ENV
         value: production
       - key: SEED_DEFAULT_USERS_PRODUCTION
@@ -19,3 +21,6 @@ services:
         value: "6"
       - key: MIGRATION_RETRY_SECONDS
         value: "5"
+
+databases:
+  - name: brainddumpdb
