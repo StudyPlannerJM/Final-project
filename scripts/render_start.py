@@ -80,6 +80,20 @@ def main() -> None:
         delay_seconds=0,
     )
 
+    seed_default_users = (
+        os.environ.get(
+            "SEED_DEFAULT_USERS_PRODUCTION",
+            "false",
+        ).lower() == "true"
+    )
+    if seed_default_users:
+        print("SEED_DEFAULT_USERS_PRODUCTION enabled. Seeding users...")
+        _run_with_retries(
+            flask_base + ["seed-default-users"],
+            retries=1,
+            delay_seconds=0,
+        )
+
     validate_only = (
         os.environ.get("STARTUP_VALIDATE_ONLY", "false").lower() == "true"
     )
