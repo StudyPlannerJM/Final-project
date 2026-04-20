@@ -1,4 +1,5 @@
 import os
+import sys
 from flask_migrate import Migrate  # type: ignore
 from app import create_app, db
 from app.models import User
@@ -90,6 +91,58 @@ def get_missing_required_tables():
     return sorted(REQUIRED_TABLES - existing_tables)
 
 
+def should_auto_bootstrap_schema():
+    enabled = (
+        os.environ.get('AUTO_SCHEMA_BOOTSTRAP', 'true').lower() == 'true'
+    )
+    running_gunicorn = 'gunicorn' in ' '.join(sys.argv).lower()
+    return enabled and running_gunicorn
+
+
+def auto_bootstrap_schema_if_needed():
+    if not should_auto_bootstrap_schema():
+        return
+
+    try:
+        missing = get_missing_required_tables()
+    except SQLAlchemyError as exc:
+        print(f"Schema bootstrap check failed: {exc}")
+        return
+
+    if not missing:
+        return
+
+    print(
+        "Missing required tables detected at startup: "
+        f"{', '.join(missing)}"
+    )
+    print("Attempting automatic schema bootstrap.")
+
+    with app.app_context():
+        try:
+            db.create_all()
+            print("Automatic schema bootstrap via db.create_all() completed.")
+        except SQLAlchemyError as exc:
+            db.session.rollback()
+            print(f"Automatic schema bootstrap failed: {exc}")
+            return
+
+    try:
+        remaining = get_missing_required_tables()
+    except SQLAlchemyError as exc:
+        print(f"Schema re-check failed after bootstrap: {exc}")
+        return
+
+    if remaining:
+        print(
+            "Automatic schema bootstrap incomplete. "
+            f"Still missing: {', '.join(remaining)}"
+        )
+        return
+
+    print("Automatic schema bootstrap validated successfully.")
+
+
 @app.cli.command("seed-default-users")
 def seed_default_users_command():
     """Seed default admin and student users."""
@@ -114,6 +167,9 @@ def verify_schema_command():
         )
 
     print("Schema verification passed.")
+
+
+auto_bootstrap_schema_if_needed()
 
 
 if __name__ == '__main__':
