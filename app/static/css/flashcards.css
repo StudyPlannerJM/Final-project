@@ -620,3 +620,60 @@
         min-width: 100%;
     }
 }
+
+/* ================================================
+   CARD FACES (calm surfaces instead of solid colour blocks)
+   Question side is neutral; answer side is tinted so the
+   two are easy to tell apart in both themes.
+   ================================================ */
+
+.flashcard-front,
+.flashcard-back {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-1);
+}
+
+.flashcard-front {
+    background: var(--color-surface);
+    border-top: 4px solid var(--color-primary);
+}
+
+.flashcard-back {
+    background: color-mix(in srgb, var(--color-success) 10%, var(--color-surface));
+    border-top: 4px solid var(--color-success);
+}
+
+.flashcard-inner {
+    color: var(--color-text);
+}
+
+.flashcard-label {
+    opacity: 1;
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    color: var(--color-text-subtle);
+}
+
+.flashcard-question,
+.flashcard-answer {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.btn-flip {
+    min-height: 44px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    color: var(--color-primary);
+    font-family: inherit;
+}
+
+.btn-flip:hover {
+    background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
+    border-color: var(--color-primary);
+    transform: none;
+}
