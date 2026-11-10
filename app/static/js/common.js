@@ -1,10 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const themeToggleBtn = document.getElementById('theme-toggle');
     const sidebarToggleBtn = document.getElementById('sidebar-toggle');
-    const sidebarOverlay = document.getElementById('sidebar-overlay');
-    const body = document.body;
     const sidebar = document.querySelector('.sidebar');
-    const mobileBreakpoint = window.matchMedia('(max-width: 768px)');
 
     // Theme Toggle (state lives in window.BrainDump, set up in theme_init.html)
     const toggleTheme = () => {
@@ -15,50 +12,24 @@ document.addEventListener('DOMContentLoaded', () => {
         themeToggleBtn.addEventListener('click', toggleTheme);
     }
 
-    // Sidebar Toggle
-    if (sidebarToggleBtn && sidebar) {
-        const closeMobileSidebar = () => {
-            sidebar.classList.remove('open');
-            body.classList.remove('sidebar-open');
-        };
-
-        const syncSidebarMode = () => {
-            if (mobileBreakpoint.matches) {
-                sidebar.classList.remove('collapsed');
-            } else {
-                closeMobileSidebar();
-            }
-        };
-
-        sidebarToggleBtn.addEventListener('click', () => {
-            if (mobileBreakpoint.matches) {
-                const isOpen = sidebar.classList.toggle('open');
-                body.classList.toggle('sidebar-open', isOpen);
-            } else {
-                sidebar.classList.toggle('collapsed');
-            }
-        });
-
-        if (sidebarOverlay) {
-            sidebarOverlay.addEventListener('click', closeMobileSidebar);
-        }
-
-        sidebar.querySelectorAll('.nav-link').forEach((link) => {
-            link.addEventListener('click', () => {
-                if (mobileBreakpoint.matches) {
-                    closeMobileSidebar();
-                }
-            });
-        });
-
-        if (mobileBreakpoint.addEventListener) {
-            mobileBreakpoint.addEventListener('change', syncSidebarMode);
-        } else {
-            mobileBreakpoint.addListener(syncSidebarMode);
-        }
-
-        syncSidebarMode();
+    // Sidebar collapse (desktop only; tablets are icon-only via CSS, phones use the tab bar)
+    const desktopQuery = window.matchMedia('(min-width: 1024px)');
+    const SIDEBAR_KEY = 'sidebarCollapsed';
+    const readCollapsed = () => {
+        try { return localStorage.getItem(SIDEBAR_KEY) === '1'; } catch (e) { return false; }
+    };
+    if (sidebar) {
+        sidebar.classList.toggle('collapsed', readCollapsed());
     }
+    if (sidebarToggleBtn && sidebar) {
+        sidebarToggleBtn.addEventListener('click', () => {
+            if (!desktopQuery.matches) return;
+            const collapsed = sidebar.classList.toggle('collapsed');
+            try { localStorage.setItem(SIDEBAR_KEY, collapsed ? '1' : '0'); } catch (e) { /* storage blocked */ }
+        });
+    }
+
+    initSheets(toggleTheme);
 
     // Floating Pomodoro Timer Widget
     initFloatingTimer();
@@ -218,4 +189,100 @@ function initFloatingTimer() {
 
     // Listen for custom event from same page
     window.addEventListener('pomodoroStateChanged', updateFloatingTimer);
+}
+
+// Bottom sheets opened from the mobile tab bar (Study, More)
+function initSheets(toggleTheme) {
+    const backdrop = document.querySelector('.sheet-backdrop');
+    const triggers = document.querySelectorAll('.bottom-nav__item[aria-controls]');
+    if (!backdrop || !triggers.length) return;
+
+    const phoneQuery = window.matchMedia('(max-width: 767.98px)');
+    let openSheetEl = null;
+    let openTrigger = null;
+
+    const focusable = (sheet) => Array.from(sheet.querySelectorAll('a[href], button:not([disabled])'));
+
+    function closeSheet(restoreFocus = true) {
+        if (!openSheetEl) return;
+        openSheetEl.hidden = true;
+        backdrop.hidden = true;
+        document.body.classList.remove('sheet-open');
+        openTrigger.setAttribute('aria-expanded', 'false');
+        const trigger = openTrigger;
+        openSheetEl = null;
+        openTrigger = null;
+        if (restoreFocus) trigger.focus();
+    }
+
+    function openSheet(id, trigger) {
+        const sheet = document.getElementById(id);
+        if (!sheet) return;
+        if (openSheetEl) closeSheet(false);
+        sheet.hidden = false;
+        backdrop.hidden = false;
+        document.body.classList.add('sheet-open');
+        trigger.setAttribute('aria-expanded', 'true');
+        openSheetEl = sheet;
+        openTrigger = trigger;
+        const first = focusable(sheet)[0];
+        if (first) first.focus();
+    }
+
+    triggers.forEach((trigger) => {
+        trigger.addEventListener('click', () => {
+            const id = trigger.getAttribute('aria-controls');
+            if (openSheetEl && openSheetEl.id === id) {
+                closeSheet();
+            } else {
+                openSheet(id, trigger);
+            }
+        });
+    });
+
+    backdrop.addEventListener('click', () => closeSheet());
+
+    document.querySelectorAll('.sheet').forEach((sheet) => {
+        sheet.addEventListener('click', (event) => {
+            const link = event.target.closest('.sheet__link');
+            if (!link) return;
+            if (link.dataset.action === 'toggle-theme') {
+                toggleTheme();
+            } else {
+                closeSheet(false);
+            }
+        });
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (!openSheetEl) return;
+        if (event.key === 'Escape') {
+            closeSheet();
+            return;
+        }
+        if (event.key !== 'Tab') return;
+        const items = focusable(openSheetEl);
+        if (!items.length) return;
+        const first = items[0];
+        const last = items[items.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        } else if (!openSheetEl.contains(document.activeElement)) {
+            event.preventDefault();
+            first.focus();
+        }
+    });
+
+    const onViewportChange = () => {
+        if (!phoneQuery.matches) closeSheet(false);
+    };
+    if (phoneQuery.addEventListener) {
+        phoneQuery.addEventListener('change', onViewportChange);
+    } else {
+        phoneQuery.addListener(onViewportChange);
+    }
 }

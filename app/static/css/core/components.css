@@ -206,8 +206,9 @@
 /* Responsive adjustments for floating timer */
 @media (max-width: 768px) {
     #floating-pomodoro {
-        bottom: 10px;
+        bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + var(--space-3));
         right: 10px;
+        z-index: 950;
         min-width: 150px;
         padding: 12px 15px;
     }
