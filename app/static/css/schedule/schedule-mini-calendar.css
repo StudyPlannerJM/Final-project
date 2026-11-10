@@ -37,7 +37,7 @@
 
 .nav-btn:hover {
     background-color: var(--primary-color);
-    color: white;
+    color: var(--color-on-primary);
 }
 
 .weekday-labels {
@@ -81,13 +81,13 @@
 
 .calendar-day.today {
     background-color: var(--primary-color);
-    color: white;
+    color: var(--color-on-primary);
     font-weight: 700;
 }
 
 .calendar-day.selected {
     background-color: var(--accent-color);
-    color: white;
+    color: var(--color-on-primary);
     font-weight: 700;
 }
 

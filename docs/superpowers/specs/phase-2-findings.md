@@ -1,0 +1,98 @@
+# Phase 2 input: findings from the Phase 1 full-page pass
+
+Date: 2026-11-10. Collected while verifying the Phase 1 shell on every page at
+320×568, 375×812, 640×360, 768×1024 and 1280×800, in light and dark themes.
+
+## How this was checked
+
+An in-browser script loaded each page at each size and theme and measured:
+horizontal overflow, text contrast below 3:1 against solid backgrounds,
+interactive controls shorter than 36px on phone widths, fixed elements
+colliding with the tab bar, and clipped tab labels. Tasks, Schedule,
+Pomodoro, Decks, the delete dialog, Add Task and both auth pages were also
+checked by eye on a 375px viewport.
+
+Limits of the check: text placed on gradients or images is not measured;
+touch-target sizes were measured without touch emulation, so `.btn` elements
+(which grow to 44px on touch devices) show up smaller than they are on a
+phone; nothing was tested on a physical device.
+
+## Result for Phase 1 scope
+
+- No horizontal page scroll on any page at any size.
+- No text below 3:1 on solid backgrounds in either theme after the fixes below.
+- Tab labels fit at 320px. The More sheet scrolls inside a 360px-tall viewport.
+- A 30-character username and a long page title do not overflow the header.
+
+Fixed during the pass (they made content unreadable or collided with the shell):
+
+- White text hardcoded on primary-coloured backgrounds, unreadable in dark
+  theme (23 rules across pomodoro, schedule, ai-planner, decks, settings,
+  summarizer): now `var(--color-on-primary)`.
+- Admin users table (`#000` text) and admin form Cancel button (white
+  background) in dark theme.
+- Date picker placeholder text in light theme.
+- Schedule "add event" button sat on top of the tab bar on phones.
+- Task and schedule modal overlays were painted under the tab bar.
+- Shared delete dialog tokenised.
+
+## Open findings by page
+
+Format: viewport / theme — problem — file and selector.
+
+### Dashboard
+- All / both — emoji used as icons in every stat card, heading and quick action (21 occurrences) — `templates/dashboard.html`.
+- Phone / both — recent-task edit links are under 36px tall — `a.task-edit-btn`.
+- All / both — coloured card borders (yellow, blue, green, purple) are hardcoded and off-palette — `dashboard.css`.
+
+### Tasks (kanban)
+- Phone / both — the three columns stack vertically, so the board is a long scroll; needs swipeable columns or a status filter — `kanban.css`.
+- All / both — column headers use a hardcoded teal gradient that is off-palette — `kanban.css` (31 hardcoded colours).
+- Phone / both — the "Drag tasks between columns" hint does not apply to touch as written.
+
+### Add / edit task
+- Phone / both — the hidden native date input is still in the layout (`input#due_date.dp-native-hidden`); harmless but should be removed from the tab order.
+- All / both — `date-picker.css` has 28 hardcoded colours and its own dark overrides.
+
+### Schedule
+- Phone / both — month title wraps mid-word ("Novem-ber, 2026") next to the view switcher — `schedule-layout.css`.
+- Phone / both — the week view squeezes seven columns into the screen; day letters are clipped. Default to day or agenda view on phones.
+- Phone / both — view switcher, previous/next and Today buttons are under 36px tall — `button.view-btn`, `button.nav-btn`, `button.today-btn`.
+
+### Pomodoro
+- Phone / both — duration presets, custom time, timer and controls are one long column; the timer itself is below the fold on short screens.
+- All / dark — Pause (`.btn-secondary`) has almost no visible boundary against the card.
+- All / both — `pomodoro.css` is 1,000+ lines with 32 hardcoded colours and a large block of `body.dark-theme` overrides that tokens now make redundant.
+- Floating timer widget buttons are emoji (⏸ ☕ 🍅 📚) — `static/js/common.js`.
+
+### Flashcards and decks
+- All / dark — deck card header keeps a light gradient in dark theme — `decks.css` (44 hardcoded colours, the most of any file).
+- Phone / both — deck icon picker renders about 40 buttons under 36px — `button.icon-btn` in add/edit deck.
+- Add/edit deck templates use emoji as icon choices (🌍 🎨 📚 📝 🔢 🔬).
+- Study view is a list of flip cards, not a one-card-at-a-time study mode.
+
+### Summarizer and AI planner
+- Phone / both — AI planner delete icon button is under 36px — `button.btn-delete-icon`.
+- All / both — `.btn-secondary`, `.btn-info` and others are redefined per page in `ai-planner-components.css` instead of using the core buttons.
+
+### Admin
+- Phone / both — admin checkbox is small (`input#is_admin`).
+- `manage-users.css` (29) and `user-form.css` (17) still carry hardcoded colours with fallback values from an older purple palette.
+
+### Calendar sync prompt
+- `calendar-sync-prompt.css` defines its own colour variables (`--sync-*`, 37 hardcoded colours) instead of the tokens.
+
+## Hardcoded colour counts remaining (per stylesheet)
+
+decks 44, calendar-sync-prompt 37, pomodoro 32, kanban 31, admin/manage-users 29,
+date-picker 28, admin/user-form 17, flashcards 16, dashboard 15, tasks 12,
+schedule-layout 10, schedule-month-view 6, ai-planner (4 files) 15,
+summarizer (4 files) 11, settings 3, schedule week/day 2.
+
+## Cross-cutting
+
+- Many page stylesheets keep `body.dark-theme` override blocks that only
+  restate colours; these can be deleted as each file moves to tokens.
+- Buttons are restyled per page in several places; converge on `core/buttons.css`.
+- Font Awesome is still loaded from a CDN; self-host or switch to inline SVG
+  when the PWA work starts (offline use).

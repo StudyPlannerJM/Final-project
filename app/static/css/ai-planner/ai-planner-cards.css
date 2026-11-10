@@ -84,7 +84,7 @@
 .btn-view {
     flex: 1;
     background-color: var(--primary-color);
-    color: white;
+    color: var(--color-on-primary);
     padding: 10px 20px;
     border-radius: 6px;
     text-decoration: none;
@@ -239,7 +239,7 @@
 .btn-view-full {
     flex: 1;
     background-color: var(--primary-color);
-    color: white;
+    color: var(--color-on-primary);
     padding: 10px 20px;
     border-radius: 6px;
     text-decoration: none;

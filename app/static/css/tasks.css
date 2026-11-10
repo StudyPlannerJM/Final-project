@@ -54,7 +54,7 @@ body.dark-theme .delete-modal .modal-footer {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 1250;
     padding: 16px;
 }
 

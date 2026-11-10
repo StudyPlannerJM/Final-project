@@ -27,7 +27,7 @@
 
 .settings-nav a.active, .settings-nav a:hover {
     background-color: var(--accent-color);
-    color: #fff;
+    color: var(--color-on-primary);
 }
 
 .settings-content {
@@ -219,7 +219,7 @@
 .about-feature:hover {
     background: var(--primary-color);
     border-color: var(--primary-color);
-    color: #fff;
+    color: var(--color-on-primary);
 }
 
 .about-feature:hover i {

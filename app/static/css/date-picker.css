@@ -60,7 +60,7 @@
 
 .dp-trigger-text {
     flex: 1;
-    color: #9aa0a6;
+    color: var(--color-text-subtle);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

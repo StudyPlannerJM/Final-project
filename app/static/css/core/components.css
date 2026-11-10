@@ -255,12 +255,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 1250; /* above the mobile tab bar and sheets */
 }
 
 .delete-modal {
-    background: white;
-    border-radius: 12px;
+    background: var(--color-surface);
+    color: var(--color-text);
+    border-radius: var(--radius-lg);
     padding: 0;
     max-width: 400px;
     width: 90%;
@@ -281,7 +282,7 @@
 
 .delete-modal .modal-header {
     padding: 20px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--color-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -289,14 +290,14 @@
 
 .delete-modal .modal-header h3 {
     margin: 0;
-    color: #dc3545;
+    color: var(--color-danger);
 }
 
 .delete-modal .modal-close {
     background: none;
     border: none;
     font-size: 24px;
-    color: #999;
+    color: var(--color-text-subtle);
     cursor: pointer;
     padding: 0;
     width: 30px;
@@ -308,7 +309,7 @@
 }
 
 .delete-modal .modal-close:hover {
-    color: #333;
+    color: var(--color-text);
 }
 
 .delete-modal .modal-body {
@@ -318,43 +319,43 @@
 
 .warning-icon {
     font-size: 48px;
-    color: #ffc107;
+    color: var(--color-accent);
     margin-bottom: 15px;
 }
 
 .delete-modal .modal-body p {
     margin: 10px 0;
     font-size: 16px;
-    color: #333;
+    color: var(--color-text);
 }
 
 .warning-text {
-    color: #dc3545;
+    color: var(--color-danger);
     font-weight: 600;
     font-size: 14px !important;
 }
 
 .delete-modal .modal-footer {
     padding: 15px 20px;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--color-border);
     display: flex;
     gap: 10px;
     justify-content: flex-end;
 }
 
 .delete-modal .btn-danger {
-    background-color: #dc3545;
-    color: white;
+    background-color: var(--color-danger);
+    color: var(--color-surface);
     border: none;
     padding: 10px 20px;
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     cursor: pointer;
     font-weight: 600;
     transition: background-color 0.2s;
 }
 
 .delete-modal .btn-danger:hover {
-    background-color: #c82333;
+    filter: brightness(0.92);
 }
 
 @media (max-width: 768px) {

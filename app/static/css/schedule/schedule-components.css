@@ -154,7 +154,7 @@
     display: none;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 1250;
     backdrop-filter: blur(4px);
 }
 
@@ -307,9 +307,16 @@
 
 .btn-save {
     background-color: var(--primary-color);
-    color: white;
+    color: var(--color-on-primary);
 }
 
 .btn-save:hover {
     background-color: var(--accent-color);
+}
+
+/* Keep the add-event button clear of the mobile bottom tab bar */
+@media (max-width: 767.98px) {
+    .fab-add-event {
+        bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + var(--space-4));
+    }
 }
