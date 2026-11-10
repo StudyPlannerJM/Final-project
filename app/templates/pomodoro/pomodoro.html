@@ -11,27 +11,32 @@
 
 {% block content %}
     <div class="pomodoro-container">
-        <div class="timer-settings">
-            <button id="time-25" class="btn-time active">25 min</button>
-            <button id="time-45" class="btn-time">45 min</button>
-            <button id="time-60" class="btn-time">60 min</button>
-        </div>
-        <div class="custom-time-section">
-            <label for="custom-time-input">Custom Time (minutes):</label>
-            <div class="custom-time-input-group">
-                <input type="number" id="custom-time-input" min="1" max="180" placeholder="e.g., 30">
-                <button id="set-custom-time" class="btn-custom-time">Set</button>
-            </div>
-        </div>
-        <div class="timer-display" id="timer-display">25:00</div>
-        <div class="timer-controls">
-            <button id="start-timer" class="btn btn-primary">Start</button>
-            <button id="pause-timer" class="btn btn-secondary">Pause</button>
-            <button id="reset-timer" class="btn btn-danger">Reset</button>
-        </div>
-        <div class="session-info">
-            <p>Session: <span id="session-count">0</span></p>
+        <div class="session-info" aria-live="polite">
             <p>Status: <span id="timer-status">Ready</span></p>
+            <p>Session: <span id="session-count">0</span></p>
+        </div>
+        <div class="timer-display" id="timer-display" role="timer" aria-label="Time remaining">25:00</div>
+        <div class="timer-controls">
+            <button type="button" id="start-timer" class="btn btn-primary"><i class="fas fa-play" aria-hidden="true"></i> Start</button>
+            <button type="button" id="pause-timer" class="btn btn-secondary">Pause</button>
+            <button type="button" id="reset-timer" class="btn btn-secondary">Reset</button>
+        </div>
+        <div class="timer-options">
+            <div>
+                <span class="timer-options-label" id="duration-label">Duration</span>
+                <div class="timer-settings" role="group" aria-labelledby="duration-label">
+                    <button type="button" id="time-25" class="btn-time active">25 min</button>
+                    <button type="button" id="time-45" class="btn-time">45 min</button>
+                    <button type="button" id="time-60" class="btn-time">60 min</button>
+                </div>
+            </div>
+            <div class="custom-time-section">
+                <label for="custom-time-input">Custom time (minutes)</label>
+                <div class="custom-time-input-group">
+                    <input type="number" id="custom-time-input" min="1" max="180" inputmode="numeric" placeholder="e.g. 30">
+                    <button type="button" id="set-custom-time" class="btn-custom-time">Set</button>
+                </div>
+            </div>
         </div>
     </div>
 

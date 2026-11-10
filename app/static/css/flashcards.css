@@ -6,20 +6,13 @@
     border-radius: 8px;
     font-size: 1em;
     font-weight: 700;
-    color: #2c3e50;
+    color: var(--color-text);
     background: var(--primary-color);
     margin-bottom: 0.5rem;
     box-shadow: 0 1px 4px rgba(44,62,80,0.08);
     position: relative;
     z-index: 1;
     transition: background 0.2s, color 0.2s;
-}
-
-body.dark-theme .flashcard-deck-indicator {
-    background: var(--bg-color-secondary, #23272e);
-    color: var(--text-color-primary, #fff);
-    box-shadow: 0 1px 6px rgba(0,0,0,0.18);
-    border: 1px solid var(--border-color, #444);
 }
 .flashcards-header {
     display: flex;
@@ -102,11 +95,11 @@ body.dark-theme .flashcard-deck-indicator {
 }
 
 .flashcard-front {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--color-primary);
 }
 
 .flashcard-back {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: var(--color-primary);
     transform: rotateY(180deg);
 }
 
@@ -115,7 +108,7 @@ body.dark-theme .flashcard-deck-indicator {
     display: flex;
     flex-direction: column;
     padding: 30px;
-    color: white;
+    color: var(--color-on-primary);
 }
 
 .flashcard-label {
@@ -185,7 +178,7 @@ body.dark-theme .flashcard-deck-indicator {
 .btn-flip {
     background: rgba(255, 255, 255, 0.25);
     border: 2px solid rgba(255, 255, 255, 0.5);
-    color: white;
+    color: var(--color-text);
     padding: 12px 24px;
     border-radius: 8px;
     cursor: pointer;
@@ -306,7 +299,7 @@ body.dark-theme .flashcard-deck-indicator {
 
 .invalid-feedback {
     display: block;
-    color: #dc3545;
+    color: var(--color-danger);
     font-size: 0.9em;
     margin-top: 5px;
 }
@@ -514,7 +507,7 @@ body.dark-theme .flashcard-deck-indicator {
    ============================================================================== */
 
 .filter-section {
-    background: white;
+    background: var(--color-surface);
     padding: 1.5rem;
     border-radius: 8px;
     margin-bottom: 2rem;
@@ -523,7 +516,7 @@ body.dark-theme .flashcard-deck-indicator {
 
 .filter-section h3 {
     margin: 0 0 1rem 0;
-    color: #2c3e50;
+    color: var(--color-text);
     font-size: 1.1rem;
     display: flex;
     align-items: center;
@@ -531,7 +524,7 @@ body.dark-theme .flashcard-deck-indicator {
 }
 
 .filter-section h3 i {
-    color: #3498db;
+    color: var(--color-primary);
 }
 
 .filter-controls {
@@ -549,16 +542,16 @@ body.dark-theme .flashcard-deck-indicator {
 
 .filter-group label {
     font-size: 0.9rem;
-    color: #7f8c8d;
+    color: var(--color-text-muted);
     font-weight: 600;
 }
 
 .filter-group select {
     padding: 0.5rem 1rem;
-    border: 1px solid #ddd;
+    border: 1px solid var(--color-border);
     border-radius: 6px;
-    background: white;
-    color: #2c3e50;
+    background: var(--color-surface);
+    color: var(--color-text);
     font-size: 0.95rem;
     min-width: 200px;
     cursor: pointer;
@@ -566,14 +559,14 @@ body.dark-theme .flashcard-deck-indicator {
 
 .filter-group select:focus {
     outline: none;
-    border-color: #3498db;
+    border-color: var(--color-primary);
     box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
 }
 
 .btn-clear-filter {
     padding: 0.5rem 1rem;
-    background: #95a5a6;
-    color: white;
+    background: var(--color-text-subtle);
+    color: var(--color-text);
     border: none;
     border-radius: 6px;
     cursor: pointer;
@@ -581,7 +574,7 @@ body.dark-theme .flashcard-deck-indicator {
 }
 
 .btn-clear-filter:hover {
-    background: #7f8c8d;
+    background: var(--color-text-subtle);
 }
 
 /* Deck Indicators */
@@ -593,7 +586,7 @@ body.dark-theme .flashcard-deck-indicator {
     border-radius: 6px;
     font-size: 0.85rem;
     font-weight: 600;
-    color: white;
+    color: var(--color-on-primary);
     margin-bottom: 0.5rem;
 }
 
@@ -605,7 +598,7 @@ body.dark-theme .flashcard-deck-indicator {
 .empty-filter-state {
     text-align: center;
     padding: 3rem 2rem;
-    color: #95a5a6;
+    color: var(--color-text-subtle);
     grid-column: 1 / -1;
 }
 

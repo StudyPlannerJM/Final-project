@@ -32,8 +32,12 @@ document.addEventListener('DOMContentLoaded', () => {
     initSheets(toggleTheme);
     initToasts();
 
-    // Floating Pomodoro Timer Widget
-    initFloatingTimer();
+    // Floating Pomodoro Timer Widget (needs localStorage; skip quietly if blocked)
+    try {
+        initFloatingTimer();
+    } catch (e) {
+        console.warn('Floating timer unavailable:', e);
+    }
 
     // Apply task category colors from data attributes.
     document.querySelectorAll('.task-category[data-category-color]').forEach((categoryBadge) => {
@@ -58,9 +62,9 @@ function initFloatingTimer() {
                 <div class="floating-timer-display">--:--</div>
                 <div class="floating-timer-status">Ready</div>
                 <div class="floating-timer-actions">
-                    <button id="floating-pause" class="floating-btn" title="Pause">⏸</button>
-                    <button id="floating-continue" class="floating-btn" title="Continue">▶</button>
-                    <button id="floating-close" class="floating-btn" title="Go to Pomodoro">🍅</button>
+                    <button type="button" id="floating-pause" class="floating-btn" title="Pause" aria-label="Pause timer"><i class="fas fa-pause" aria-hidden="true"></i></button>
+                    <button type="button" id="floating-continue" class="floating-btn" title="Continue" aria-label="Continue timer"><i class="fas fa-play" aria-hidden="true"></i></button>
+                    <button type="button" id="floating-close" class="floating-btn" title="Open Pomodoro" aria-label="Open Pomodoro timer"><i class="fas fa-up-right-from-square" aria-hidden="true"></i></button>
                 </div>
             </div>
         `;
@@ -95,7 +99,7 @@ function initFloatingTimer() {
         const state = JSON.parse(savedState);
         
         // Don't show floating timer on pomodoro page itself
-        if (window.location.pathname === '/pomodoro') {
+        if (window.location.pathname.replace(/\/$/, '') === '/pomodoro') {
             removeFloatingTimer();
             return;
         }
@@ -115,7 +119,7 @@ function initFloatingTimer() {
                     const minutes = Math.floor(remaining / 60);
                     const seconds = remaining % 60;
                     display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                    status = state.isBreak ? '☕ Break' : '📚 Working';
+                    status = state.isBreak ? 'Break' : 'Focus';
                 }
             } else if (!state.isRunning && state.timeLeft > 0) {
                 // Paused (even if pause is clicked multiple times)

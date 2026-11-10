@@ -101,3 +101,40 @@ def test_no_stylesheet_makes_body_a_scroll_container():
             if 'body' in targets and re.search(r'(?<![-\w])overflow(-[xy])?\s*:', body):
                 offenders.append(f'{path.name}: {selector.strip()}')
     assert offenders == []
+
+
+# --- Dashboard, Pomodoro, stylesheets --------------------------------------
+
+EMOJI = re.compile('[\U0001F300-\U0001FAFF☀-➿⭐⏩-⏿]')
+
+
+def _main(html):
+    return html.split('id="main-content"')[1].split('class="bottom-nav"')[0]
+
+
+@pytest.mark.parametrize('url', ['/', '/pomodoro/'])
+def test_page_uses_icons_not_emoji(auth_client, url):
+    content = _main(auth_client.get(url).get_data(as_text=True))
+    assert EMOJI.findall(content) == []
+
+
+def test_dashboard_shows_counts_and_links(auth_client, db_session, test_user):
+    _add_task(db_session, test_user, title='One', status='todo')
+    _add_task(db_session, test_user, title='Two', status='done')
+    content = _main(auth_client.get('/').get_data(as_text=True))
+    for label in ('To do', 'In progress', 'Completed', 'Minutes today', 'Decks', 'Flashcards'):
+        assert label in content
+    assert re.search(r'data-stat="todo"[^>]*>\s*1\s*<', content)
+    assert re.search(r'data-stat="done"[^>]*>\s*1\s*<', content)
+    assert 'href="/tasks/add"' in content
+
+
+def test_pomodoro_timer_comes_before_duration_options(auth_client):
+    content = _main(auth_client.get('/pomodoro/').get_data(as_text=True))
+    assert content.index('id="timer-display"') < content.index('id="start-timer"') < content.index('id="time-25"')
+
+
+@pytest.mark.parametrize('name', ['kanban.css', 'pomodoro.css', 'decks.css', 'flashcards.css', 'dashboard.css'])
+def test_reworked_stylesheet_has_no_hardcoded_hex(name):
+    css = (STATIC / 'css' / name).read_text()
+    assert HEX.findall(css) == []

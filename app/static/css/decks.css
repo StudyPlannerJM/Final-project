@@ -9,19 +9,19 @@
     align-items: center;
     margin-bottom: 2rem;
     padding-bottom: 1rem;
-    border-bottom: 2px solid #e0e0e0;
+    border-bottom: 2px solid var(--color-border);
 }
 
 .decks-header h2 {
     margin: 0;
-    color: #2c3e50;
+    color: var(--color-text);
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
 .decks-header i {
-    color: #3498db;
+    color: var(--color-primary);
 }
 
 /* Decks Grid */
@@ -34,8 +34,8 @@
 
 /* Individual Deck Card */
 .deck-card {
-    background: white;
-    border-left: 4px solid var(--deck-color, #3498db);
+    background: var(--color-surface);
+    border-left: 4px solid var(--deck-color, var(--color-primary));
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     overflow: hidden;
@@ -51,16 +51,16 @@
 
 /* Deck Header Section */
 .deck-header {
-    background: linear-gradient(135deg, var(--deck-color-light1, #eef6ff), var(--deck-color-light2, #dcecff));
+    background: linear-gradient(135deg, var(--deck-color-light1, color-mix(in srgb, var(--color-primary) 14%, var(--color-surface))), var(--deck-color-light2, color-mix(in srgb, var(--color-primary) 14%, var(--color-surface))));
     padding: 1.5rem;
     display: flex;
     align-items: center;
     gap: 1rem;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--color-border);
 }
 
 .deck-icon {
-    color: var(--deck-color, #3498db);
+    color: var(--deck-color, var(--color-primary));
     font-size: 2rem;
     width: 50px;
     height: 50px;
@@ -71,7 +71,6 @@
     background: rgba(255, 255, 255, 0.9);
 }
 
-
 .deck-info h3 {
     margin: 0 0 0.25rem 0;
     font-size: 1.25rem;
@@ -79,8 +78,8 @@
 
 .deck-title-bg {
     display: inline-block;
-    background: white;
-    color: #2c3e50;
+    background: var(--color-surface);
+    color: var(--color-text);
     padding: 0.25em 0.75em;
     border-radius: 8px;
     box-shadow: 0 1px 4px rgba(44,62,80,0.08);
@@ -88,13 +87,6 @@
     position: relative;
     z-index: 1;
     transition: background 0.2s, color 0.2s;
-}
-
-body.dark-theme .deck-title-bg {
-    background: var(--bg-color-secondary, #23272e);
-    color: var(--text-color-primary, #fff);
-    box-shadow: 0 1px 6px rgba(0,0,0,0.18);
-    border: 1px solid var(--border-color, #444);
 }
 
 .badge {
@@ -107,8 +99,8 @@ body.dark-theme .deck-title-bg {
 }
 
 .badge-default {
-    background-color: #3498db;
-    color: white;
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
 }
 
 /* Deck Body Section */
@@ -118,13 +110,13 @@ body.dark-theme .deck-title-bg {
 }
 
 .deck-description {
-    color: #7f8c8d;
+    color: var(--color-text-muted);
     margin-bottom: 1rem;
     line-height: 1.6;
 }
 
 .text-muted {
-    color: #bdc3c7 !important;
+    color: var(--color-text-subtle) !important;
     font-style: italic;
 }
 
@@ -139,19 +131,19 @@ body.dark-theme .deck-title-bg {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: #7f8c8d;
+    color: var(--color-text-muted);
     font-size: 0.9rem;
 }
 
 .deck-stats .stat i {
-    color: #3498db;
+    color: var(--color-primary);
 }
 
 /* Deck Actions */
 .deck-actions {
     padding: 1rem 1.5rem;
-    background-color: #f8f9fa;
-    border-top: 1px solid #e9ecef;
+    background-color: var(--color-surface);
+    border-top: 1px solid color-mix(in srgb, var(--color-primary) 35%, var(--color-surface));
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
@@ -161,7 +153,7 @@ body.dark-theme .deck-title-bg {
 .empty-state {
     text-align: center;
     padding: 4rem 2rem;
-    color: #95a5a6;
+    color: var(--color-text-subtle);
     grid-column: 1 / -1;
 }
 
@@ -178,7 +170,7 @@ body.dark-theme .deck-title-bg {
 
 /* Form Container for Deck Forms */
 .form-card {
-    background: white;
+    background: var(--color-surface);
     padding: 2rem;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -188,7 +180,7 @@ body.dark-theme .deck-title-bg {
 
 .form-card h2 {
     margin: 0 0 1.5rem 0;
-    color: #2c3e50;
+    color: var(--color-text);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -199,10 +191,10 @@ body.dark-theme .deck-title-bg {
     width: 100%;
     padding: 12px 15px;
     font-size: 0.95rem;
-    border: 1px solid #ced4da;
+    border: 1px solid var(--color-border);
     border-radius: 6px;
-    background-color: #f8fafc;
-    color: #2c3e50;
+    background-color: color-mix(in srgb, var(--color-primary) 14%, var(--color-surface));
+    color: var(--color-text);
     font-family: inherit;
     resize: vertical;
     box-sizing: border-box;
@@ -211,25 +203,9 @@ body.dark-theme .deck-title-bg {
 
 .form-card .form-control:focus {
     outline: none;
-    border-color: #3498db;
+    border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
-    background-color: #fff;
-}
-
-/* Override dark-theme inheritance — keep the card's inputs always light */
-body.dark-theme .form-card .form-control,
-body.dark-theme .form-card input[type="text"],
-body.dark-theme .form-card textarea {
-    background-color: #f8fafc;
-    color: #2c3e50;
-    border-color: #ced4da;
-}
-
-body.dark-theme .form-card .form-control:focus,
-body.dark-theme .form-card input[type="text"]:focus,
-body.dark-theme .form-card textarea:focus {
-    background-color: #fff;
-    border-color: #3498db;
+    background-color: var(--color-surface);
 }
 
 .form-card .form-label {
@@ -239,9 +215,8 @@ body.dark-theme .form-card textarea:focus {
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #6c757d;
+    color: var(--color-text-muted);
 }
-
 
 .form-row {
     display: grid;
@@ -259,7 +234,7 @@ body.dark-theme .form-card textarea:focus {
 .color-input {
     width: 80px !important;
     height: 45px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--color-border);
     border-radius: 4px;
     cursor: pointer;
 }
@@ -268,14 +243,14 @@ body.dark-theme .form-card textarea:focus {
     width: 30px;
     height: 30px;
     border-radius: 4px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--color-border);
 }
 
 /* Icon Suggestions */
 .icon-suggestions {
     margin: 1.5rem 0;
     padding: 1.5rem;
-    background-color: #f8f9fa;
+    background-color: var(--color-surface);
     border-radius: 8px;
     max-height: 500px;
     overflow-y: auto;
@@ -285,7 +260,7 @@ body.dark-theme .form-card textarea:focus {
     display: block;
     margin-bottom: 1rem;
     font-weight: 700;
-    color: #2c3e50;
+    color: var(--color-text);
     font-size: 1.1rem;
 }
 
@@ -295,15 +270,15 @@ body.dark-theme .form-card textarea:focus {
     align-items: center;
     gap: 1rem;
     padding: 1rem;
-    background: white;
+    background: var(--color-surface);
     border-radius: 8px;
     margin-bottom: 1.5rem;
-    border: 2px solid #3498db;
+    border: 2px solid var(--color-primary);
 }
 
 .current-icon-display > span {
     font-weight: 600;
-    color: #495057;
+    color: var(--color-text);
 }
 
 .current-icon-preview {
@@ -311,8 +286,8 @@ body.dark-theme .form-card textarea:focus {
     align-items: center;
     gap: 0.75rem;
     padding: 0.5rem 1rem;
-    background: linear-gradient(135deg, #3498db, #2980b9);
-    color: white;
+    background: var(--color-primary);
+    color: var(--color-on-primary);
     border-radius: 6px;
     font-weight: 600;
 }
@@ -329,7 +304,7 @@ body.dark-theme .form-card textarea:focus {
 .icon-category {
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid #dee2e6;
+    border-bottom: 1px solid var(--color-border);
 }
 
 .icon-category:last-child {
@@ -339,7 +314,7 @@ body.dark-theme .form-card textarea:focus {
 
 .icon-category h4 {
     margin: 0 0 0.75rem 0;
-    color: #495057;
+    color: var(--color-text);
     font-size: 0.95rem;
     font-weight: 600;
 }
@@ -352,8 +327,8 @@ body.dark-theme .form-card textarea:focus {
 
 .icon-btn {
     padding: 0.5rem 0.75rem;
-    border: 1px solid #ddd;
-    background: white;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s;
@@ -361,13 +336,13 @@ body.dark-theme .form-card textarea:focus {
     align-items: center;
     gap: 0.35rem;
     font-size: 0.85rem;
-    color: #495057;
+    color: var(--color-text);
 }
 
 .icon-btn:hover {
-    background-color: #3498db;
-    color: white;
-    border-color: #3498db;
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    border-color: var(--color-primary);
     transform: translateY(-2px);
     box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
 }
@@ -408,92 +383,10 @@ body.dark-theme .form-card textarea:focus {
     }
 }
 
-/* =============================================================================
-   DARK MODE
-   ============================================================================= */
-body.dark-theme .decks-header {
-    border-bottom-color: var(--border-color);
-}
-
-body.dark-theme .decks-header h2 {
-    color: var(--text-color-primary);
-}
-
-body.dark-theme .deck-card {
-    background: var(--bg-color-secondary);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-body.dark-theme .deck-card:hover {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-}
-
-body.dark-theme .deck-header {
-    border-bottom-color: var(--border-color);
-}
-
-body.dark-theme .deck-icon {
-    background: rgba(255, 255, 255, 0.08);
-}
-
-body.dark-theme .deck-info h3 {
-    color: var(--text-color-primary);
-}
-
-body.dark-theme .deck-description {
-    color: var(--text-color-secondary);
-}
-
-body.dark-theme .text-muted {
-    color: var(--text-color-tertiary) !important;
-}
-
-body.dark-theme .deck-stats .stat {
-    color: var(--text-color-secondary);
-}
-
-body.dark-theme .deck-actions {
-    background-color: var(--bg-color-tertiary);
-    border-top-color: var(--border-color);
-}
-
-body.dark-theme .empty-state {
-    color: var(--text-color-tertiary);
-}
-
-body.dark-theme .icon-suggestions {
-    background-color: var(--bg-color-tertiary);
-}
-
-body.dark-theme .icon-suggestions > label {
-    color: var(--text-color-primary);
-}
-
-body.dark-theme .current-icon-display {
-    background: var(--bg-color-secondary);
-    border-color: var(--primary-color);
-}
-
-body.dark-theme .current-icon-display > span {
-    color: var(--text-color-secondary);
-}
-
-body.dark-theme .icon-category {
-    border-bottom-color: var(--border-color);
-}
-
-body.dark-theme .icon-category h4 {
-    color: var(--text-color-secondary);
-}
-
-body.dark-theme .icon-btn {
-    background: var(--bg-color-secondary);
-    border-color: var(--border-color);
-    color: var(--text-color-secondary);
-}
-
-body.dark-theme .icon-btn:hover {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-    color: var(--color-on-primary);
+/* Icon picker: comfortable touch targets */
+.icon-btn {
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: var(--radius-md);
 }
