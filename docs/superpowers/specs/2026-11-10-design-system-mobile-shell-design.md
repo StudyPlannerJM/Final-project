@@ -221,11 +221,13 @@ Modified:
 
 New:
 
+- `app/navigation.py` (navigation state for templates; context processor only)
 - `app/templates/components/bottom_nav.html`
 - `app/templates/components/theme_init.html` (inline head script)
 - `app/static/css/core/bottom-nav.css`
 - `app/static/css/core/fonts.css`, `app/static/fonts/Inter-Variable.woff2`
-- `tests/test_shell.py`
+- `tests/test_shell.py`, `tests/test_design_tokens.py`
+- `app/__init__.py` is modified only to register the context processor.
 
 No routes, models, services or migrations change.
 
