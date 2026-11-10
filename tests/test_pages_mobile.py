@@ -74,3 +74,30 @@ def test_task_title_is_escaped_in_card(auth_client, db_session, test_user):
     card = _card(auth_client.get('/tasks/').get_data(as_text=True), task.id)
     assert '<script>alert(1)</script>' not in card
     assert '&lt;script&gt;' in card
+
+
+# --- Schedule --------------------------------------------------------------
+
+def test_schedule_offers_agenda_view(auth_client):
+    html = auth_client.get('/calendar/schedule').get_data(as_text=True)
+    views = re.findall(r'class="view-btn[^"]*" data-view="(\w+)"', html)
+    assert views == ['agenda', 'week', 'month', 'day']
+    assert 'id="agendaView"' in html
+
+
+def test_schedule_tells_script_whether_view_was_requested(auth_client):
+    default = auth_client.get('/calendar/schedule').get_data(as_text=True)
+    explicit = auth_client.get('/calendar/schedule?view=month').get_data(as_text=True)
+    assert '"viewRequested": false' in default
+    assert '"viewRequested": true' in explicit
+
+
+def test_no_stylesheet_makes_body_a_scroll_container():
+    """overflow on body breaks the sticky header (see Phase 1 review)."""
+    offenders = []
+    for path in sorted((STATIC / 'css').rglob('*.css')):
+        for selector, body in re.findall(r'([^{}]+)\{([^{}]*)\}', path.read_text()):
+            targets = [s.strip() for s in selector.split(',')]
+            if 'body' in targets and re.search(r'(?<![-\w])overflow(-[xy])?\s*:', body):
+                offenders.append(f'{path.name}: {selector.strip()}')
+    assert offenders == []

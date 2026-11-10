@@ -320,3 +320,140 @@
         bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + var(--space-4));
     }
 }
+
+/* =============================================================================
+   AGENDA VIEW (next days as a list; default on phones)
+   ============================================================================= */
+
+.agenda-view {
+    padding: var(--space-2) 0 var(--space-5);
+}
+
+.agenda-day + .agenda-day {
+    margin-top: var(--space-5);
+}
+
+.agenda-day__heading {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-2);
+    padding: 0 var(--space-1);
+    font-size: var(--text-base);
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.agenda-day__date {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--color-text-subtle);
+}
+
+.agenda-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.agenda-item {
+    --agenda-color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    min-height: 60px;
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-left: 4px solid var(--agenda-color);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.agenda-item:hover {
+    box-shadow: var(--shadow-1);
+}
+
+.agenda-item--task {
+    --agenda-color: var(--color-accent);
+}
+
+.agenda-item__time {
+    flex: 0 0 4.5rem;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-muted);
+}
+
+.agenda-item__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 2px;
+}
+
+.agenda-item__title {
+    font-size: var(--text-base);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.agenda-item.is-done .agenda-item__title {
+    color: var(--color-text-muted);
+    text-decoration: line-through;
+}
+
+.agenda-item__meta {
+    font-size: var(--text-xs);
+    color: var(--color-text-subtle);
+    overflow-wrap: anywhere;
+}
+
+.agenda-item__chevron {
+    flex: 0 0 auto;
+    font-size: var(--text-xs);
+    color: var(--color-text-subtle);
+}
+
+.agenda-empty {
+    padding: var(--space-7) var(--space-4);
+    background: var(--color-surface);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-lg);
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+.agenda-empty i {
+    margin-bottom: var(--space-3);
+    font-size: var(--text-2xl);
+    color: var(--color-primary);
+}
+
+.agenda-empty p {
+    margin: 0;
+    font-size: var(--text-sm);
+}
+
+.agenda-empty .agenda-empty__title {
+    margin-bottom: var(--space-1);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+/* Previous/next do not apply to the agenda */
+.calendar-main[data-view="agenda"] #prevWeek,
+.calendar-main[data-view="agenda"] #nextWeek {
+    display: none;
+}

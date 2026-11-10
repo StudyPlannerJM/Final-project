@@ -9,6 +9,7 @@ import { renderDayView } from './calendar/day-view.js';
 import { renderMonthView } from './calendar/month-view.js';
 import { renderMiniCalendar, updateMiniCalendarHeader } from './calendar/mini-calendar.js';
 import { renderUpcomingEvents } from './calendar/upcoming-events.js';
+import { renderAgendaView } from './calendar/agenda-view.js';
 import { showCalendarEventDetails, showTaskDetails, closeTaskDetailsModal } from './calendar/event-modals.js';
 import { getMonthNames } from './calendar/utils.js';
 import { MONTHS_PER_YEAR, DAYS_PER_WEEK } from './calendar/constants.js';
@@ -44,6 +45,9 @@ function initializeDOMCache() {
     domCache.weekView = document.getElementById('weekView');
     domCache.monthView = document.getElementById('monthView');
     domCache.dayView = document.getElementById('dayView');
+    domCache.agendaView = document.getElementById('agendaView');
+    domCache.calendarMain = document.querySelector('.calendar-main');
+    domCache.calendarLayout = document.querySelector('.calendar-layout');
     domCache.weekDaysHeader = document.querySelector('.week-days-header');
     
     // Navigation buttons
@@ -79,10 +83,13 @@ function initializeDOMCache() {
 // =============================================================================
 
 async function fetchCalendarData(date, view) {
-    const dateStr = date.toISOString().split('T')[0];
+    // The agenda always shows the days ahead of today, using the "upcoming" range
+    const isAgenda = view === 'agenda';
+    const apiView = isAgenda ? 'upcoming' : view;
+    const dateStr = (isAgenda ? new Date() : date).toISOString().split('T')[0];
 
     try {
-        const response = await fetch(`/calendar/api/events?date=${dateStr}&view=${view}`);
+        const response = await fetch(`/calendar/api/events?date=${dateStr}&view=${apiView}`);
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -99,8 +106,10 @@ async function fetchCalendarData(date, view) {
         calendarEvents = data.calendarEvents || [];
         tasks = data.tasks || [];
         calendarConnected = data.calendarConnected || false;
-        currentMonth = data.currentMonth || date.getMonth() + 1;
-        currentYear = data.currentYear || date.getFullYear();
+        if (!isAgenda) {
+            currentMonth = data.currentMonth || date.getMonth() + 1;
+            currentYear = data.currentYear || date.getFullYear();
+        }
 
         return data;
     } catch (error) {
@@ -270,7 +279,9 @@ async function changeMonth(delta, updateMainView = false) {
 // =============================================================================
 
 async function navigateToDate(date, view = null) {
-    const viewParam = view || activeView;
+    // Picking a date while on the agenda opens that day
+    const viewParam = view || (activeView === 'agenda' ? 'day' : activeView);
+    activeView = viewParam;
 
     currentDate = new Date(date);
     currentMonth = currentDate.getMonth() + 1;
@@ -283,7 +294,7 @@ async function navigateToDate(date, view = null) {
 
     if (data) {
         const dateStr = currentDate.toISOString().split('T')[0];
-        const newUrl = `/schedule?date=${dateStr}&view=${viewParam}`;
+        const newUrl = `${window.location.pathname}?date=${dateStr}&view=${viewParam}`;
         window.history.pushState({ date: dateStr, view: viewParam }, '', newUrl);
 
         renderCurrentView();
@@ -314,7 +325,17 @@ function renderCurrentView() {
     hideView(domCache.weekView);
     hideView(domCache.monthView);
     hideView(domCache.dayView);
+    hideView(domCache.agendaView);
     hideView(domCache.weekDaysHeader);
+
+    // Lets CSS hide the previous/next arrows, which do not apply to the agenda
+    if (domCache.calendarMain) {
+        domCache.calendarMain.dataset.view = activeView;
+    }
+    if (domCache.calendarLayout) {
+        domCache.calendarLayout.dataset.view = activeView;
+    }
+    updateMainCalendarHeader();
 
     // Update view buttons
     document.querySelectorAll('.view-btn').forEach(btn => {
@@ -335,6 +356,9 @@ function renderCurrentView() {
     } else if (activeView === 'day') {
         showView(domCache.dayView, 'block');
         renderDayView(currentDate, calendarEvents, tasks);
+    } else if (activeView === 'agenda') {
+        showView(domCache.agendaView, 'block');
+        renderAgendaView(calendarEvents, tasks);
     }
 
     renderUpcomingEvents(upcomingCalendarEvents, upcomingTasks);
@@ -342,6 +366,10 @@ function renderCurrentView() {
 
 function updateMainCalendarHeader() {
     const monthNames = getMonthNames();
+    if (domCache.mainCalendarHeader && activeView === 'agenda') {
+        domCache.mainCalendarHeader.textContent = 'Next 7 days';
+        return;
+    }
     if (domCache.mainCalendarHeader) {
         domCache.mainCalendarHeader.textContent = `${monthNames[currentMonth - 1]}, ${currentYear}`;
     }
@@ -423,6 +451,11 @@ function initializeEventHandlers() {
     });
 
     domCache.todayBtn?.addEventListener('click', async function () {
+        if (activeView === 'agenda') {
+            currentDate = new Date();
+            await refreshCalendarView();
+            return;
+        }
         await navigateToDate(new Date());
     });
 
@@ -597,13 +630,14 @@ document.addEventListener('DOMContentLoaded', async function () {
     initializeDOMCache();
     
     // Get initial date and view
-    let initialDate, initialView, initialCalendarConnected;
+    let initialDate, initialView, initialCalendarConnected, viewRequested = false;
 
     if (domCache.initialDataElement) {
         try {
             const initialData = JSON.parse(domCache.initialDataElement.textContent);
             initialDate = initialData.initialDate;
             initialView = initialData.initialView;
+            viewRequested = Boolean(initialData.viewRequested);
             initialCalendarConnected = initialData.calendarConnected;
         } catch (e) {
             console.error('Failed to parse initial data:', e);
@@ -612,7 +646,11 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     const urlParams = new URLSearchParams(window.location.search);
     const dateParam = initialDate || urlParams.get('date') || new Date().toISOString().split('T')[0];
-    const viewParam = initialView || urlParams.get('view') || 'week';
+    // Phones open on the agenda unless the link asked for a specific view
+    const isPhone = window.matchMedia('(max-width: 767.98px)').matches;
+    const viewParam = (!viewRequested && isPhone)
+        ? 'agenda'
+        : (initialView || urlParams.get('view') || 'week');
 
     currentDate = new Date(dateParam);
     activeView = viewParam;
