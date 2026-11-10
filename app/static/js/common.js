@@ -290,22 +290,55 @@ function initSheets(toggleTheme) {
 
 
 // Flash messages rendered as dismissible toasts
-function initToasts() {
-    const AUTO_DISMISS_MS = 6000;
-    document.querySelectorAll('.toast').forEach((toast) => {
-        const close = toast.querySelector('.toast__close');
-        if (close) close.addEventListener('click', () => toast.remove());
+const TOAST_AUTO_DISMISS_MS = 6000;
 
-        const sticky = toast.classList.contains('toast--danger') || toast.classList.contains('toast--error');
-        if (sticky) return;
+function wireToast(toast) {
+    const close = toast.querySelector('.toast__close');
+    if (close) close.addEventListener('click', () => toast.remove());
 
-        let timer = null;
-        const start = () => { timer = setTimeout(() => toast.remove(), AUTO_DISMISS_MS); };
-        const pause = () => { clearTimeout(timer); };
-        toast.addEventListener('mouseenter', pause);
-        toast.addEventListener('mouseleave', start);
-        toast.addEventListener('focusin', pause);
-        toast.addEventListener('focusout', start);
-        start();
-    });
+    const sticky = toast.classList.contains('toast--danger') || toast.classList.contains('toast--error');
+    if (sticky) return;
+
+    let timer = null;
+    const start = () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => toast.remove(), TOAST_AUTO_DISMISS_MS);
+    };
+    const pause = () => clearTimeout(timer);
+    const resumeIfIdle = () => {
+        if (!toast.matches(':hover') && !toast.contains(document.activeElement)) start();
+    };
+    toast.addEventListener('mouseenter', pause);
+    toast.addEventListener('mouseleave', resumeIfIdle);
+    toast.addEventListener('focusin', pause);
+    toast.addEventListener('focusout', () => setTimeout(resumeIfIdle, 0));
+    start();
 }
+
+function initToasts() {
+    document.querySelectorAll('.toast').forEach(wireToast);
+}
+
+// Show a toast from JavaScript: BrainDump.toast('Saved', 'success')
+function showToast(message, category = 'info') {
+    const region = document.querySelector('.toasts');
+    if (!region) return null;
+    const allowed = ['success', 'danger', 'warning', 'info', 'error'];
+    const toast = document.createElement('div');
+    toast.className = 'toast toast--' + (allowed.includes(category) ? category : 'info');
+    const text = document.createElement('span');
+    text.className = 'toast__text';
+    text.textContent = message;
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'toast__close';
+    close.setAttribute('aria-label', 'Dismiss');
+    close.textContent = '\u00d7';
+    toast.append(text, close);
+    region.appendChild(toast);
+    wireToast(toast);
+    return toast;
+}
+
+window.BrainDump = window.BrainDump || {};
+window.BrainDump.toast = showToast;
