@@ -10,7 +10,7 @@
 
 .plan-details-header {
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
-    color: white;
+    color: var(--color-on-primary);
     padding: 30px;
     border-radius: 12px;
     margin-bottom: 30px;

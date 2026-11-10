@@ -6,8 +6,10 @@
     var memory = null; // used when storage is unavailable (private mode)
 
     function getThemePreference() {
-        var stored = memory;
-        try { stored = localStorage.getItem(KEY) || memory; } catch (e) { /* storage blocked */ }
+        // A choice made on this page wins, even if storage rejected the write.
+        if (memory) { return memory; }
+        var stored = null;
+        try { stored = localStorage.getItem(KEY); } catch (e) { /* storage blocked */ }
         return stored === 'light' || stored === 'dark' ? stored : 'system';
     }
 
@@ -33,10 +35,15 @@
 
     function getResolvedTheme() { return resolve(getThemePreference()); }
 
+    // Called inline right after <body> opens so page CSS keyed on
+    // body.dark-theme applies before any content paints.
+    function syncBodyTheme() { apply(getThemePreference()); }
+
     window.BrainDump = {
         getThemePreference: getThemePreference,
         getResolvedTheme: getResolvedTheme,
-        setTheme: setTheme
+        setTheme: setTheme,
+        syncBodyTheme: syncBodyTheme
     };
 
     apply(getThemePreference());

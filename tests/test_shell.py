@@ -149,3 +149,60 @@ def test_auth_pages_use_design_system(client, url):
     assert 'core/variables.css' in head
     assert 'dataset.theme' in head
     assert head.index('BrainDump = ') < head.index('variables.css')
+
+
+# --- Review fixes ----------------------------------------------------------
+
+from pathlib import Path  # noqa: E402
+
+STATIC = Path(__file__).resolve().parent.parent / 'app/static'
+
+
+def _rules(css):
+    """Yield (selector, declarations) for every innermost CSS rule."""
+    return [(sel.strip(), body) for sel, body in re.findall(r'([^{}]+)\{([^{}]*)\}', css)]
+
+
+def test_body_is_not_a_scroll_container():
+    """overflow on both html and body breaks position: sticky in the shell."""
+    css = (STATIC / 'css/core/base.css').read_text()
+    for selector, body in _rules(css):
+        targets = [s.strip() for s in selector.split(',')]
+        if 'body' in targets:
+            assert 'overflow' not in body, f'{selector!r} sets overflow on body'
+
+
+def test_sheet_scroll_lock_targets_the_viewport():
+    css = (STATIC / 'css/core/base.css').read_text()
+    js = (STATIC / 'js/common.js').read_text()
+    assert re.search(r'html\.sheet-open\s*\{[^}]*overflow:\s*hidden', css)
+    assert "document.documentElement.classList.add('sheet-open')" in js
+    assert "document.body.classList.add('sheet-open')" not in js
+
+
+def test_no_white_text_on_primary_only_gradients():
+    """White on a gradient whose stops are all the primary token fails in dark theme."""
+    offenders = []
+    for path in sorted((STATIC / 'css').rglob('*.css')):
+        for selector, body in _rules(path.read_text()):
+            gradient = re.search(r'background[^;]*gradient\(([^;]*)\)\s*;', body)
+            if not gradient:
+                continue
+            stops = re.sub(r'var\(--(primary-color|accent-color|color-primary)\)', '', gradient.group(1))
+            if '#' in stops or 'rgb' in stops or 'var(' in stops:
+                continue  # mixed gradient, not purely primary
+            if re.search(r'(?<![-\w])color\s*:\s*(#fff(fff)?|white)\b', body, re.I):
+                offenders.append(f'{path.name}: {selector}')
+    assert offenders == []
+
+
+def test_dark_body_class_is_set_before_content_renders(auth_client):
+    html = auth_client.get('/').get_data(as_text=True)
+    body = html.split('<body', 1)[1]
+    before_content = body.split('class="wrapper"')[0]
+    assert 'syncBodyTheme' in before_content
+
+
+def test_memory_preference_wins_over_stale_storage(auth_client):
+    script = _head(auth_client.get('/')).split('<script>')[1].split('</script>')[0]
+    assert 'if (memory) { return memory; }' in script

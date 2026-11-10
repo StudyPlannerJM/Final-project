@@ -208,7 +208,7 @@ function initSheets(toggleTheme) {
         if (!openSheetEl) return;
         openSheetEl.hidden = true;
         backdrop.hidden = true;
-        document.body.classList.remove('sheet-open');
+        document.documentElement.classList.remove('sheet-open');
         openTrigger.setAttribute('aria-expanded', 'false');
         const trigger = openTrigger;
         openSheetEl = null;
@@ -222,7 +222,7 @@ function initSheets(toggleTheme) {
         if (openSheetEl) closeSheet(false);
         sheet.hidden = false;
         backdrop.hidden = false;
-        document.body.classList.add('sheet-open');
+        document.documentElement.classList.add('sheet-open');
         trigger.setAttribute('aria-expanded', 'true');
         openSheetEl = sheet;
         openTrigger = trigger;

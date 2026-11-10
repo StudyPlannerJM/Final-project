@@ -96,3 +96,23 @@ summarizer (4 files) 11, settings 3, schedule week/day 2.
 - Buttons are restyled per page in several places; converge on `core/buttons.css`.
 - Font Awesome is still loaded from a CDN; self-host or switch to inline SVG
   when the PWA work starts (offline use).
+
+## From the Phase 1 code review (not fixed in Phase 1)
+
+- No automated test covers shell behaviour in the browser: sheet open/close
+  and focus, toast dismissal and timers, the theme toggle and the
+  storage-blocked fallback are checked by hand only. The project has no
+  JavaScript test runner; adding one (or a small Playwright suite) is the fix.
+- The floating Pomodoro timer reads `localStorage` without a guard
+  (`static/js/common.js`, `initFloatingTimer`). With storage blocked it throws
+  on every page and the task category colours are not applied.
+- `user_initial` takes the first code point, so a flag emoji, a decomposed
+  accent or a leading zero-width character gives a wrong or empty avatar.
+- A toast's auto-dismiss timer can restart on mouse-leave while keyboard focus
+  is still inside it.
+- Flash messages present at page load may not be announced by screen readers,
+  because the live region is rendered with its content already in place.
+- `summarizer-components.css` `.btn-primary:hover` uses a hardcoded blue with
+  about 4:1 contrast in dark theme.
+- The floating Pomodoro widget and the schedule "add event" button share the
+  bottom-right corner on phones (pre-existing).

@@ -13,11 +13,16 @@ html {
     text-size-adjust: 100%;
 }
 
+/* Clip horizontal overflow on the root only. Setting overflow on <body> as
+   well turns it into a scroll container and breaks position: sticky. */
+html {
+    overflow-x: clip;
+}
+
 html,
 body {
     width: 100%;
     max-width: 100%;
-    overflow-x: hidden;
 }
 
 body {
@@ -34,7 +39,8 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-body.sheet-open {
+/* Lock page scroll while a bottom sheet is open (set on <html>, the scroller) */
+html.sheet-open {
     overflow: hidden;
 }
 
