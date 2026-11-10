@@ -6,15 +6,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.querySelector('.sidebar');
     const mobileBreakpoint = window.matchMedia('(max-width: 768px)');
 
-    // Theme Toggle
+    // Theme Toggle (state lives in window.BrainDump, set up in theme_init.html)
+    const toggleTheme = () => {
+        const next = window.BrainDump.getResolvedTheme() === 'dark' ? 'light' : 'dark';
+        window.BrainDump.setTheme(next);
+    };
     if (themeToggleBtn) {
-        themeToggleBtn.addEventListener('click', () => {
-            body.classList.toggle('dark-theme');
-            localStorage.setItem('theme', body.classList.contains('dark-theme') ? 'dark' : 'light');
-        });
-        if (localStorage.getItem('theme') === 'dark') {
-            body.classList.add('dark-theme');
-        }
+        themeToggleBtn.addEventListener('click', toggleTheme);
     }
 
     // Sidebar Toggle

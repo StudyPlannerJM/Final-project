@@ -1,0 +1,50 @@
+<script>
+/* Sets the theme before first paint. Defines window.BrainDump for common.js. */
+(function () {
+    var KEY = 'theme';
+    var media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+    var memory = null; // used when storage is unavailable (private mode)
+
+    function getThemePreference() {
+        var stored = memory;
+        try { stored = localStorage.getItem(KEY) || memory; } catch (e) { /* storage blocked */ }
+        return stored === 'light' || stored === 'dark' ? stored : 'system';
+    }
+
+    function resolve(pref) {
+        if (pref === 'system') { return media && media.matches ? 'dark' : 'light'; }
+        return pref;
+    }
+
+    function apply(pref) {
+        var theme = resolve(pref);
+        document.documentElement.dataset.theme = theme;
+        if (document.body) { document.body.classList.toggle('dark-theme', theme === 'dark'); }
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) { meta.setAttribute('content', theme === 'dark' ? '#172236' : '#FFFFFF'); }
+    }
+
+    function setTheme(pref) {
+        if (pref !== 'light' && pref !== 'dark') { pref = 'system'; }
+        memory = pref;
+        try { localStorage.setItem(KEY, pref); } catch (e) { /* storage blocked */ }
+        apply(pref);
+    }
+
+    function getResolvedTheme() { return resolve(getThemePreference()); }
+
+    window.BrainDump = {
+        getThemePreference: getThemePreference,
+        getResolvedTheme: getResolvedTheme,
+        setTheme: setTheme
+    };
+
+    apply(getThemePreference());
+    document.addEventListener('DOMContentLoaded', function () { apply(getThemePreference()); });
+    if (media) {
+        var onChange = function () { if (getThemePreference() === 'system') { apply('system'); } };
+        if (media.addEventListener) { media.addEventListener('change', onChange); }
+        else if (media.addListener) { media.addListener(onChange); }
+    }
+})();
+</script>
