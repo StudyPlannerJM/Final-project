@@ -3,25 +3,25 @@
    ================================================ */
 
 .form-container {
-    background-color: var(--bg-color-secondary);
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
     max-width: 600px;
     margin: 0 auto;
-    transition: background-color 0.3s ease;
+    padding: var(--space-6);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-1);
 }
 
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: var(--space-5);
 }
 
 .form-group label {
     display: block;
+    margin-bottom: var(--space-2);
+    font-size: var(--text-sm);
     font-weight: 600;
-    font-size: 1rem;
-    margin-bottom: 8px;
-    color: var(--text-color-primary);
+    color: var(--color-text);
 }
 
 .form-group input[type="text"],
@@ -32,25 +32,21 @@
 .form-group textarea,
 .form-group .form-control {
     width: 100%;
-    padding: 12px 15px;
-    font-size: 0.95rem;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    background-color: #fff;
-    color: var(--text-color-primary);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    font-family: inherit;
+    /* 16px minimum stops iOS zooming the page on focus */
+    font-size: max(16px, var(--text-base));
     box-sizing: border-box;
-    transition: border-color 0.3s ease, background-color 0.3s ease;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-body.dark-theme .form-group input[type="text"],
-body.dark-theme .form-group input[type="datetime-local"],
-body.dark-theme .form-group input[type="date"],
-body.dark-theme .form-group input[type="time"],
-body.dark-theme .form-group select,
-body.dark-theme .form-group textarea,
-body.dark-theme .form-group .form-control {
-    background-color: var(--bg-color-primary);
-    color: var(--text-color-primary);
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: var(--color-text-subtle);
 }
 
 .form-group input[type="text"]:focus,
@@ -60,19 +56,31 @@ body.dark-theme .form-group .form-control {
 .form-group select:focus,
 .form-group textarea:focus,
 .form-group .form-control:focus {
-    border-color: var(--accent-color);
+    border-color: var(--color-primary);
     outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 25%, transparent);
+}
+
+@media (pointer: coarse) {
+    .form-group input[type="text"],
+    .form-group input[type="datetime-local"],
+    .form-group input[type="date"],
+    .form-group input[type="time"],
+    .form-group select,
+    .form-group .form-control:not(textarea) {
+        min-height: 44px;
+    }
 }
 
 @media (max-width: 600px) {
     .form-container {
-        padding: 20px;
+        padding: var(--space-4);
     }
 
     .form-container .btn,
     .form-actions .btn {
         width: 100%;
-        margin-bottom: 10px;
+        margin-bottom: var(--space-2);
         margin-right: 0;
     }
 }

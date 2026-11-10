@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     initSheets(toggleTheme);
+    initToasts();
 
     // Floating Pomodoro Timer Widget
     initFloatingTimer();
@@ -285,4 +286,26 @@ function initSheets(toggleTheme) {
     } else {
         phoneQuery.addListener(onViewportChange);
     }
+}
+
+
+// Flash messages rendered as dismissible toasts
+function initToasts() {
+    const AUTO_DISMISS_MS = 6000;
+    document.querySelectorAll('.toast').forEach((toast) => {
+        const close = toast.querySelector('.toast__close');
+        if (close) close.addEventListener('click', () => toast.remove());
+
+        const sticky = toast.classList.contains('toast--danger') || toast.classList.contains('toast--error');
+        if (sticky) return;
+
+        let timer = null;
+        const start = () => { timer = setTimeout(() => toast.remove(), AUTO_DISMISS_MS); };
+        const pause = () => { clearTimeout(timer); };
+        toast.addEventListener('mouseenter', pause);
+        toast.addEventListener('mouseleave', start);
+        toast.addEventListener('focusin', pause);
+        toast.addEventListener('focusout', start);
+        start();
+    });
 }

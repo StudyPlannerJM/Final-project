@@ -11,121 +11,146 @@
 }
 
 /* Task List */
-.task-list-section { 
-    margin-top: 30px; 
-    background-color: var(--bg-color-secondary); 
-    padding: 20px; 
-    border-radius: 8px; 
+.task-list-section {
+    margin-top: var(--space-6);
+    padding: var(--space-5);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
 }
 
-.task-list { 
-    list-style: none; 
-    padding: 0; 
-    margin: 0; 
+.task-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-.task-item { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    padding: 15px; 
-    border: 1px solid var(--border-color); 
-    border-radius: 5px; 
-    margin-bottom: 10px; 
+.task-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-2);
 }
 
-.task-item.completed { 
-    background-color: #e0ffe0; 
-    opacity: 0.7; 
+.task-item.completed {
+    background-color: color-mix(in srgb, var(--color-success) 12%, transparent);
+    opacity: 0.8;
 }
 
-.dark-theme .task-item.completed { 
-    background-color: #3a504a; 
+.task-title {
+    font-weight: 600;
 }
 
-.task-title { 
-    font-weight: bold; 
+.task-item.completed .task-title {
+    text-decoration: line-through;
 }
 
-.task-item.completed .task-title { 
-    text-decoration: line-through; 
+.task-due-date {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
 }
 
-.task-due-date { 
-    font-size: 0.9em; 
-    color: var(--text-color-secondary); 
+.task-actions {
+    display: flex;
+    gap: var(--space-2);
 }
 
-.task-actions { 
-    display: flex; 
-    gap: 10px; 
+/* Toasts (flash messages) */
+.toasts {
+    position: fixed;
+    /* below the sticky header so the page title stays readable */
+    top: calc(var(--header-height) + var(--space-3) + env(safe-area-inset-top));
+    right: var(--space-4);
+    z-index: 1300;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    max-height: 60vh;
+    max-height: 60dvh;
+    overflow-y: auto;
+    pointer-events: none;
 }
 
-/* Flash Messages */
-.flash-messages { 
-    margin: 20px 0; 
+.toast {
+    --toast-color: var(--color-primary);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    width: max-content;
+    max-width: min(92vw, 420px);
+    padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-left: 4px solid var(--toast-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-2);
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    pointer-events: auto;
+    animation: slideIn 0.2s ease;
 }
 
-.flash-message {
-    padding: 12px 20px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    border-left: 4px solid;
-    animation: slideIn 0.3s ease;
+.toast--success {
+    --toast-color: var(--color-success);
 }
 
-.flash-message.success {
-    background-color: #d4edda;
-    border-color: #28a745;
-    color: #155724;
+.toast--danger,
+.toast--error {
+    --toast-color: var(--color-danger);
 }
 
-.flash-message.danger {
-    background-color: #f8d7da;
-    border-color: #dc3545;
-    color: #721c24;
+.toast--warning {
+    --toast-color: var(--color-warning);
 }
 
-.flash-message.warning {
-    background-color: #fff3cd;
-    border-color: #ffc107;
-    color: #856404;
+.toast__text {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-top: 2px;
+    overflow-wrap: anywhere;
 }
 
-.flash-message.info {
-    background-color: #d1ecf1;
-    border-color: #17a2b8;
-    color: #0c5460;
+.toast__close {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    margin: -2px 0;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: none;
+    color: var(--color-text-subtle);
+    font-size: var(--text-lg);
+    line-height: 1;
+    cursor: pointer;
 }
 
-.dark-theme .flash-message.success {
-    background-color: #1e4620;
-    color: #a8d5a8;
+.toast__close:hover {
+    background: var(--color-surface-2);
+    color: var(--color-text);
 }
 
-.dark-theme .flash-message.danger {
-    background-color: #4a1e1e;
-    color: #d5a8a8;
-}
-
-.dark-theme .flash-message.warning {
-    background-color: #4a3e1e;
-    color: #d5cba8;
-}
-
-.dark-theme .flash-message.info {
-    background-color: #1e3e4a;
-    color: #a8cbd5;
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
+@media (pointer: coarse) {
+    .toast__close {
+        width: 44px;
+        height: 44px;
+        margin: -10px -6px -10px 0;
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
+}
+
+@media (max-width: 767.98px) {
+    .toasts {
+        left: var(--space-3);
+        right: var(--space-3);
+        align-items: center;
+    }
+
+    .toast {
+        width: 100%;
+        max-width: 420px;
     }
 }
 
@@ -134,26 +159,15 @@
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 15px 20px;
-    border-radius: 15px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-    z-index: 9999;
+    z-index: 950;
     min-width: 180px;
+    padding: var(--space-4) var(--space-5);
+    background: var(--color-text);
+    color: var(--color-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-2);
+    font-family: var(--font-sans);
     animation: slideIn 0.3s ease-out;
-    font-family: 'Inter', sans-serif;
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateY(100px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
 }
 
 .floating-timer-content {
@@ -166,7 +180,7 @@
 .floating-timer-display {
     font-size: 28px;
     font-weight: bold;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-mono);
     letter-spacing: 2px;
 }
 
@@ -184,9 +198,9 @@
 }
 
 .floating-btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
+    background: color-mix(in srgb, var(--color-bg) 16%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-bg) 30%, transparent);
+    color: inherit;
     padding: 6px 10px;
     border-radius: 8px;
     cursor: pointer;
@@ -195,7 +209,7 @@
 }
 
 .floating-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: color-mix(in srgb, var(--color-bg) 28%, transparent);
     transform: scale(1.05);
 }
 
