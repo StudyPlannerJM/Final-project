@@ -61,8 +61,8 @@ values on `html[data-theme="dark"]`.
 | `--color-primary-hover` | `#174EAD` | `#8BB9FF` | Hover and pressed |
 | `--color-on-primary` | `#FFFFFF` | `#0E1626` | Text on primary |
 | `--color-accent` | `#F2A33A` | `#F5B556` | Streaks, due markers (fills only) |
-| `--color-success` | `#1F8A5B` | `#4CC38A` | Success states |
-| `--color-warning` | `#B26A00` | `#F5B556` | Warning states |
+| `--color-success` | `#1A7A50` | `#4CC38A` | Success states |
+| `--color-warning` | `#9A5B00` | `#F5B556` | Warning states |
 | `--color-danger` | `#C73A3A` | `#FF7B7B` | Errors, destructive actions |
 
 Hex values may be adjusted during implementation if a pair fails the contrast
