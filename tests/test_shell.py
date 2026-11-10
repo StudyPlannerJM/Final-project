@@ -139,3 +139,13 @@ def test_flash_renders_as_toast(auth_client):
     assert 'class="toast toast--success"' in html
     assert 'class="toast toast--danger"' in html
     assert html.count('toast__close') == 2
+
+
+# --- Auth pages ------------------------------------------------------------
+
+@pytest.mark.parametrize('url', ['/auth/login', '/auth/register'])
+def test_auth_pages_use_design_system(client, url):
+    head = _head(client.get(url))
+    assert 'core/variables.css' in head
+    assert 'dataset.theme' in head
+    assert head.index('BrainDump = ') < head.index('variables.css')
