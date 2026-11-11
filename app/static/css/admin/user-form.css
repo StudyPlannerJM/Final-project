@@ -136,7 +136,7 @@
 
 .admin-user-form-card .form-actions .btn-secondary {
     border: 1px solid var(--border-color, #d4dbe5);
-    background: #fff;
+    background: var(--color-surface);
     color: var(--text-color-primary, #1f2a37);
 }
 

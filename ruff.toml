@@ -1,0 +1,9 @@
+# Lint rules for CI (`ruff check .`).
+#
+# CI installs ruff unpinned. Newer ruff releases enable a much broader default
+# rule set, which flagged ~160 pre-existing style issues across the codebase.
+# Pin the selection to the rules this project has always been checked against
+# (pycodestyle errors and pyflakes) so a ruff upgrade cannot break the build.
+# Widen this list deliberately, together with the fixes it requires.
+[lint]
+select = ["E4", "E7", "E9", "F"]

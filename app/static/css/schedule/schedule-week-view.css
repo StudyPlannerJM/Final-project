@@ -39,7 +39,7 @@
 
 .day-header.today {
     background-color: var(--primary-color);
-    color: white;
+    color: var(--color-on-primary);
 }
 
 .day-header.selected {
@@ -50,7 +50,7 @@
 .day-header.today.selected {
     /* When a day is both today and selected, keep today styling */
     background-color: var(--primary-color);
-    color: white;
+    color: var(--color-on-primary);
     border: 2px solid var(--primary-color);
 }
 
@@ -62,7 +62,7 @@
 }
 
 .day-header.today .day-name {
-    color: white;
+    color: var(--color-on-primary);
 }
 
 .day-number {
@@ -79,7 +79,7 @@
 }
 
 .day-header.today .day-date {
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--color-on-primary);
 }
 
 /* Week Calendar Grid */

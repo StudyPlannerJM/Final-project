@@ -2,12 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    {% include 'components/theme_init.html' %}
     <title>{{ title }} - BrainDump</title>
     {% include 'components/favicons.html' %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/core/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/core/fonts.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/core/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/login_register.css') }}">
 </head>
-<body>
+<body class="auth-page">
     <div class="container">
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -19,7 +23,7 @@
         {% endif %}
     {% endwith %}
     <div class="auth-header">
-        <img src="{{ url_for('static', filename='img/braindump-logo-bg.png') }}" alt="BrainDump" class="auth-logo">
+        <img src="{{ url_for('static', filename='img/braindump-logo-full-bg.png') }}" alt="BrainDump" class="auth-logo">
         <h2 class="auth-title">{{ title }}</h2>
     </div>
     <form action="" method="post" novalidate>

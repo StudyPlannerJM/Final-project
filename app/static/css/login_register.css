@@ -1,198 +1,205 @@
-/* Form group for better label-input alignment */
-.form-group {
-    margin-bottom: 1.2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-}
+/* ================================================
+   LOGIN AND REGISTER
+   Standalone pages (they do not extend base.html).
+   ================================================ */
 
-/* Consistent input styling for form-control class */
-.form-control {
-    width: 100%;
-    padding: 0.65rem 0.75rem;
-    font-size: 0.95rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    transition: border-color 0.3s ease;
-    margin-top: 0.3rem;
-}
-
-label {
-    margin-bottom: 0.2rem;
-}
-/* login_register.css */
-
-/* Reset and base styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(to right, #1e3c72, #2a5298);
-    color: #333;
-    min-height: 100vh;
+body.auth-page {
     display: flex;
     justify-content: center;
     align-items: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: var(--space-5) var(--space-4);
+    padding-top: calc(var(--space-5) + env(safe-area-inset-top));
+    padding-bottom: calc(var(--space-5) + env(safe-area-inset-bottom));
 }
 
-/* Container styling */
 .container {
-    background-color: #ffffff;
-    padding: 2.5rem 3rem;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     width: 100%;
-    max-width: 420px;
-    transition: all 0.3s ease-in-out;
-}
-
-h2 {
-    text-align: center;
-    margin-bottom: 2rem;
-    font-size: 1.8rem;
-    color: #1e3c72;
+    max-width: 400px;
+    padding: var(--space-6);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-1);
 }
 
 .auth-header {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 1.2rem;
+    margin-bottom: var(--space-5);
 }
 
 .auth-logo {
-    width: 200px;
+    width: 150px;
     height: auto;
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--space-3);
+}
+
+/* The logo artwork is drawn for a light background */
+html[data-theme="dark"] .auth-logo {
+    padding: var(--space-3);
+    background: #FFFFFF;
+    border-radius: var(--radius-md);
 }
 
 .auth-title {
-    margin-bottom: 0;
+    margin: 0;
+    font-size: var(--text-xl);
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    color: var(--color-text);
+    text-align: center;
 }
 
-/* Form elements */
-form p {
-    margin-bottom: 1.2rem;
+.container p {
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+}
+
+.container > p:last-child {
+    margin: var(--space-5) 0 0;
+    text-align: center;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: var(--space-4);
 }
 
 label {
-    font-weight: 600;
-    font-size: 0.95rem;
-    margin-bottom: 0.4rem;
     display: block;
-    color: #1e3c72;
+    margin-bottom: var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-text);
 }
 
+.form-control,
 input[type="text"],
 input[type="email"],
 input[type="password"] {
     width: 100%;
-    padding: 0.65rem 0.75rem;
-    font-size: 0.95rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    transition: border-color 0.3s ease;
+    min-height: 44px;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text);
+    /* 16px minimum stops iOS zooming the page on focus */
+    font-size: max(16px, var(--text-base));
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
+.form-control:focus,
 input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="password"]:focus {
-    border-color: #2a5298;
+    border-color: var(--color-primary);
     outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 25%, transparent);
 }
 
-/* Checkbox and submit */
+/* "Remember me" row */
+form p label {
+    display: inline;
+    margin: 0;
+    font-weight: 500;
+    color: var(--color-text-muted);
+}
+
 input[type="checkbox"] {
-    margin-right: 0.5rem;
-    transform: scale(1.2);
+    width: 18px;
+    height: 18px;
+    margin: 0 var(--space-2) 0 0;
+    vertical-align: -3px;
+    accent-color: var(--color-primary);
 }
 
 input[type="submit"] {
-    background-color: #2a5298;
-    color: white;
-    border: none;
-    padding: 0.75rem;
-    border-radius: 6px;
-    cursor: pointer;
     width: 100%;
-    font-size: 1rem;
+    min-height: 48px;
+    padding: var(--space-3);
+    border: none;
+    border-radius: var(--radius-md);
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    font-size: var(--text-base);
     font-weight: 600;
-    transition: background-color 0.3s ease;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 input[type="submit"]:hover {
-    background-color: #1e3c72;
+    background: var(--color-primary-hover);
 }
 
 /* Flash messages */
 .flashes {
     list-style: none;
-    margin-bottom: 1rem;
+    margin: 0 0 var(--space-4);
     padding: 0;
 }
 
 .flashes li {
-    padding: 0.6rem 0.8rem;
-    margin-bottom: 0.5rem;
-    border-radius: 6px;
-    font-size: 0.9rem;
+    --flash-color: var(--color-primary);
+    margin-bottom: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    border-left: 4px solid var(--flash-color);
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--flash-color) 10%, var(--color-surface));
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    overflow-wrap: anywhere;
 }
 
-.flashes .error {
-    background-color: #f8d7da;
-    color: #721c24;
-}
-
+.flashes .error,
 .flashes .danger {
-    background-color: #f8d7da;
-    color: #721c24;
+    --flash-color: var(--color-danger);
 }
 
 .flashes .success {
-    background-color: #d4edda;
-    color: #155724;
+    --flash-color: var(--color-success);
 }
 
-.flashes .info {
-    background-color: #d1ecf1;
-    color: #0c5460;
+.flashes .warning {
+    --flash-color: var(--color-warning);
 }
 
-/* Error messages */
 .field-error {
-    font-size: 0.85rem;
     display: block;
-    margin-top: 0.3rem;
-    color: red;
+    margin-top: var(--space-1);
+    font-size: var(--text-sm);
+    color: var(--color-danger);
 }
 
-/* Links */
-a {
-    color: #2a5298;
-    text-decoration: none;
+.container a {
     font-weight: 600;
-    font-size: 0.95rem;
+    text-decoration: none;
 }
 
-a:hover {
+.container a:hover {
     text-decoration: underline;
 }
 
-/* Responsive tweaks */
 @media (max-width: 480px) {
+    body.auth-page {
+        align-items: flex-start;
+        padding-left: 0;
+        padding-right: 0;
+        background: var(--color-surface);
+    }
+
     .container {
-        padding: 2rem;
-    }
-
-    h2 {
-        font-size: 1.5rem;
-    }
-
-    input[type="submit"] {
-        font-size: 0.95rem;
+        max-width: none;
+        padding: var(--space-4);
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
     }
 }

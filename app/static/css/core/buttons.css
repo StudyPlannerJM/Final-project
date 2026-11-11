@@ -3,59 +3,71 @@
    ================================================ */
 
 .btn {
-    padding: 10px 20px;
-    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    margin-right: var(--space-2);
+    padding: 10px var(--space-5);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: var(--text-sm);
     font-weight: 600;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    line-height: 1.2;
     text-decoration: none;
-    display: inline-block;
-    margin-right: 10px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+    opacity: 0.55;
+    cursor: not-allowed;
 }
 
 .btn-primary {
-    background-color: var(--accent-color);
-    color: #fff;
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
 }
 
 .btn-primary:hover {
-    background-color: #357abd;
+    background-color: var(--color-primary-hover);
 }
 
 .btn-secondary {
-    background-color: #bdc3c7;
-    color: #333;
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+    color: var(--color-text);
 }
 
 .btn-secondary:hover {
-    background-color: #a0a7ad;
+    background-color: var(--color-surface-2);
 }
 
-body.dark-theme .btn-secondary {
-    background-color: #4a627a;
-    color: #ecf0f1;
+.btn-sm {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-xs);
 }
 
-body.dark-theme .btn-secondary:hover {
-    background-color: #3b5166;
+.btn-success {
+    background-color: var(--color-success);
+    color: var(--color-surface);
 }
 
-.btn-sm { 
-    padding: 10px 10px; 
-    font-size: 0.8em; 
+.btn-danger {
+    background-color: var(--color-danger);
+    color: var(--color-surface);
 }
 
-.btn-success { 
-    background-color: #2ecc71; 
-    color: #fff; 
-    border: none; 
-    border-radius: 4px; 
-    cursor: pointer; 
+.btn-success:hover,
+.btn-danger:hover {
+    filter: brightness(0.92);
 }
 
-.btn-danger { 
-    background-color: #e74c3c; 
-    color: #fff; 
+@media (pointer: coarse) {
+    .btn,
+    .btn-sm {
+        min-height: 44px;
+    }
 }

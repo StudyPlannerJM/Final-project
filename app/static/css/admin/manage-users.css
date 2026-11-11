@@ -26,20 +26,20 @@
 
 .users-table thead tr {
     background: var(--primary-color, #6750a4);
-    color: #fff;
+    color: var(--color-on-primary);
 }
 
 .users-table th {
     padding: 0.75rem 1rem;
     text-align: left;
-    color: #fff;
+    color: var(--color-on-primary);
 }
 
 .users-table td {
     padding: 0.75rem 1rem;
     text-align: left;
     border-bottom: 1px solid var(--border-color, #e9ecef);
-    color: #000;
+    color: var(--color-text);
 }
 
 .users-table tbody tr:last-child td {
@@ -47,7 +47,7 @@
 }
 
 .users-table tbody tr:hover {
-    background: var(--hover-bg, #f5f0ff);
+    background: var(--color-surface-2);
 }
 
 .user-icon {

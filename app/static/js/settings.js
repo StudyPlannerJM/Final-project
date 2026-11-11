@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const navLinks = document.querySelectorAll('.settings-nav a');
     const sections = document.querySelectorAll('.settings-section');
     const themeSelect = document.getElementById('theme-select');
-    const body = document.body;
 
     // Settings navigation
     navLinks.forEach(link => {
@@ -20,21 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Theme selector logic
-    if (themeSelect) {
-        // Set initial value from localStorage
-        const currentTheme = localStorage.getItem('theme') || 'light';
-        themeSelect.value = currentTheme;
-
+    // Theme selector (state lives in window.BrainDump, set up in theme_init.html)
+    if (themeSelect && window.BrainDump) {
+        themeSelect.value = window.BrainDump.getThemePreference();
         themeSelect.addEventListener('change', (e) => {
-            const selectedTheme = e.target.value;
-            body.classList.remove('light-theme', 'dark-theme');
-            if (selectedTheme === 'dark') {
-                body.classList.add('dark-theme');
-            } else {
-                body.classList.remove('dark-theme'); // Or add 'light-theme' if you have specific light styles
-            }
-            localStorage.setItem('theme', selectedTheme);
+            window.BrainDump.setTheme(e.target.value);
         });
     }
 });

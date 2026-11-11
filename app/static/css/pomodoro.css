@@ -82,7 +82,7 @@
     cursor: pointer;
     border: 2px solid var(--accent-color);
     background-color: var(--accent-color);
-    color: #fff;
+    color: var(--color-on-primary);
     border-radius: 8px;
     transition: all 0.3s ease;
     font-weight: 500;
@@ -100,12 +100,12 @@
 
 .btn-time:hover {
     background-color: var(--accent-color);
-    color: #fff;
+    color: var(--color-on-primary);
 }
 
 .btn-time.active {
     background-color: var(--accent-color);
-    color: #fff;
+    color: var(--color-on-primary);
     font-weight: bold;
 }
 
@@ -725,7 +725,7 @@
 
 .pagination-btn:hover:not(.disabled) {
     background: var(--primary-color);
-    color: white;
+    color: var(--color-on-primary);
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 102, 204, 0.2);
 }
@@ -773,12 +773,12 @@ body.dark-theme .btn-time {
 
 body.dark-theme .btn-time:hover {
     background-color: var(--accent-color);
-    color: #fff;
+    color: var(--color-on-primary);
 }
 
 body.dark-theme .btn-time.active {
     background-color: var(--accent-color);
-    color: #fff;
+    color: var(--color-on-primary);
 }
 
 /* Custom Time Input */
@@ -815,11 +815,6 @@ body.dark-theme .btn-custom-time:hover {
 /* Timer Display */
 body.dark-theme .timer-display {
     color: var(--text-color-primary);
-}
-
-/* Timer Controls */
-body.dark-theme .timer-controls button {
-    color: #fff;
 }
 
 /* Session Info */
@@ -996,7 +991,7 @@ body.dark-theme .pagination-btn {
 
 body.dark-theme .pagination-btn:hover:not(.disabled) {
     background: var(--primary-color);
-    color: #fff;
+    color: var(--color-on-primary);
 }
 
 body.dark-theme .pagination-btn.disabled {

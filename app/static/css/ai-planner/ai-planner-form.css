@@ -16,7 +16,7 @@
     padding: 30px 20px;
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
     border-radius: 12px;
-    color: white;
+    color: var(--color-on-primary);
 }
 
 .header-icon {
@@ -193,7 +193,7 @@
 
 .btn-view-all:hover {
     background: var(--primary-color);
-    color: white;
+    color: var(--color-on-primary);
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);
     text-decoration: none;

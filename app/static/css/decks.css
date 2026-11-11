@@ -495,5 +495,5 @@ body.dark-theme .icon-btn {
 body.dark-theme .icon-btn:hover {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
-    color: #fff;
+    color: var(--color-on-primary);
 }
