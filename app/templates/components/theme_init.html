@@ -50,7 +50,8 @@
     try {
         var zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         if (zone && /^[A-Za-z0-9_+\-\/]{1,64}$/.test(zone)) {
-            document.cookie = 'bd_tz=' + zone + '; path=/; max-age=31536000; SameSite=Lax';
+            var secure = location.protocol === 'https:' ? '; Secure' : '';
+            document.cookie = 'bd_tz=' + zone + '; path=/; max-age=31536000; SameSite=Lax' + secure;
         }
     } catch (e) { /* no Intl or cookies blocked: the server falls back to UTC */ }
 

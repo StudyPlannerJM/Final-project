@@ -107,3 +107,61 @@ def test_calendar_disconnect_needs_a_post(auth_client, monkeypatch):
     assert calls == []
     auth_client.post('/calendar/disconnect')
     assert len(calls) == 1
+
+
+# --- Error pages -----------------------------------------------------------
+
+def test_unknown_page_shows_a_friendly_404(client):
+    response = client.get('/definitely-not-here')
+    assert response.status_code == 404
+    html = response.get_data(as_text=True)
+    assert 'Page not found' in html and 'Go to dashboard' in html
+
+
+def test_scripts_get_json_errors(client):
+    response = client.get('/definitely-not-here', headers={'Accept': 'application/json'})
+    assert response.status_code == 404 and response.get_json() == {
+        'success': False, 'error': "We couldn't find that page. It may have been moved or deleted."}
+
+
+def test_wrong_method_shows_a_friendly_405(auth_client):
+    response = auth_client.get('/tasks/delete/1')
+    assert response.status_code == 405
+    assert 'That action is not available' in response.get_data(as_text=True)
+
+
+def test_crash_shows_a_friendly_500_and_the_app_keeps_working(app, auth_client, monkeypatch):
+    def broken():
+        raise RuntimeError('boom')
+    monkeypatch.setitem(app.view_functions, 'main.settings', broken)
+    monkeypatch.setitem(app.config, 'PROPAGATE_EXCEPTIONS', False)
+    response = auth_client.get('/settings')
+    assert response.status_code == 500
+    html = response.get_data(as_text=True)
+    assert 'Something went wrong' in html and 'boom' not in html
+    assert auth_client.get('/').status_code == 200
+
+
+def test_forbidden_and_rate_limited_pages(app):
+    from app.errors import error_response
+    with app.test_request_context('/'):
+        for code, title in ((403, 'have access'), (429, 'Too many attempts')):
+            body, status = error_response(code)
+            assert status == code and title in body
+
+
+# --- Security headers ------------------------------------------------------
+
+def test_security_headers_on_every_response(client):
+    for url in ('/auth/login', '/definitely-not-here', '/static/css/core/base.css'):
+        headers = client.get(url).headers
+        assert headers['X-Content-Type-Options'] == 'nosniff', url
+        assert headers['X-Frame-Options'] == 'SAMEORIGIN', url
+        assert headers['Referrer-Policy'] == 'strict-origin-when-cross-origin', url
+        assert 'camera=()' in headers['Permissions-Policy'], url
+        assert 'Strict-Transport-Security' not in headers, url   # production only
+
+
+def test_timezone_cookie_is_secure_on_https():
+    script = (TEMPLATES / 'components/theme_init.html').read_text()
+    assert "location.protocol === 'https:'" in script and '; Secure' in script
