@@ -147,3 +147,17 @@ summarizer (4 files) 11, settings 3, schedule week/day 2.
 - The rating replay check is not atomic: two tabs rating the same card at the
   same instant could both be recorded.
 - PWA tests read source text; nothing loads every pre-cached URL in a test.
+
+## Left open after Phase 4 (from its code review)
+
+- Check on Render, after deploy, that `PROXY_FIX_X_FOR=1` is right: a blocked
+  sign-in logs `remote_addr` and `X-Forwarded-For`. If every request shows
+  the same address, the hop count is wrong and the sign-in limits are shared.
+- Registration says whether an email is already taken, and a sign-in for an
+  unknown email answers slightly faster (no password hash). Both reveal which
+  emails have accounts.
+- Behind HTTPS, Flask-WTF requires a same-origin Referer on form posts. A
+  browser or extension that strips the Referer would see "Session expired".
+- No upload size limit (`MAX_CONTENT_LENGTH`) and no friendly 413 page for the
+  summarizer.
+- No Content-Security-Policy yet; the app still uses some inline scripts.

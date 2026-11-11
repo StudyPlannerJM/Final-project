@@ -1,10 +1,18 @@
 """
-Slow down password guessing.
+Slow down password guessing without letting one person lock another out.
 
-Failed sign-ins are stored briefly. Too many for one email address, or from
-one IP address, within the window blocks further attempts until the oldest
-one in the window ages out. Unknown emails are counted the same way, so the
-response does not reveal whether an account exists.
+Failed sign-ins are stored briefly. Within the window, further attempts are
+refused (until the oldest counted failure ages out) when any of these is hit:
+
+- 5 failures for one email from one network address. Someone guessing a
+  classmate's password blocks only their own address, not the owner.
+- 20 failures for one email across all addresses: stops guessing spread over
+  many machines; locking an account this way needs 4+ different addresses.
+- 50 failures from one address across all emails: stops one machine trying
+  many accounts, with headroom for a class sharing a campus address.
+
+Unknown emails are counted the same way, so the response does not reveal
+whether an account exists.
 """
 
 from datetime import timedelta
@@ -14,8 +22,9 @@ from app.models import LoginAttempt
 from app.services.review_service import utcnow
 
 WINDOW = timedelta(minutes=15)
-EMAIL_LIMIT = 5
-IP_LIMIT = 30
+PAIR_LIMIT = 5
+EMAIL_LIMIT = 20
+IP_LIMIT = 50
 KEEP_FOR = timedelta(days=1)
 
 
@@ -27,28 +36,33 @@ class LoginLimiter:
     """Database-backed sign-in limits (works across several server processes)."""
 
     @staticmethod
+    def _wait_for(filters, limit, now):
+        """Seconds until fewer than `limit` matching failures remain in the window."""
+        recent = (
+            LoginAttempt.query
+            .filter(*filters, LoginAttempt.attempted_at > now - WINDOW)
+            .order_by(LoginAttempt.attempted_at.desc())
+            .limit(limit)
+            .all()
+        )
+        if len(recent) < limit:
+            return 0
+        oldest = recent[-1].attempted_at
+        return (oldest + WINDOW - now).total_seconds()
+
+    @staticmethod
     def seconds_until_allowed(email, ip, now=None):
         """0 if a sign-in may be attempted now, otherwise seconds to wait."""
         now = now or utcnow()
-        since = now - WINDOW
+        email = _normalise(email)
+        ip = (ip or '')[:64]
         waits = []
-        for column, value, limit in (
-            (LoginAttempt.email, _normalise(email), EMAIL_LIMIT),
-            (LoginAttempt.ip, (ip or '')[:64], IP_LIMIT),
-        ):
-            if not value:
-                continue
-            recent = (
-                LoginAttempt.query
-                .filter(column == value, LoginAttempt.attempted_at > since)
-                .order_by(LoginAttempt.attempted_at.desc())
-                .limit(limit)
-                .all()
-            )
-            if len(recent) >= limit:
-                # Allowed again once the oldest of the last `limit` failures leaves the window
-                oldest = recent[-1].attempted_at
-                waits.append((oldest + WINDOW - now).total_seconds())
+        if email:
+            waits.append(LoginLimiter._wait_for(
+                [LoginAttempt.email == email, LoginAttempt.ip == ip], PAIR_LIMIT, now))
+            waits.append(LoginLimiter._wait_for([LoginAttempt.email == email], EMAIL_LIMIT, now))
+        if ip:
+            waits.append(LoginLimiter._wait_for([LoginAttempt.ip == ip], IP_LIMIT, now))
         return max(0, int(max(waits))) if waits else 0
 
     @staticmethod

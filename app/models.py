@@ -118,7 +118,7 @@ class LoginAttempt(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), nullable=False, index=True)  # lowercased
-    ip = db.Column(db.String(64), nullable=False, default='', index=True)
+    ip = db.Column(db.String(64), nullable=False, default='', server_default='', index=True)
     attempted_at = db.Column(db.DateTime, nullable=False, index=True)  # UTC
 
     def __repr__(self):

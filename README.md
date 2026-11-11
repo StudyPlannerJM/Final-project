@@ -56,7 +56,7 @@ keys are only needed for the features that use them:
 | `DATABASE_URL` | Optional locally; defaults to SQLite in `instance/` |
 | `GEMINI_API_KEY` | AI study plans ([get a key](https://aistudio.google.com/apikey)) |
 | `APYHUB_API_KEY` | Document summarizer ([apyhub.com](https://apyhub.com/)) |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `SERVER_URL` | Google Calendar sync |
+| `client_secret.json` (a file, not a variable) | Google Calendar sync; see below |
 
 Then create the database and start the app:
 
@@ -80,9 +80,11 @@ again. Existing data is kept.
 1. In the [Google Cloud console](https://console.cloud.google.com/), create a
    project and enable the Google Calendar API.
 2. Create OAuth 2.0 credentials (web application) with the redirect URI
-   `<SERVER_URL>/calendar/oauth2callback`.
-3. Put the client ID and secret in `.env`, and set `SERVER_URL` to the address
-   you open the app on.
+   `<address you open the app on>/calendar/oauth2callback`, for example
+   `http://localhost:5000/calendar/oauth2callback`.
+3. Download the credentials as JSON, name the file `client_secret.json` and put
+   it in the project folder (the folder you run the app from). It is listed in
+   `.gitignore`; never commit it.
 
 ## Tests and linting
 
@@ -101,13 +103,18 @@ The app is deployed on Render (`render.yaml`). Production needs
 Run `flask db upgrade` on each deploy that includes migrations.
 
 In production the app sends secure cookies and HSTS, and trusts one proxy hop
-for the client address (Render's load balancer).
+for the client address (Render's load balancer). If the platform puts more
+proxies in front of the app, set `PROXY_FIX_X_FOR` to that number; blocked
+sign-ins are logged with the address seen and the `X-Forwarded-For` header, so
+this can be checked after deploying.
 
 ## Security
 
 - CSRF protection on every form and every script request.
-- Sign-in is limited to 5 failed attempts per email and 30 per network address
-  in 15 minutes; passwords need at least 8 characters.
+- Failed sign-ins are limited within 15 minutes: 5 per email from one network
+  address, 20 per email in total, and 50 per network address. Someone guessing
+  a classmate's password blocks only their own address. Passwords need at
+  least 8 characters.
 - Security headers on every response (no MIME sniffing, no framing by other
   sites, strict referrer policy).
 

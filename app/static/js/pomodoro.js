@@ -251,10 +251,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 showNotification(`Great job! You've studied ${data.total_minutes_today} minutes today!`);
             } else {
                 console.error('Failed to save Pomodoro:', data.error);
+                if (window.BrainDump && window.BrainDump.toast) {
+                    window.BrainDump.toast(data.error || 'This Pomodoro could not be saved. Reload the page and try again.', 'danger');
+                }
             }
         })
         .catch(error => {
             console.error('Error saving Pomodoro:', error);
+            if (window.BrainDump && window.BrainDump.toast) {
+                window.BrainDump.toast('This Pomodoro could not be saved. Check your connection and reload the page.', 'danger');
+            }
         });
     }
 

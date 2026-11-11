@@ -5,7 +5,7 @@ Every page works signed in or out and does not depend on the app shell,
 so it can render even when something else on the request has failed.
 """
 
-from flask import current_app, jsonify, render_template, request
+from flask import current_app, flash, jsonify, redirect, render_template, request, url_for
 from flask_wtf.csrf import CSRFError
 
 from app import db
@@ -35,6 +35,9 @@ def wants_json():
     """True for fetch/XHR calls that expect JSON rather than a page."""
     if request.is_json:
         return True
+    # fetch()/XHR requests are not page loads; browsers mark navigations as "document"
+    if request.headers.get('Sec-Fetch-Dest') == 'empty':
+        return True
     accept = request.accept_mimetypes
     best = accept.best_match(['application/json', 'text/html'])
     return best == 'application/json' and accept[best] > accept['text/html']
@@ -53,6 +56,10 @@ def error_response(code, message=None, title=None):
 def register_error_handlers(app):
     @app.errorhandler(CSRFError)
     def csrf_error(error):
+        # A sign-in or registration page restored from an old tab: start it afresh
+        if request.endpoint in ('auth.login', 'auth.register') and not wants_json():
+            flash('That page had expired. Please try again.', 'warning')
+            return redirect(url_for(request.endpoint, **request.args))
         if wants_json():
             return error_response(400, 'Your session has expired. Reload the page and try again.')
         return error_response(400, SESSION_EXPIRED[1], SESSION_EXPIRED[0])
@@ -62,9 +69,11 @@ def register_error_handlers(app):
 
     @app.errorhandler(500)
     def server_error(error):
-        # Leave the database usable for the next request
-        db.session.rollback()
-        current_app.logger.exception('Unhandled error on %s %s', request.method, request.path)
+        # Leave the database usable for the next request (Flask has already logged the error)
+        try:
+            db.session.rollback()
+        except Exception:
+            current_app.logger.warning('Could not roll back the database session after an error')
         try:
             return error_response(500)
         except Exception:  # the error page itself failed: fall back to plain text

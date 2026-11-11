@@ -33,7 +33,9 @@ def login():
             minutes = max(1, -(-wait // 60))
             flash(f'Too many sign-in attempts. Try again in {minutes} minute'
                   f'{"" if minutes == 1 else "s"}.', 'danger')
-            current_app.logger.warning('Sign-in blocked by rate limit')
+            current_app.logger.warning(
+                'Sign-in blocked by rate limit (remote_addr=%s, X-Forwarded-For=%s)',
+                ip, request.headers.get('X-Forwarded-For', ''))
             return render_template('auth/login.html', title='Sign In', form=form), 429
 
         user = User.query.filter_by(email=email).first()

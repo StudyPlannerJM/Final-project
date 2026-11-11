@@ -1,5 +1,7 @@
 """Security settings applied by the app factory (headers, production cookies, proxy)."""
 
+import os
+
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 SECURITY_HEADERS = {
@@ -17,9 +19,12 @@ def configure_production(app):
     app.config['REMEMBER_COOKIE_SECURE'] = True
     app.config['REMEMBER_COOKIE_HTTPONLY'] = True
     app.config['BRAINDUMP_HSTS'] = True
-    # Render's load balancer adds one X-Forwarded-For hop; trust exactly that one,
-    # so request.remote_addr is the student's IP (used by the sign-in limiter).
-    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+    # Trust exactly as many X-Forwarded-For hops as there are proxies in front of
+    # the app (1 for Render's load balancer), so request.remote_addr is the
+    # student's address (used by the sign-in limiter). Too high lets clients
+    # spoof it; too low makes everyone share the proxy's address.
+    hops = int(os.environ.get('PROXY_FIX_X_FOR', '1'))
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=hops, x_proto=1)
 
 
 def register_security_headers(app):

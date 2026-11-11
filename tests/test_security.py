@@ -165,3 +165,65 @@ def test_security_headers_on_every_response(client):
 def test_timezone_cookie_is_secure_on_https():
     script = (TEMPLATES / 'components/theme_init.html').read_text()
     assert "location.protocol === 'https:'" in script and '; Secure' in script
+
+
+# --- Review fixes ---------------------------------------------------------
+
+def test_expired_login_form_returns_to_a_fresh_sign_in_page(app, client, db_session):
+    with csrf_enabled(app):
+        response = client.post('/auth/login', data={'email': 'a@b.com', 'password': 'x'})
+        assert response.status_code == 302 and response.headers['Location'].startswith('/auth/login')
+        page = client.get(response.headers['Location']).get_data(as_text=True)
+        assert 'Please try again' in page
+
+
+def test_fetch_calls_get_json_errors_even_with_a_generic_accept_header(client):
+    response = client.get('/definitely-not-here', headers={
+        'Accept': 'application/json, */*', 'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors'})
+    assert response.is_json
+
+
+def test_crash_page_survives_a_broken_database_session(app, auth_client, monkeypatch):
+    from app import db
+
+    def broken():
+        raise RuntimeError('boom')
+
+    def failing_rollback():
+        raise RuntimeError('database gone')
+
+    monkeypatch.setitem(app.view_functions, 'main.settings', broken)
+    monkeypatch.setitem(app.config, 'PROPAGATE_EXCEPTIONS', False)
+    monkeypatch.setattr(db.session, 'rollback', failing_rollback)
+    response = auth_client.get('/settings')
+    assert response.status_code == 500
+    assert 'Something went wrong' in response.get_data(as_text=True)
+
+
+def test_google_callback_rejects_a_mismatched_state(auth_client, monkeypatch):
+    import app.routes.calendar_routes as routes
+    calls = []
+    monkeypatch.setattr(routes, 'get_google_auth_flow', lambda: calls.append('flow'))
+    with auth_client.session_transaction() as sess:
+        sess['state'] = 'expected-state'
+    response = auth_client.get('/calendar/oauth2callback?state=attacker-state&code=x')
+    assert response.status_code == 302 and calls == []
+    response = auth_client.get('/calendar/oauth2callback?code=x')        # state already used up
+    assert response.status_code == 302 and calls == []
+
+
+def test_insecure_oauth_transport_is_only_allowed_outside_production():
+    source = (ROOT / 'app/utils/calendar_client.py').read_text()
+    assert re.search(r"if [^\n]*!= 'production'[^\n]*:\n\s+os\.environ\['OAUTHLIB_INSECURE_TRANSPORT'\] = '1'", source)
+
+
+def test_pomodoro_save_failures_are_shown_to_the_user():
+    js = (STATIC_JS / 'pomodoro.js').read_text()
+    block = js[js.index('function savePomodoroSession'):js.index('function showNotification')]
+    assert block.count('BrainDump.toast') >= 2
+
+
+def test_readme_documents_the_real_google_credentials_file():
+    readme = (ROOT / 'README.md').read_text()
+    assert 'client_secret.json' in readme
+    assert 'GOOGLE_CLIENT_ID' not in readme

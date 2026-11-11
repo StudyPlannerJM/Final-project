@@ -40,14 +40,21 @@ project that is hard to read on GitHub and only checked by CI on `main`.
 ## Sign-in protection
 
 - New table `login_attempt` (email lowercased, IP, time), one migration.
-- A sign-in is refused before the password is checked when the email has 5
-  or more failed attempts in the last 15 minutes, or the IP has 30 or more.
+- A sign-in is refused before the password is checked when, in the last 15
+  minutes, there are 5 failures for that email from the same IP, 20 for that
+  email from any IP, or 50 from that IP for any email. (Revised after review:
+  a plain per-email limit let one student lock a classmate out, and a low
+  per-IP limit could block a whole campus network.)
   The message says how long to wait and does not reveal whether the email
   exists.
 - A successful sign-in clears that email's failures. Rows older than a day
   are deleted as new failures are written.
 - In production the app trusts one proxy hop for the client IP (`ProxyFix`),
-  matching Render's load balancer.
+  matching Render's load balancer; `PROXY_FIX_X_FOR` overrides it. Blocked
+  sign-ins are logged with the address and `X-Forwarded-For` so the setting
+  can be checked after deploy.
+- Google Calendar's OAuth callback checks the `state` it issued (added after
+  review), and insecure OAuth transport is only allowed outside production.
 - Registration and the admin user form require at least 8 characters.
 - `?next=` is honoured only for same-site relative paths.
 
