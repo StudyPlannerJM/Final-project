@@ -32,13 +32,16 @@ def index():
         Task.date_created.asc()
     ).all()
     
-    # STEP 4: Pass all three lists to the template for display
+    # STEP 4: Pass the columns to the template for display
+    columns = [
+        ('todo', 'To-Do', todo_tasks),
+        ('doing', 'Doing', doing_tasks),
+        ('done', 'Done', done_tasks),
+    ]
     return render_template(
-        'tasks/tasks.html', 
-        title='Tasks', 
-        todo_tasks=todo_tasks,
-        doing_tasks=doing_tasks,
-        done_tasks=done_tasks
+        'tasks/tasks.html',
+        title='Tasks',
+        columns=columns
     )
 
 

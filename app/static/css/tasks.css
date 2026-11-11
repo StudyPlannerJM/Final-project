@@ -1,5 +1,6 @@
 .task-category {
-    background-color: var(--category-color, #e3f2fd);
+    /* category colour comes from the user's data; mix it so text stays readable */
+    background-color: color-mix(in srgb, var(--category-color, var(--color-primary)) 18%, var(--color-surface));
 }
 
 body.dark-theme .modal-overlay {

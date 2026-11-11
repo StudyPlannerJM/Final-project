@@ -10,164 +10,94 @@
 {% block page_title %}{{ title }}{% endblock %}
 
 {% block content %}
+{% macro stat(value, label, icon, tone, href, key='') %}
+<a class="stat-card stat-card--{{ tone }}" href="{{ href }}">
+    <span class="stat-icon" aria-hidden="true"><i class="fas {{ icon }}"></i></span>
+    <span class="stat-content">
+        <span class="stat-value"{% if key %} data-stat="{{ key }}"{% endif %}>{{ value }}</span>
+        <span class="stat-label">{{ label }}</span>
+    </span>
+</a>
+{% endmacro %}
+
+{% macro action(endpoint, icon, label, primary=False) %}
+<a href="{{ url_for(endpoint) }}" class="action-btn{% if primary %} action-btn--primary{% endif %}">
+    <i class="fas {{ icon }}" aria-hidden="true"></i>
+    <span>{{ label }}</span>
+</a>
+{% endmacro %}
+
 <div class="dashboard-container">
-    <!-- Welcome Section -->
     <div class="welcome-section">
-        <h1>Welcome back, {{ current_user.username }}! 👋</h1>
-        <p class="welcome-subtitle">Here's your study progress overview</p>
+        <h2 class="welcome-title">Welcome back, {{ current_user.username }}</h2>
+        <p class="welcome-subtitle">Here is where your studying stands today.</p>
     </div>
 
-    <!-- Task Overview -->
-    <div class="section">
-        <h2 class="section-title">📋 Task Overview</h2>
-        <div class="stats-grid">
-            <div class="stat-card todo">
-                <div class="stat-icon">📝</div>
-                <div class="stat-content">
-                    <h3>{{ todo_count }}</h3>
-                    <p>To Do</p>
-                </div>
-            </div>
-            <div class="stat-card doing">
-                <div class="stat-icon">⚡</div>
-                <div class="stat-content">
-                    <h3>{{ doing_count }}</h3>
-                    <p>In Progress</p>
-                </div>
-            </div>
-            <div class="stat-card done">
-                <div class="stat-icon">✅</div>
-                <div class="stat-content">
-                    <h3>{{ done_count }}</h3>
-                    <p>Completed</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Study Statistics -->
-    <div class="section">
-        <h2 class="section-title">📊 Study Time</h2>
-        <div class="stats-grid four-cols">
-            <div class="stat-card study">
-                <div class="stat-icon">🕐</div>
-                <div class="stat-content">
-                    <h3>{{ today_minutes }}</h3>
-                    <p>Minutes Today</p>
-                </div>
-            </div>
-            <div class="stat-card study">
-                <div class="stat-icon">📅</div>
-                <div class="stat-content">
-                    <h3>{{ week_minutes }}</h3>
-                    <p>Minutes This Week</p>
-                </div>
-            </div>
-            <div class="stat-card study">
-                <div class="stat-icon">🍅</div>
-                <div class="stat-content">
-                    <h3>{{ pomodoros_today }}</h3>
-                    <p>Pomodoros Today</p>
-                </div>
-            </div>
-            <div class="stat-card study">
-                <div class="stat-icon">⏱️</div>
-                <div class="stat-content">
-                    <h3>{{ (week_minutes / 60) | round(1) }}</h3>
-                    <p>Hours This Week</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Flashcard Overview -->
-    <div class="section">
-        <h2 class="section-title">🎴 Flashcards & Decks</h2>
-        <div class="stats-grid">
-            <div class="stat-card flashcard">
-                <div class="stat-icon">📚</div>
-                <div class="stat-content">
-                    <h3>{{ total_decks }}</h3>
-                    <p>Deck{{ 's' if total_decks != 1 else '' }}</p>
-                </div>
-            </div>
-            <div class="stat-card flashcard">
-                <div class="stat-icon">🃏</div>
-                <div class="stat-content">
-                    <h3>{{ total_flashcards }}</h3>
-                    <p>Flashcard{{ 's' if total_flashcards != 1 else '' }}</p>
-                </div>
-            </div>
-            <div class="stat-card flashcard">
-                <div class="stat-icon">📊</div>
-                <div class="stat-content">
-                    <h3>{% if total_decks == 0 %}0{% else %}{{ (total_flashcards / total_decks) | round(1) }}{% endif %}</h3>
-                    <p>Avg Cards per Deck</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="section">
-        <h2 class="section-title">🚀 Quick Actions</h2>
+    <section class="section" aria-labelledby="dash-actions">
+        <h2 class="section-title" id="dash-actions">Quick actions</h2>
         <div class="quick-actions">
-            <a href="{{ url_for('tasks.add') }}" class="action-btn primary">
-                <span class="btn-icon">➕</span>
-                <span>Add Task</span>
-            </a>
-            <a href="{{ url_for('pomodoro.index') }}" class="action-btn secondary">
-                <span class="btn-icon">🍅</span>
-                <span>Start Pomodoro</span>
-            </a>
-            <a href="{{ url_for('calendar.schedule') }}" class="action-btn tertiary">
-                <span class="btn-icon">📅</span>
-                <span>View Schedule</span>
-            </a>
-            <a href="{{ url_for('ai_planner.generator') }}" class="action-btn quaternary">
-                <span class="btn-icon">🤖</span>
-                <span>AI Study Plan</span>
-            </a>
-            <a href="{{ url_for('flashcards.add') }}" class="action-btn primary">
-                <span class="btn-icon">🎴</span>
-                <span>Add Flashcard</span>
-            </a>
-            <a href="{{ url_for('flashcards.index') }}" class="action-btn secondary">
-                <span class="btn-icon">📚</span>
-                <span>View Decks</span>
-            </a>
+            {{ action('tasks.add', 'fa-plus', 'Add task', primary=True) }}
+            {{ action('pomodoro.index', 'fa-clock', 'Start Pomodoro') }}
+            {{ action('flashcards.index', 'fa-layer-group', 'Study flashcards') }}
+            {{ action('calendar.schedule', 'fa-calendar-days', 'View schedule') }}
+            {{ action('ai_planner.generator', 'fa-brain', 'AI study plan') }}
+            {{ action('flashcards.add', 'fa-square-plus', 'Add flashcard') }}
         </div>
-    </div>
+    </section>
 
-    <!-- Recent Tasks -->
-    {% if recent_tasks %}
-    <div class="section">
-        <h2 class="section-title">📌 Recent Tasks</h2>
-        <div class="recent-tasks-list">
-            {% for task in recent_tasks %}
-            <div class="task-item">
-                <div class="task-status-dot {{ task.status }}"></div>
-                <div class="task-info">
-                    <h4>{{ task.title }}</h4>
-                    <p class="task-meta">
-                        {% if task.task_category %}
-                            <span class="task-category" data-category-color="{{ task.task_category.color }}">
-                                {{ task.task_category.name }}
-                            </span>
-                        {% endif %}
-                        {% if task.due_date %}
-                            <span class="task-date">Due: {{ task.due_date.strftime('%b %d, %Y') }}</span>
-                        {% endif %}
-                    </p>
-                </div>
-                <a href="{{ url_for('tasks.edit', task_id=task.id) }}" class="task-edit-btn">Edit</a>
-            </div>
-            {% endfor %}
+    <section class="section" aria-labelledby="dash-tasks">
+        <h2 class="section-title" id="dash-tasks">Tasks</h2>
+        <div class="stats-grid">
+            {{ stat(todo_count, 'To do', 'fa-list-check', 'neutral', url_for('tasks.index'), 'todo') }}
+            {{ stat(doing_count, 'In progress', 'fa-bolt', 'accent', url_for('tasks.index'), 'doing') }}
+            {{ stat(done_count, 'Completed', 'fa-circle-check', 'success', url_for('tasks.index'), 'done') }}
         </div>
-    </div>
+    </section>
+
+    <section class="section" aria-labelledby="dash-time">
+        <h2 class="section-title" id="dash-time">Study time</h2>
+        <div class="stats-grid four-cols">
+            {{ stat(today_minutes, 'Minutes today', 'fa-stopwatch', 'primary', url_for('pomodoro.index')) }}
+            {{ stat(pomodoros_today, 'Pomodoros today', 'fa-clock', 'primary', url_for('pomodoro.index')) }}
+            {{ stat(week_minutes, 'Minutes this week', 'fa-calendar-week', 'primary', url_for('pomodoro.sessions')) }}
+            {{ stat((week_minutes / 60) | round(1), 'Hours this week', 'fa-hourglass-half', 'primary', url_for('pomodoro.sessions')) }}
+        </div>
+    </section>
+
+    <section class="section" aria-labelledby="dash-cards">
+        <h2 class="section-title" id="dash-cards">Flashcards</h2>
+        <div class="stats-grid">
+            {{ stat(total_decks, 'Decks', 'fa-layer-group', 'neutral', url_for('flashcards.decks')) }}
+            {{ stat(total_flashcards, 'Flashcards', 'fa-clone', 'neutral', url_for('flashcards.index')) }}
+            {{ stat(0 if total_decks == 0 else (total_flashcards / total_decks) | round(1), 'Average cards per deck', 'fa-chart-simple', 'neutral', url_for('flashcards.decks')) }}
+        </div>
+    </section>
+
+    {% if recent_tasks %}
+    <section class="section" aria-labelledby="dash-recent">
+        <h2 class="section-title" id="dash-recent">Recent tasks</h2>
+        <ul class="recent-tasks-list">
+            {% for task in recent_tasks %}
+            <li>
+                <a class="task-item" href="{{ url_for('tasks.edit', task_id=task.id) }}">
+                    <span class="task-status-dot {{ task.status }}" aria-hidden="true"></span>
+                    <span class="task-info">
+                        <span class="task-name">{{ task.title }}</span>
+                        <span class="task-meta">
+                            {% if task.task_category %}
+                                <span class="task-category" data-category-color="{{ task.task_category.color }}">{{ task.task_category.name }}</span>
+                            {% endif %}
+                            {% if task.due_date %}
+                                <span class="task-date">Due {{ task.due_date.strftime('%b %d, %Y') }}</span>
+                            {% endif %}
+                        </span>
+                    </span>
+                    <i class="fas fa-chevron-right task-chevron" aria-hidden="true"></i>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
     {% endif %}
 </div>
-{% endblock %}
-{% block body_extra %}
-<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 {% endblock %}

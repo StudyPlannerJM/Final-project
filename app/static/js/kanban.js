@@ -6,10 +6,23 @@ const AUTO_SCROLL_STEP = 16;
 
 let activeTouchDrag = null;
 
+const phoneQuery = window.matchMedia('(max-width: 767.98px)');
+const STATUS_LABELS = { todo: 'To-Do', doing: 'Doing', done: 'Done' };
+
+const notify = (message, category) => {
+    if (window.BrainDump && window.BrainDump.toast) {
+        window.BrainDump.toast(message, category);
+    }
+};
+
 taskCards.forEach((card) => {
     registerDesktopDrag(card);
     registerTouchDrag(card);
+    registerMoveSelect(card);
 });
+
+initBoardTabs();
+taskCards.forEach(refreshOverdue);
 
 columns.forEach((column) => {
     column.addEventListener('dragover', (e) => {
@@ -58,7 +71,7 @@ function registerTouchDrag(card) {
     card.addEventListener('touchcancel', cancelTouchDrag);
 
     function onTouchStart(e) {
-        if (isInteractiveElement(e.target)) {
+        if (phoneQuery.matches || isInteractiveElement(e.target)) {
             return;
         }
 
@@ -226,9 +239,115 @@ function isInteractiveElement(element) {
     return Boolean(element.closest('a, button, input, textarea, select, label'));
 }
 
+// ===== "MOVE TO" CONTROL =====
+function registerMoveSelect(card) {
+    const select = card.querySelector('.task-move');
+    if (!select) return;
+    select.addEventListener('change', () => {
+        const newStatus = select.value;
+        if (!newStatus) return;
+        updateTaskStatus(card.dataset.taskId, newStatus, card);
+    });
+}
+
+function refreshMoveSelect(card, status) {
+    const select = card.querySelector('.task-move');
+    if (!select) return;
+    select.innerHTML = '';
+    const placeholder = new Option('Move to\u2026', '', true, true);
+    placeholder.disabled = true;
+    select.add(placeholder);
+    Object.entries(STATUS_LABELS).forEach(([value, label]) => {
+        if (value !== status) select.add(new Option(label, value));
+    });
+}
+
+function resetMoveSelect(card) {
+    const select = card.querySelector('.task-move');
+    if (select) select.selectedIndex = 0;
+}
+
+// ===== OVERDUE MARKER =====
+// data-due is the due date as the user entered it (wall-clock, no timezone),
+// so comparing it with the browser's clock is correct wherever the server runs.
+function refreshOverdue(card) {
+    const due = card.dataset.due ? new Date(card.dataset.due) : null;
+    const status = card.closest('.column-content')?.dataset.status;
+    const overdue = Boolean(due) && !Number.isNaN(due.getTime()) && due < new Date() && status !== 'done';
+    card.classList.toggle('is-overdue', overdue);
+    let label = card.querySelector('.task-overdue-label');
+    if (overdue && !label) {
+        const dueLine = card.querySelector('.task-due-date');
+        if (dueLine) {
+            label = document.createElement('span');
+            label.className = 'task-overdue-label';
+            label.textContent = 'Overdue';
+            dueLine.appendChild(label);
+        }
+    } else if (!overdue && label) {
+        label.remove();
+    }
+}
+
+// ===== COLUMN TABS (phones) =====
+function initBoardTabs() {
+    const board = document.querySelector('.kanban-board');
+    const tabs = Array.from(document.querySelectorAll('.board-tab'));
+    if (!board || !tabs.length) return;
+
+    let programmaticUntil = 0;
+
+    const setActive = (status) => {
+        tabs.forEach((tab) => {
+            const active = tab.dataset.status === status;
+            tab.classList.toggle('is-active', active);
+            tab.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+    };
+
+    tabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+            const column = document.getElementById('column-' + tab.dataset.status);
+            if (!column) return;
+            programmaticUntil = Date.now() + 600;
+            board.scrollTo({ left: column.offsetLeft - board.offsetLeft, behavior: 'smooth' });
+            setActive(tab.dataset.status);
+        });
+    });
+
+    const syncFromScroll = () => {
+        const columns = Array.from(board.querySelectorAll('.kanban-column'));
+        const centre = board.scrollLeft + board.clientWidth / 2;
+        const current = columns.find((column) => {
+            const left = column.offsetLeft - board.offsetLeft;
+            return centre >= left && centre < left + column.offsetWidth;
+        });
+        if (current) setActive(current.dataset.column);
+    };
+
+    // Keep the tabs in step with swiping (ignored while a tab tap is scrolling the board)
+    let ticking = false;
+    board.addEventListener('scroll', () => {
+        if (ticking || Date.now() < programmaticUntil) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+            ticking = false;
+            syncFromScroll();
+        });
+    }, { passive: true });
+
+    const onLayoutChange = () => syncFromScroll();
+    if (phoneQuery.addEventListener) {
+        phoneQuery.addEventListener('change', onLayoutChange);
+    } else {
+        phoneQuery.addListener(onLayoutChange);
+    }
+}
+
 // ===== BACKEND COMMUNICATION =====
 /**
- * Send the status update to the server
+ * Send the status update to the server and move the card when it succeeds.
+ * On any failure the card stays where it was and the user is told.
  * @param {number} taskId - The ID of the task being updated
  * @param {string} newStatus - The new status: 'todo', 'doing', or 'done'
  * @param {Element} taskCard - The DOM element of the task
@@ -236,61 +355,61 @@ function isInteractiveElement(element) {
 function updateTaskStatus(taskId, newStatus, taskCard) {
     const currentStatus = taskCard.closest('.column-content')?.dataset.status;
     if (currentStatus === newStatus) {
+        resetMoveSelect(taskCard);
         return;
     }
 
-    // Construct the URL for the backend route
     const url = `/tasks/update_status/${taskId}/${newStatus}`;
+    taskCard.classList.add('is-saving');
 
-    // Send POST request to backend
     fetch(url, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        }
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Failed to update task');
+    .then((response) => {
+        // An expired session redirects to the login page instead of returning JSON
+        const isJson = (response.headers.get('content-type') || '').includes('application/json');
+        if (response.redirected) {
+            throw new Error('Your session may have expired. Reload the page and sign in again.');
         }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            // Update successful - move the card visually
-            // Find the target column and append the card
-            const targetColumn = document.querySelector(`[data-status="${newStatus}"]`);
-            targetColumn.appendChild(taskCard);
-
-            // Update task counts
-            updateTaskCounts();
-        } else {
-            // Handle error
-            console.error('Error:', data.error);
-            alert('Failed to update task: ' + data.error);
+        if (!isJson) {
+            throw new Error('The task could not be updated. Reload the page and try again.');
         }
+        return response.json().then((data) => {
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || 'The task could not be updated.');
+            }
+            return data;
+        });
     })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error updating task: ' + error.message);
-        // Optionally reload the page if update fails
-        // location.reload();
+    .then(() => {
+        const targetColumn = document.querySelector(`.column-content[data-status="${newStatus}"]`);
+        const emptyNote = targetColumn.querySelector('.column-empty');
+        targetColumn.insertBefore(taskCard, emptyNote);
+        refreshMoveSelect(taskCard, newStatus);
+        refreshOverdue(taskCard);
+        updateTaskCounts();
+        notify(`Moved to ${STATUS_LABELS[newStatus]}`, 'success');
+    })
+    .catch((error) => {
+        console.error('Error updating task:', error);
+        resetMoveSelect(taskCard);
+        notify(error.message || 'The task could not be updated.', 'danger');
+    })
+    .finally(() => {
+        taskCard.classList.remove('is-saving');
     });
 }
 
-// ===== UPDATE TASK COUNTS =====
-/**
- * Update the task count badges in each column header
- * This shows how many tasks are in each column
- */
+// ===== UI UPDATES =====
 function updateTaskCounts() {
-    const columns = document.querySelectorAll('.column-content');
-    const countElements = document.querySelectorAll('.task-count');
-
-    columns.forEach((column, index) => {
-        // Count task cards in this column
-        const taskCount = column.querySelectorAll('.task-card').length;
-        // Update the count display
-        countElements[index].textContent = taskCount;
+    document.querySelectorAll('.column-content').forEach((column) => {
+        const status = column.dataset.status;
+        const count = column.querySelectorAll('.task-card').length;
+        document.querySelectorAll(`.task-count[data-count-for="${status}"]`).forEach((el) => {
+            el.textContent = count;
+        });
+        const emptyNote = column.querySelector('.column-empty');
+        if (emptyNote) emptyNote.hidden = count > 0;
     });
 }

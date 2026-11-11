@@ -3,7 +3,7 @@
 // Renders the weekly calendar grid with events
 // =============================================================================
 
-import { formatTime, getDayNames, escapeHtml } from './utils.js';
+import { formatTime, getDayNames, escapeHtml, localDateString } from './utils.js';
 import { showCalendarEventDetails, showTaskDetails } from './event-modals.js';
 import { getCategoryColor } from './utils.js';
 import { DAYS_PER_WEEK, HOURS_PER_DAY, HOUR_SLOT_HEIGHT } from './constants.js';
@@ -78,7 +78,7 @@ export function renderWeekView(currentDate, calendarEvents, tasks) {
     for (let i = 0; i < DAYS_PER_WEEK; i++) {
         const day = new Date(startOfWeek);
         day.setDate(startOfWeek.getDate() + i);
-        const dateStr = day.toISOString().split('T')[0];
+        const dateStr = localDateString(day);
 
         const dayColumn = document.createElement('div');
         dayColumn.className = 'day-column';

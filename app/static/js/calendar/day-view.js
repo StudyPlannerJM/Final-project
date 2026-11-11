@@ -3,7 +3,7 @@
 // Renders the single day calendar view with hourly events
 // =============================================================================
 
-import { formatTime, escapeHtml } from './utils.js';
+import { formatTime, escapeHtml, localDateString } from './utils.js';
 import { showCalendarEventDetails, showTaskDetails } from './event-modals.js';
 import { getCategoryColor } from './utils.js';
 import { HOURS_PER_DAY } from './constants.js';
@@ -26,7 +26,7 @@ export function renderDayView(currentDate, calendarEvents, tasks) {
     dayEventsDataMap.clear();
     dayTasksDataMap.clear();
 
-    const dateStr = currentDate.toISOString().split('T')[0];
+    const dateStr = localDateString(currentDate);
     dayEventsColumn.setAttribute('data-date', dateStr);
 
     // Update day header

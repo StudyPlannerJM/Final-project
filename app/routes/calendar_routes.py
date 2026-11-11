@@ -140,6 +140,7 @@ def schedule():
         calendar_connected=calendar_connected,
         target_date=target_date,
         view=view_param,
+        view_requested='view' in request.args,
         current_month=target_date.strftime('%B, %Y')
     )
 

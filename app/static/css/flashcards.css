@@ -6,20 +6,13 @@
     border-radius: 8px;
     font-size: 1em;
     font-weight: 700;
-    color: #2c3e50;
+    color: var(--color-text);
     background: var(--primary-color);
     margin-bottom: 0.5rem;
-    box-shadow: 0 1px 4px rgba(44,62,80,0.08);
+    box-shadow: var(--shadow-1);
     position: relative;
     z-index: 1;
     transition: background 0.2s, color 0.2s;
-}
-
-body.dark-theme .flashcard-deck-indicator {
-    background: var(--bg-color-secondary, #23272e);
-    color: var(--text-color-primary, #fff);
-    box-shadow: 0 1px 6px rgba(0,0,0,0.18);
-    border: 1px solid var(--border-color, #444);
 }
 .flashcards-header {
     display: flex;
@@ -102,11 +95,11 @@ body.dark-theme .flashcard-deck-indicator {
 }
 
 .flashcard-front {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--color-primary);
 }
 
 .flashcard-back {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: var(--color-primary);
     transform: rotateY(180deg);
 }
 
@@ -115,7 +108,7 @@ body.dark-theme .flashcard-deck-indicator {
     display: flex;
     flex-direction: column;
     padding: 30px;
-    color: white;
+    color: var(--color-on-primary);
 }
 
 .flashcard-label {
@@ -148,19 +141,19 @@ body.dark-theme .flashcard-deck-indicator {
 
 .flashcard-question::-webkit-scrollbar-track,
 .flashcard-answer::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--color-surface-2);
     border-radius: 3px;
 }
 
 .flashcard-question::-webkit-scrollbar-thumb,
 .flashcard-answer::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
+    background: var(--color-text-subtle);
     border-radius: 3px;
 }
 
 .flashcard-question::-webkit-scrollbar-thumb:hover,
 .flashcard-answer::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.5);
+    background: var(--color-text-muted);
 }
 
 .flashcard-question h3,
@@ -183,9 +176,9 @@ body.dark-theme .flashcard-deck-indicator {
 }
 
 .btn-flip {
-    background: rgba(255, 255, 255, 0.25);
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    color: white;
+    background: var(--color-surface);
+    border: 1px solid var(--color-primary);
+    color: var(--color-text);
     padding: 12px 24px;
     border-radius: 8px;
     cursor: pointer;
@@ -198,9 +191,9 @@ body.dark-theme .flashcard-deck-indicator {
 }
 
 .btn-flip:hover {
-    background: rgba(255, 255, 255, 0.35);
+    background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
     transform: scale(1.05);
-    border-color: rgba(255, 255, 255, 0.7);
+    border-color: var(--color-primary);
 }
 
 .btn-flip i {
@@ -306,7 +299,7 @@ body.dark-theme .flashcard-deck-indicator {
 
 .invalid-feedback {
     display: block;
-    color: #dc3545;
+    color: var(--color-danger);
     font-size: 0.9em;
     margin-top: 5px;
 }
@@ -325,8 +318,8 @@ body.dark-theme .flashcard-deck-indicator {
 
 @media (max-width: 768px) {
     .flashcards-header {
-        background: linear-gradient(180deg, rgba(52, 152, 219, 0.09) 0%, rgba(52, 152, 219, 0.03) 100%);
-        border: 1px solid rgba(52, 152, 219, 0.18);
+        background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
+        border: 1px solid color-mix(in srgb, var(--color-primary) 20%, var(--color-surface));
         border-radius: 12px;
         padding: 12px;
         margin-bottom: 16px;
@@ -514,7 +507,7 @@ body.dark-theme .flashcard-deck-indicator {
    ============================================================================== */
 
 .filter-section {
-    background: white;
+    background: var(--color-surface);
     padding: 1.5rem;
     border-radius: 8px;
     margin-bottom: 2rem;
@@ -523,7 +516,7 @@ body.dark-theme .flashcard-deck-indicator {
 
 .filter-section h3 {
     margin: 0 0 1rem 0;
-    color: #2c3e50;
+    color: var(--color-text);
     font-size: 1.1rem;
     display: flex;
     align-items: center;
@@ -531,7 +524,7 @@ body.dark-theme .flashcard-deck-indicator {
 }
 
 .filter-section h3 i {
-    color: #3498db;
+    color: var(--color-primary);
 }
 
 .filter-controls {
@@ -549,16 +542,16 @@ body.dark-theme .flashcard-deck-indicator {
 
 .filter-group label {
     font-size: 0.9rem;
-    color: #7f8c8d;
+    color: var(--color-text-muted);
     font-weight: 600;
 }
 
 .filter-group select {
     padding: 0.5rem 1rem;
-    border: 1px solid #ddd;
+    border: 1px solid var(--color-border);
     border-radius: 6px;
-    background: white;
-    color: #2c3e50;
+    background: var(--color-surface);
+    color: var(--color-text);
     font-size: 0.95rem;
     min-width: 200px;
     cursor: pointer;
@@ -566,14 +559,14 @@ body.dark-theme .flashcard-deck-indicator {
 
 .filter-group select:focus {
     outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 25%, transparent);
 }
 
 .btn-clear-filter {
     padding: 0.5rem 1rem;
-    background: #95a5a6;
-    color: white;
+    background: var(--color-text-subtle);
+    color: var(--color-text);
     border: none;
     border-radius: 6px;
     cursor: pointer;
@@ -581,7 +574,7 @@ body.dark-theme .flashcard-deck-indicator {
 }
 
 .btn-clear-filter:hover {
-    background: #7f8c8d;
+    background: var(--color-text-subtle);
 }
 
 /* Deck Indicators */
@@ -593,7 +586,7 @@ body.dark-theme .flashcard-deck-indicator {
     border-radius: 6px;
     font-size: 0.85rem;
     font-weight: 600;
-    color: white;
+    color: var(--color-on-primary);
     margin-bottom: 0.5rem;
 }
 
@@ -605,7 +598,7 @@ body.dark-theme .flashcard-deck-indicator {
 .empty-filter-state {
     text-align: center;
     padding: 3rem 2rem;
-    color: #95a5a6;
+    color: var(--color-text-subtle);
     grid-column: 1 / -1;
 }
 
@@ -626,4 +619,61 @@ body.dark-theme .flashcard-deck-indicator {
     .filter-group select {
         min-width: 100%;
     }
+}
+
+/* ================================================
+   CARD FACES (calm surfaces instead of solid colour blocks)
+   Question side is neutral; answer side is tinted so the
+   two are easy to tell apart in both themes.
+   ================================================ */
+
+.flashcard-front,
+.flashcard-back {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-1);
+}
+
+.flashcard-front {
+    background: var(--color-surface);
+    border-top: 4px solid var(--color-primary);
+}
+
+.flashcard-back {
+    background: color-mix(in srgb, var(--color-success) 10%, var(--color-surface));
+    border-top: 4px solid var(--color-success);
+}
+
+.flashcard-inner {
+    color: var(--color-text);
+}
+
+.flashcard-label {
+    opacity: 1;
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    color: var(--color-text-subtle);
+}
+
+.flashcard-question,
+.flashcard-answer {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.btn-flip {
+    min-height: 44px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    color: var(--color-primary);
+    font-family: inherit;
+}
+
+.btn-flip:hover {
+    background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
+    border-color: var(--color-primary);
+    transform: none;
 }

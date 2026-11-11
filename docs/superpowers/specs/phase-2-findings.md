@@ -116,3 +116,18 @@ summarizer (4 files) 11, settings 3, schedule week/day 2.
   about 4:1 contrast in dark theme.
 - The floating Pomodoro widget and the schedule "add event" button share the
   bottom-right corner on phones (pre-existing).
+
+## Left open after Phase 2 (from its code review)
+
+- Overdue, agenda dates and the kanban tabs are browser-side logic with no
+  automated tests; the project still has no JavaScript test runner.
+- The schedule has no `popstate` handler, so the browser Back button does not
+  restore the previous calendar view.
+- `showNotification` in `schedule.js` still uses `alert()`.
+- On phones a toast and the floating Pomodoro widget can briefly overlap at
+  the bottom of the screen.
+- Deck indicator colour (`--deck-indicator-color`) is set by `flashcard.js`
+  but not used by any stylesheet.
+- Not reworked in Phase 2: summarizer, AI planner, admin, settings, date
+  picker and calendar sync prompt pages still carry hardcoded colours.
+- Nothing has been tested on a physical phone.

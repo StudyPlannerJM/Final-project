@@ -67,3 +67,32 @@ export function getMonthNames() {
 export function getDayNames() {
     return ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 }
+
+
+/**
+ * Format a Date as YYYY-MM-DD in the user's own timezone.
+ * (toISOString() would give the UTC date, which is the wrong day near midnight.)
+ * @param {Date} date
+ * @returns {string}
+ */
+export function localDateString(date) {
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${date.getFullYear()}-${month}-${day}`;
+}
+
+/**
+ * Parse an event start/end value. Date-only strings (all-day events) are read
+ * as local midnight; `new Date('2026-11-12')` would read them as UTC midnight
+ * and shift them to the previous day west of UTC.
+ * @param {string} value
+ * @returns {Date}
+ */
+export function parseEventDate(value) {
+    const text = String(value);
+    const dateOnly = text.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (dateOnly) {
+        return new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]));
+    }
+    return new Date(text);
+}

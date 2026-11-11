@@ -103,31 +103,35 @@
             <div class="week-header">
                 <h2 id="mainCalendarHeader">{{ target_date.strftime('%B, %Y') }}</h2>
                 <div class="view-controls">
-                    <button class="view-btn" data-view="month">Month</button>
-                    <button class="view-btn active" data-view="week">Week</button>
-                    <button class="view-btn" data-view="day">Day</button>
+                    <button type="button" class="view-btn" data-view="agenda">Agenda</button>
+                    <button type="button" class="view-btn active" data-view="week">Week</button>
+                    <button type="button" class="view-btn" data-view="month">Month</button>
+                    <button type="button" class="view-btn" data-view="day">Day</button>
                 </div>
             </div>
 
             <div class="week-selector">
-                <button class="nav-btn" id="prevWeek">
-                    <i class="fas fa-chevron-left"></i>
+                <button type="button" class="nav-btn" id="prevWeek" aria-label="Previous">
+                    <i class="fas fa-chevron-left" aria-hidden="true"></i>
                 </button>
                 <button class="today-btn" id="todayBtn">Today</button>
-                <button class="nav-btn" id="nextWeek">
-                    <i class="fas fa-chevron-right"></i>
+                <button type="button" class="nav-btn" id="nextWeek" aria-label="Next">
+                    <i class="fas fa-chevron-right" aria-hidden="true"></i>
                 </button>
             </div>
         </div>
 
+        <!-- Agenda: next days as a list (default on phones) -->
+        <div class="agenda-view is-hidden" id="agendaView"></div>
+
         <!-- Week Day Headers -->
-        <div class="week-days-header" id="weekDaysHeader">
+        <div class="week-days-header is-hidden" id="weekDaysHeader">
             <div class="time-column-header"></div>
             <!-- JavaScript will populate day headers here -->
         </div>
 
         <!-- Week Calendar Grid -->
-        <div class="week-calendar-grid" id="weekView">
+        <div class="week-calendar-grid is-hidden" id="weekView">
             <!-- Time Column -->
             <div class="time-column" id="weekTimeColumn">
                 <!-- JavaScript will populate time slots here -->
@@ -176,7 +180,7 @@
 </div>
 
 <!-- Add Event Button (Floating) -->
-<button class="fab-add-event" id="addEventBtn" title="Add Event">
+<button type="button" class="fab-add-event" id="addEventBtn" title="Add Event" aria-label="Add event">
     <i class="fas fa-plus"></i>
 </button>
 
@@ -284,6 +288,7 @@
 {
     "initialDate": "{{ target_date.strftime('%Y-%m-%d') }}",
     "initialView": "{{ view }}",
+    "viewRequested": {{ view_requested|tojson }},
     "calendarConnected": {{ calendar_connected|tojson }}
 }
 </script>
