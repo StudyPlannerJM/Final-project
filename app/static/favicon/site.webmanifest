@@ -1,1 +1,32 @@
-{"name":"BrainDump","short_name":"BrainDump","icons":[{"src":"/static/favicon/android-chrome-192x192.png","sizes":"192x192","type":"image/png"},{"src":"/static/favicon/android-chrome-512x512.png","sizes":"512x512","type":"image/png"}],"theme_color":"#FFFFFF","background_color":"#F7F6F2","display":"standalone","start_url":"/","scope":"/"}
+{
+    "name": "BrainDump",
+    "short_name": "BrainDump",
+    "description": "Study planner with tasks, a schedule, a Pomodoro timer and flashcards with spaced repetition.",
+    "id": "/",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "any",
+    "theme_color": "#FFFFFF",
+    "background_color": "#F7F6F2",
+    "categories": ["education", "productivity"],
+    "icons": [
+        {
+            "src": "/static/favicon/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/static/favicon/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ],
+    "shortcuts": [
+        { "name": "Review flashcards", "url": "/flashcards/review" },
+        { "name": "Add task", "url": "/tasks/add" },
+        { "name": "Pomodoro", "url": "/pomodoro/" }
+    ]
+}

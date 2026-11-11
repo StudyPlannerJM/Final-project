@@ -1,7 +1,7 @@
 """
 Main Blueprint - Dashboard and general routes
 """
-from flask import Blueprint, render_template
+from flask import Blueprint, current_app, render_template, send_from_directory
 from flask_login import login_required, current_user
 from app import db
 from app.models import Task, Deck, Flashcard
@@ -67,3 +67,26 @@ def dashboard():
 def settings():
     """User settings page"""
     return render_template('settings.html', title='Settings')
+
+
+# ==============================================================================
+# INSTALLABLE APP (PWA)
+# ==============================================================================
+
+@main_bp.route('/sw.js')
+def service_worker():
+    """
+    Serve the service worker from the site root so its scope is the whole app.
+    Public on purpose: the browser fetches it without credentials on install.
+    """
+    response = send_from_directory(
+        current_app.static_folder, 'js/sw.js', mimetype='text/javascript', max_age=0
+    )
+    response.headers['Cache-Control'] = 'no-cache'
+    return response
+
+
+@main_bp.route('/offline')
+def offline():
+    """Fallback page shown by the service worker when there is no connection."""
+    return render_template('offline.html')

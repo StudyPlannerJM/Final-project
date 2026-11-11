@@ -52,5 +52,8 @@
     </form>
     <p>Already have an account? <a href="{{ url_for('auth.login') }}">Click to Login!</a></p>
     </div>
+    <script>
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js').catch(function () {}); }
+    </script>
 </body>
 </html>

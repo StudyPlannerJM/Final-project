@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    {% include 'components/theme_init.html' %}
+    <title>Offline - BrainDump</title>
+    <meta name="theme-color" content="#FFFFFF">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/core/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/core/fonts.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/core/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/offline.css') }}">
+</head>
+<body class="offline-page">
+    <main class="offline-card">
+        <img src="{{ url_for('static', filename='favicon/android-chrome-192x192.png') }}" alt="" width="72" height="72">
+        <h1>You're offline</h1>
+        <p>BrainDump needs a connection to load your tasks and flashcards. Check your internet and try again.</p>
+        <div class="offline-actions">
+            <button type="button" class="offline-btn offline-btn--primary" id="offline-retry">Try again</button>
+            <a class="offline-btn" href="{{ url_for('main.dashboard') }}">Go to dashboard</a>
+        </div>
+    </main>
+    <script>
+        document.getElementById('offline-retry').addEventListener('click', function () {
+            window.location.reload();
+        });
+        // Come back automatically when the connection returns
+        window.addEventListener('online', function () { window.location.reload(); });
+    </script>
+</body>
+</html>

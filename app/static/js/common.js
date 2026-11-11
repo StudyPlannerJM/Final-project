@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     initSheets(toggleTheme);
+    registerServiceWorker();
     initToasts();
 
     // Floating Pomodoro Timer Widget (needs localStorage; skip quietly if blocked)
@@ -346,3 +347,11 @@ function showToast(message, category = 'info') {
 
 window.BrainDump = window.BrainDump || {};
 window.BrainDump.toast = showToast;
+
+
+// Installable app: the service worker only provides an offline fallback page.
+// A failed registration (old browser, private mode, http) is harmless.
+function registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) return;
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
