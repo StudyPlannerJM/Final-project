@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
+from sqlalchemy.exc import SQLAlchemyError
 from app.config import config
 
 db = SQLAlchemy()
@@ -53,7 +54,17 @@ def create_app(config_name=None):
 
     @login_manager.user_loader
     def load_user(user_id):
-        return db.session.get(User, int(user_id))
+        try:
+            return db.session.get(User, int(user_id))
+        except (TypeError, ValueError):
+            return None
+        except SQLAlchemyError as exc:
+            db.session.rollback()
+            app.logger.warning(
+                "User loader skipped due to DB error: %s",
+                exc,
+            )
+            return None
 
     # Import blueprints here to avoid circular imports
     from app.routes import (

@@ -5,6 +5,7 @@ from app.models import User
 from app.services.login_limiter import LoginLimiter
 from urllib.parse import urlsplit
 from flask_login import login_user, logout_user, current_user
+from sqlalchemy.exc import SQLAlchemyError
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -38,7 +39,14 @@ def login():
                 ip, request.headers.get('X-Forwarded-For', ''))
             return render_template('auth/login.html', title='Sign In', form=form), 429
 
-        user = User.query.filter_by(email=email).first()
+        try:
+            user = User.query.filter_by(email=email).first()
+        except SQLAlchemyError as exc:
+            db.session.rollback()
+            current_app.logger.exception("Login query failed due to DB error: %s", exc)
+            flash('Login temporarily unavailable. Please try again shortly.', 'danger')
+            return redirect(url_for('auth.login', next=request.args.get('next') or None))
+
         if user is None or not user.check_password(form.password.data):
             LoginLimiter.record_failure(email, ip)
             flash('Invalid email or password', 'danger')
@@ -56,10 +64,16 @@ def register():
         return redirect(url_for('main.dashboard'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, email=form.email.data) #type: ignore
-        user.set_password(form.password.data)
-        db.session.add(user)
-        db.session.commit()
+        try:
+            user = User(username=form.username.data, email=form.email.data)  # type: ignore
+            user.set_password(form.password.data)
+            db.session.add(user)
+            db.session.commit()
+        except SQLAlchemyError as exc:
+            db.session.rollback()
+            current_app.logger.exception("Registration failed due to DB error: %s", exc)
+            flash('Registration temporarily unavailable. Please try again.', 'danger')
+            return redirect(url_for('auth.register'))
         flash('Congratulations, you are now a registered user!', 'success')
         return redirect(url_for('auth.login'))
     return render_template('auth/register.html', title='Register', form=form)
