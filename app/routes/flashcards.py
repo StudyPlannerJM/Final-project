@@ -7,6 +7,7 @@ from app.forms import DeckForm, FlashcardForm
 from app.services.deck_service import DeckService
 from app.services.flashcard_service import FlashcardService
 from app.services.review_service import ReviewService, describe_interval, stage_of, utcnow
+from app.utils.ai_generator import AIServiceError, generate_text
 from app.models import Flashcard, StudyPlan
 from app.exceptions import ValidationError, NotFoundError, AuthorizationError
 
@@ -282,30 +283,6 @@ def generate_from_study_plan(plan_id):
     
     deck = None  # Initialize to prevent unbound variable error
     try:
-        # Auto-create or get deck named after the study plan subject
-        deck = DeckService.get_or_create_deck(
-            user_id=current_user.id,
-            name=plan.subject,
-            description=f"Flashcards generated from {plan.subject} study plan",
-            color='#9b59b6',  # Purple for AI-generated decks
-            icon='fa-robot'
-        )
-        
-        # Use Gemini AI to generate flashcards
-        try:
-            from google import genai
-        except ImportError:
-            flash('Google Generative AI library is not installed.', 'danger')
-            return redirect(url_for('ai_planner.view_plan', plan_id=plan_id))
-        
-        # Get API key from config (NEVER hardcode API keys!)
-        api_key = current_app.config.get('GEMINI_API_KEY')
-        if not api_key:
-            flash('Gemini API key is not configured. Please set GEMINI_API_KEY in your .env file.', 'danger')
-            return redirect(url_for('ai_planner.view_plan', plan_id=plan_id))
-        
-        client = genai.Client(api_key=api_key)
-        
         prompt = f"""Based on the following study plan for {plan.subject}, generate {num_cards} flashcards 
 to help the student review key concepts. Each flashcard should have a clear question and a concise answer.
 
@@ -317,14 +294,15 @@ Q: [Question]
 A: [Answer]
 
 Make the questions specific and the answers clear and educational."""
-        
-        response = client.models.generate_content(
-            model='gemini-flash-latest',
-            contents=prompt
-        )
-        
+
+        # Ask the AI first; the deck is only created once there are cards to put in it
+        try:
+            flashcard_text = generate_text(prompt)
+        except AIServiceError as e:
+            flash(str(e), 'danger')
+            return redirect(url_for('ai_planner.view_plan', plan_id=plan_id))
+
         # Parse Q&A pairs
-        flashcard_text = response.text or ""
         lines = flashcard_text.strip().split('\n')
         
         flashcards_data = []
@@ -341,6 +319,18 @@ Make the questions specific and the answers clear and educational."""
                     'answer': answer
                 })
                 question = None
+        
+        if not flashcards_data:
+            flash("The AI's answer didn't contain any flashcards. Please try again.", 'warning')
+            return redirect(url_for('ai_planner.view_plan', plan_id=plan_id))
+
+        deck = DeckService.get_or_create_deck(
+            user_id=current_user.id,
+            name=plan.subject,
+            description=f"Flashcards generated from {plan.subject} study plan",
+            color='#9b59b6',  # Purple for AI-generated decks
+            icon='fa-robot'
+        )
         
         # Use service to bulk create flashcards
         created_flashcards = FlashcardService.bulk_create_flashcards(

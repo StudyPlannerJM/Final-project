@@ -3,7 +3,7 @@ Tests for AI Generator utility functions
 """
 import pytest
 from unittest.mock import Mock, patch
-from app.utils.ai_generator import configure_gemini_api, generate_study_plan, format_plan_for_display
+from app.utils.ai_generator import AIServiceError, generate_text, configure_gemini_api, generate_study_plan, format_plan_for_display
 
 
 class TestConfigureGeminiAPI:
@@ -126,30 +126,101 @@ class TestGenerateStudyPlan:
             assert '1 month' in call_kwargs['contents']
     
     @patch('app.utils.ai_generator.configure_gemini_api')
-    def test_generate_plan_handles_api_errors(self, mock_config, app):
-        """Test error handling when API call fails"""
+    def test_generate_plan_raises_instead_of_returning_error_text(self, mock_config, app):
+        """A failed call must not come back as plan text (it used to be saved as a 'plan')."""
         with app.app_context():
             mock_client = Mock()
             mock_client.models.generate_content.side_effect = Exception("API Error")
             mock_config.return_value = mock_client
-            
-            result = generate_study_plan('Subject', 5, 'days', 'beginner')
-            
-            assert result is not None
-            assert "Error generating study plan" in result
-            assert "API Error" in result
-    
+
+            with pytest.raises(AIServiceError) as excinfo:
+                generate_study_plan('Subject', 5, 'days', 'beginner')
+            assert 'API Error' not in str(excinfo.value)           # raw details stay in the log
+
     @patch('app.utils.ai_generator.configure_gemini_api')
-    def test_generate_plan_handles_config_errors(self, mock_config, app):
-        """Test error handling when configuration fails"""
+    def test_generate_plan_reports_missing_configuration(self, mock_config, app):
         with app.app_context():
-            mock_config.side_effect = ValueError("Configuration failed")
-            
-            result = generate_study_plan('Subject', 5, 'days', 'beginner')
-            
-            assert result is not None
-            assert "Error generating study plan" in result
-            assert "Configuration failed" in result
+            mock_config.side_effect = ValueError("GEMINI_API_KEY is not configured")
+            with pytest.raises(AIServiceError) as excinfo:
+                generate_study_plan('Subject', 5, 'days', 'beginner')
+            assert 'not set up' in str(excinfo.value)
+
+
+class TestGenerateText:
+    """Retry and error messages around the Gemini call (review of a live 503)."""
+
+    BUSY = Exception("503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently "
+                     "experiencing high demand.', 'status': 'UNAVAILABLE'}}")
+
+    @patch('app.utils.ai_generator.time.sleep')
+    @patch('app.utils.ai_generator.configure_gemini_api')
+    def test_busy_model_is_retried_once(self, mock_config, mock_sleep, app):
+        with app.app_context():
+            ok = Mock(text='A plan')
+            mock_client = Mock()
+            mock_client.models.generate_content.side_effect = [self.BUSY, ok]
+            mock_config.return_value = mock_client
+            assert generate_text('prompt') == 'A plan'
+            assert mock_client.models.generate_content.call_count == 2
+            mock_sleep.assert_called_once()
+
+    @patch('app.utils.ai_generator.time.sleep')
+    @patch('app.utils.ai_generator.configure_gemini_api')
+    def test_still_busy_gives_a_friendly_busy_message(self, mock_config, mock_sleep, app):
+        with app.app_context():
+            mock_client = Mock()
+            mock_client.models.generate_content.side_effect = [self.BUSY, self.BUSY]
+            mock_config.return_value = mock_client
+            with pytest.raises(AIServiceError) as excinfo:
+                generate_text('prompt')
+            assert 'busy' in str(excinfo.value)
+            assert mock_client.models.generate_content.call_count == 2
+
+    @patch('app.utils.ai_generator.time.sleep')
+    @patch('app.utils.ai_generator.configure_gemini_api')
+    def test_rate_limit_is_treated_as_busy(self, mock_config, mock_sleep, app):
+        with app.app_context():
+            mock_client = Mock()
+            mock_client.models.generate_content.side_effect = Exception('429 RESOURCE_EXHAUSTED quota')
+            mock_config.return_value = mock_client
+            with pytest.raises(AIServiceError) as excinfo:
+                generate_text('prompt')
+            assert 'busy' in str(excinfo.value)
+
+    @patch('app.utils.ai_generator.time.sleep')
+    @patch('app.utils.ai_generator.configure_gemini_api')
+    def test_other_errors_are_not_retried(self, mock_config, mock_sleep, app):
+        with app.app_context():
+            mock_client = Mock()
+            mock_client.models.generate_content.side_effect = Exception('400 INVALID_ARGUMENT')
+            mock_config.return_value = mock_client
+            with pytest.raises(AIServiceError):
+                generate_text('prompt')
+            assert mock_client.models.generate_content.call_count == 1
+            mock_sleep.assert_not_called()
+
+    @patch('app.utils.ai_generator.time.monotonic')
+    @patch('app.utils.ai_generator.time.sleep')
+    @patch('app.utils.ai_generator.configure_gemini_api')
+    def test_slow_failure_is_not_retried(self, mock_config, mock_sleep, mock_clock, app):
+        """A retry after a long wait could exceed the web server's request time limit."""
+        with app.app_context():
+            mock_clock.side_effect = [0.0, 20.0]
+            mock_client = Mock()
+            mock_client.models.generate_content.side_effect = self.BUSY
+            mock_config.return_value = mock_client
+            with pytest.raises(AIServiceError):
+                generate_text('prompt')
+            assert mock_client.models.generate_content.call_count == 1
+
+    @patch('app.utils.ai_generator.configure_gemini_api')
+    def test_empty_answer_is_an_error(self, mock_config, app):
+        with app.app_context():
+            mock_client = Mock()
+            mock_client.models.generate_content.return_value = Mock(text='   ')
+            mock_config.return_value = mock_client
+            with pytest.raises(AIServiceError):
+                generate_text('prompt')
 
 
 class TestFormatPlanForDisplay:
