@@ -112,6 +112,19 @@ class Flashcard(db.Model):
             f"'{self.date_created}')"
         )
 
+class LoginAttempt(db.Model):
+    """A failed sign-in, kept briefly to slow down password guessing."""
+    __tablename__ = 'login_attempt'
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), nullable=False, index=True)  # lowercased
+    ip = db.Column(db.String(64), nullable=False, default='', index=True)
+    attempted_at = db.Column(db.DateTime, nullable=False, index=True)  # UTC
+
+    def __repr__(self):
+        return f'<LoginAttempt {self.email} {self.attempted_at}>'
+
+
 class CardReview(db.Model):
     """One rating of one flashcard. The log behind study streaks."""
     __tablename__ = 'card_review'

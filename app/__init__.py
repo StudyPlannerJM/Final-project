@@ -43,7 +43,11 @@ def create_app(config_name=None):
     csrf.init_app(app)  # every POST/PUT/PATCH/DELETE needs a token (form field or X-CSRFToken header)
 
     from app.errors import register_error_handlers
+    from app.security import configure_production, register_security_headers
     register_error_handlers(app)
+    register_security_headers(app)
+    if config_name == 'production':
+        configure_production(app)
 
     from app.models import User
 

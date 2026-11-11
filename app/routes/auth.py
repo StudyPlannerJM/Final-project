@@ -2,9 +2,21 @@ from flask import Blueprint, render_template, redirect, url_for, flash, current_
 from app import db
 from app.forms import LoginForm, RegistrationForm
 from app.models import User
+from app.services.login_limiter import LoginLimiter
+from urllib.parse import urlsplit
 from flask_login import login_user, logout_user, current_user
 
 auth_bp = Blueprint('auth', __name__)
+
+
+def _safe_next(target):
+    """Return target only if it is a path on this site; otherwise None (no open redirects)."""
+    if not target or not target.startswith('/') or target.startswith('//') or '\\' in target:
+        return None
+    parts = urlsplit(target)
+    if parts.scheme or parts.netloc:
+        return None
+    return target
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -13,15 +25,27 @@ def login():
     form = LoginForm()  
      
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
-        if user is None or not user.check_password(form.password.data):
-            flash('Invalid email or password', 'danger')
-            return redirect(url_for('auth.login'))
-        current_app.logger.info(f"User login attempt: {user.username}")
-        login_user(user, remember=form.remember_me.data)
-        current_app.logger.info(f"Login successful for user: {user.username}")       
+        email = form.email.data or ''
+        ip = request.remote_addr or ''
 
-        return redirect(url_for('main.dashboard'))
+        wait = LoginLimiter.seconds_until_allowed(email, ip)
+        if wait:
+            minutes = max(1, -(-wait // 60))
+            flash(f'Too many sign-in attempts. Try again in {minutes} minute'
+                  f'{"" if minutes == 1 else "s"}.', 'danger')
+            current_app.logger.warning('Sign-in blocked by rate limit')
+            return render_template('auth/login.html', title='Sign In', form=form), 429
+
+        user = User.query.filter_by(email=email).first()
+        if user is None or not user.check_password(form.password.data):
+            LoginLimiter.record_failure(email, ip)
+            flash('Invalid email or password', 'danger')
+            return redirect(url_for('auth.login', next=request.args.get('next') or None))
+
+        LoginLimiter.clear(email)
+        login_user(user, remember=form.remember_me.data)
+        current_app.logger.info(f"Login successful for user: {user.username}")
+        return redirect(_safe_next(request.args.get('next')) or url_for('main.dashboard'))
     return render_template('auth/login.html', title='Sign In', form=form)
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
