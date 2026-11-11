@@ -3,6 +3,7 @@ function confirmDelete(deleteUrl) {
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = deleteUrl;
+    addCsrfField(form); // csrf_token
     document.body.appendChild(form);
     form.submit();
 }

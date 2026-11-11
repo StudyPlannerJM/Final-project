@@ -2,8 +2,6 @@
 Flashcards Blueprint - Deck and flashcard management routes
 """
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, abort
-from flask_wtf.csrf import generate_csrf, validate_csrf
-from wtforms.validators import ValidationError as CSRFValidationError
 from flask_login import login_required, current_user
 from app.forms import DeckForm, FlashcardForm
 from app.services.deck_service import DeckService
@@ -412,7 +410,6 @@ def review():
         review_data={'cards': [_review_payload(card) for card in cards]},
         total_due=total_due,
         next_due_in=describe_interval(next_due - now) if next_due else None,
-        csrf_token_value=generate_csrf(),
     )
 
 
@@ -420,12 +417,7 @@ def review():
 @login_required
 def rate_card(card_id):
     """Record one rating for one card (JSON)."""
-    if current_app.config.get('WTF_CSRF_ENABLED', True):
-        try:
-            validate_csrf(request.headers.get('X-CSRFToken', ''))
-        except CSRFValidationError:
-            return {'success': False, 'error': 'Your session has expired. Reload the page and try again.'}, 400
-
+    # CSRF is checked app-wide (X-CSRFToken header) before this runs
     data = request.get_json(silent=True)
     if not isinstance(data, dict):
         data = {}

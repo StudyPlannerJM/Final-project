@@ -26,13 +26,18 @@ def test_oauth2callback_redirects_based_on_unsynced(monkeypatch, auth_client, te
     monkeypatch.setattr('app.routes.calendar_routes.get_google_auth_flow', lambda: FakeFlow())
     # unsynced >0 -> redirect to sync_prompt
     monkeypatch.setattr('app.routes.calendar_routes.CalendarService.connect_google_calendar', lambda user, creds: 2)
-    resp = auth_client.get('/calendar/oauth2callback')
+    # A real callback carries the state stored when the flow started
+    with auth_client.session_transaction() as sess:
+        sess['state'] = 'S'
+    resp = auth_client.get('/calendar/oauth2callback?state=S')
     assert resp.status_code == 302
     assert '/calendar/sync_prompt' in resp.headers['Location']
 
     # unsynced == 0 -> redirect to schedule
     monkeypatch.setattr('app.routes.calendar_routes.CalendarService.connect_google_calendar', lambda user, creds: 0)
-    resp = auth_client.get('/calendar/oauth2callback')
+    with auth_client.session_transaction() as sess:
+        sess['state'] = 'S'
+    resp = auth_client.get('/calendar/oauth2callback?state=S')
     assert resp.status_code == 302
     assert resp.headers['Location'].endswith('/calendar/schedule')
 

@@ -3,6 +3,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
+from flask_wtf.csrf import CSRFProtect
 from sqlalchemy.exc import SQLAlchemyError
 from app.config import config
 
@@ -10,6 +11,7 @@ db = SQLAlchemy()
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'  # type: ignore[attr-defined]
 migrate = Migrate()
+csrf = CSRFProtect()
 
 
 def create_app(config_name=None):
@@ -39,6 +41,14 @@ def create_app(config_name=None):
     db.init_app(app)
     login_manager.init_app(app)
     migrate.init_app(app, db)
+    csrf.init_app(app)  # every POST/PUT/PATCH/DELETE needs a token (form field or X-CSRFToken header)
+
+    from app.errors import register_error_handlers
+    from app.security import configure_production, register_security_headers
+    register_error_handlers(app)
+    register_security_headers(app)
+    if config_name == 'production':
+        configure_production(app)
 
     from app.models import User
 

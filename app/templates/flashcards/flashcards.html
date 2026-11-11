@@ -60,6 +60,7 @@
                             </a>
                             {% if not deck.is_default %}
                                 <form method="POST" action="{{ url_for('flashcards.delete_deck', deck_id=deck.id) }}" style="display:inline;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <button type="button" class="btn btn-danger btn-sm open-delete-modal"
                                             data-delete-entity="deck"
                                             data-delete-label="{{ deck.name }}">
@@ -143,6 +144,7 @@
                                             <i class="fas fa-edit"></i> Edit
                                         </a>
                                         <form method="POST" action="{{ url_for('flashcards.delete', flashcard_id=flashcard.id) }}" style="display:inline;">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                             <button type="button" class="btn btn-danger btn-sm open-delete-modal"
                                                     data-delete-entity="flashcard"
                                                     data-delete-label="{{ flashcard.question }}"
@@ -167,6 +169,7 @@
                                             <i class="fas fa-edit"></i> Edit
                                         </a>
                                         <form method="POST" action="{{ url_for('flashcards.delete', flashcard_id=flashcard.id) }}" style="display:inline;">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                             <button type="button" class="btn btn-danger btn-sm open-delete-modal"
                                                     data-delete-entity="flashcard"
                                                     data-delete-label="{{ flashcard.question }}"

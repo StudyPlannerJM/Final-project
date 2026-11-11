@@ -1,3 +1,43 @@
+// CSRF: every same-origin POST/PUT/PATCH/DELETE made with fetch() carries the
+// token from <meta name="csrf-token">, so individual scripts need no changes.
+(function () {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    const token = meta ? meta.content : '';
+    window.BrainDump = window.BrainDump || {};
+    window.BrainDump.csrfToken = () => token;
+    if (!token || !window.fetch) return;
+
+    const SAFE_METHODS = /^(GET|HEAD|OPTIONS|TRACE)$/i;
+    const originalFetch = window.fetch.bind(window);
+    window.fetch = function (input, init) {
+        const options = init ? { ...init } : {};
+        const isRequest = typeof Request !== 'undefined' && input instanceof Request;
+        const method = options.method || (isRequest ? input.method : 'GET');
+        let sameOrigin = false;
+        try {
+            sameOrigin = new URL(isRequest ? input.url : String(input), window.location.href).origin === window.location.origin;
+        } catch (e) { /* unparsable URL: leave the request alone */ }
+        if (sameOrigin && !SAFE_METHODS.test(method)) {
+            const headers = new Headers(options.headers || (isRequest ? input.headers : undefined));
+            if (!headers.has('X-CSRFToken')) headers.set('X-CSRFToken', token);
+            options.headers = headers;
+        }
+        return originalFetch(input, options);
+    };
+})();
+
+// Adds the CSRF token to a form built in JavaScript before it is submitted
+function addCsrfField(form) {
+    const token = window.BrainDump && window.BrainDump.csrfToken ? window.BrainDump.csrfToken() : '';
+    if (!token) return form;
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'csrf_token';
+    input.value = token;
+    form.appendChild(input);
+    return form;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const themeToggleBtn = document.getElementById('theme-toggle');
     const sidebarToggleBtn = document.getElementById('sidebar-toggle');

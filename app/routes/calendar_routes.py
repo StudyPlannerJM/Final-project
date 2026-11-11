@@ -30,7 +30,12 @@ def authorize_google():
 @login_required
 def oauth2callback():
     """Handle Google's redirect after user authorizes"""
-    session.get('state')  # Verify CSRF protection
+    # The state must match the one stored when this user started the flow,
+    # otherwise someone else's Google account could be linked to this one.
+    expected_state = session.pop('state', None)
+    if not expected_state or request.args.get('state') != expected_state:
+        flash('Google Calendar connection could not be verified. Please try connecting again.', 'danger')
+        return redirect(url_for('calendar.schedule'))
 
     flow = get_google_auth_flow()
     flow.fetch_token(authorization_response=request.url)
@@ -98,10 +103,12 @@ def skip_sync_existing_tasks():
     return redirect(url_for('calendar.schedule'))
 
 
-@calendar_bp.route('/disconnect')
+@calendar_bp.route('/disconnect', methods=['GET', 'POST'])
 @login_required
 def disconnect_google():
-    """Remove Google Calendar connection - clear stored token"""
+    """Remove Google Calendar connection - clear stored token (POST only)"""
+    if request.method == 'GET':
+        return redirect(url_for('calendar.schedule'))
     try:
         CalendarService.disconnect_google_calendar(current_user.id)
         flash('Google Calendar disconnected.', 'info')

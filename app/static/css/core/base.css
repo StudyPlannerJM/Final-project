@@ -241,7 +241,16 @@ a {
     font-weight: 600;
 }
 
+.logout-form,
+.disconnect-form,
+.sheet__form {
+    margin: 0;
+}
+
 .logout-btn {
+    background: none;
+    font-family: inherit;
+    cursor: pointer;
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);

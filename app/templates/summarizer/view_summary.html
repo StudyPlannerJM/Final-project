@@ -20,6 +20,7 @@
             </a>
             <div class="header-actions">
                 <form action="{{ url_for('summarizer.delete', summary_id=summary.id) }}" method="POST" class="delete-summary-form inline-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="button" class="btn btn-danger open-delete-modal" data-delete-entity="summary" data-delete-label="{{ summary.title }}">
                         <i class="fas fa-trash"></i> Delete
                     </button>

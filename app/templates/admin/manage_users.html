@@ -82,6 +82,7 @@
                         </a>
                         {% if user.id != current_user.id %}
                         <form id="delForm-{{ user.id }}" action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="button" class="btn-icon btn-delete open-admin-delete-modal"
                                     data-username="{{ user.username }}"
                                     data-form-id="delForm-{{ user.id }}">

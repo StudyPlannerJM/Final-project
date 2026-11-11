@@ -71,3 +71,12 @@ body.offline-page {
     border-color: var(--color-primary);
     color: var(--color-on-primary);
 }
+
+/* Error pages reuse the offline card */
+.error-code {
+    margin: 0;
+    font-size: var(--text-sm);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--color-text-subtle);
+}

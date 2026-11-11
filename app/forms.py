@@ -21,7 +21,8 @@ class LoginForm(FlaskForm):
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[
+        DataRequired(), Length(min=8, message='Password must be at least 8 characters.')])
     password2 = PasswordField(
         'Repeat Password',
         validators=[DataRequired(), EqualTo('password')]
@@ -147,7 +148,8 @@ class AdminCreateUserForm(FlaskForm):
     """Form for admin to create a new user"""
     username = StringField('Username', validators=[DataRequired(), Length(min=3, max=64)])
     email = StringField('Email', validators=[DataRequired(), Email(), Length(max=120)])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
+    password = PasswordField('Password', validators=[
+        DataRequired(), Length(min=8, message='Password must be at least 8 characters.')])
     password2 = PasswordField(
         'Repeat Password',
         validators=[DataRequired(), EqualTo('password')]
@@ -170,7 +172,8 @@ class AdminEditUserForm(FlaskForm):
     """Form for admin to edit an existing user"""
     username = StringField('Username', validators=[DataRequired(), Length(min=3, max=64)])
     email = StringField('Email', validators=[DataRequired(), Email(), Length(max=120)])
-    password = PasswordField('New Password (leave blank to keep current)', validators=[Optional(), Length(min=6)])
+    password = PasswordField('New Password (leave blank to keep current)', validators=[
+        Optional(), Length(min=8, message='Password must be at least 8 characters.')])
     password2 = PasswordField(
         'Repeat New Password',
         validators=[EqualTo('password')]
