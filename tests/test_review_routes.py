@@ -92,7 +92,7 @@ def test_rating_updates_card_and_logs_review(auth_client, db_session, test_user,
     assert response.status_code == 200
     body = response.get_json()
     assert body['success'] is True and body['due_in'] == '1 day' and body['version'] == '1-0'
-    assert body['preview'] == {'0': '10 min', '1': '2 days', '2': '3 days', '3': '3 days'}
+    assert body['preview'] == {'0': '10 min', '1': '2 days', '2': '3 days', '3': '4 days'}
     db_session.session.refresh(card)
     assert card.reps == 1 and card.interval_days == 1
     assert CardReview.query.filter_by(flashcard_id=card.id, rating=2).count() == 1
@@ -175,3 +175,28 @@ def test_to_local_and_day_bounds_follow_the_zone(app):
 def test_theme_bootstrap_sets_timezone_cookie(auth_client):
     head = auth_client.get('/').get_data(as_text=True).split('</head>')[0]
     assert 'bd_tz=' in head and 'resolvedOptions().timeZone' in head
+
+
+# --- Review fixes ---------------------------------------------------------
+
+@pytest.mark.parametrize('body', ['[1]', '"x"', '3'])
+def test_non_object_json_body_is_a_bad_request(auth_client, db_session, test_user, deck, body):
+    card = _card(db_session, test_user, deck)
+    response = auth_client.post(f'/flashcards/review/{card.id}', data=body,
+                                content_type='application/json')
+    assert response.status_code == 400
+    assert CardReview.query.count() == 0
+
+
+def test_csrf_token_does_not_expire_while_a_review_tab_is_open(app):
+    # Tied to the login session instead of a one-hour clock
+    assert app.config['WTF_CSRF_TIME_LIMIT'] is None
+
+
+def test_network_errors_show_a_friendly_message_in_every_browser():
+    from pathlib import Path
+    static = Path(__file__).resolve().parent.parent / 'app/static/js'
+    for name in ('review.js', 'kanban.js'):
+        js = (static / name).read_text()
+        assert '/fetch/i.test' not in js
+        assert 'userFacing' in js

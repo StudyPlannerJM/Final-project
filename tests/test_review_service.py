@@ -167,3 +167,48 @@ def test_deck_progress_counts_stages_and_due(db_session, test_user, deck):
 def test_preview_intervals_describe_each_rating(db_session, test_user, deck):
     card = _card(db_session, test_user, deck)
     assert ReviewService.preview(card) == {AGAIN: '10 min', HARD: '1 day', GOOD: '1 day', EASY: '4 days'}
+
+
+# --- Review fixes: ratings stay in order ----------------------------------
+
+def _reachable_states(depth=5):
+    """Every card state reachable from a new card in up to `depth` ratings."""
+    frontier = {NEW}
+    seen = set(frontier)
+    for _ in range(depth):
+        nxt = set()
+        for state in frontier:
+            for rating in (AGAIN, HARD, GOOD, EASY):
+                nxt.add(schedule(state, rating, NOW)[0])
+        frontier = nxt - seen
+        seen |= nxt
+    return seen
+
+
+def test_harder_answers_never_earn_longer_intervals():
+    for state in _reachable_states():
+        hard = schedule(state, HARD, NOW)[0].interval_days
+        good = schedule(state, GOOD, NOW)[0].interval_days
+        easy = schedule(state, EASY, NOW)[0].interval_days
+        assert hard <= good <= easy, state
+        if state.reps > 0:
+            assert good > state.interval_days or good == MAX_INTERVAL_DAYS, state
+
+
+def test_easy_then_good_does_not_shrink_the_interval():
+    state, _ = schedule(NEW, EASY, NOW)          # 4 days
+    assert schedule(state, GOOD, NOW)[0].interval_days > 4
+
+
+def test_describe_interval_under_a_minute():
+    from app.services.review_service import describe_interval
+    assert describe_interval(timedelta(seconds=20)) == 'less than a minute'
+
+
+def test_deck_progress_includes_empty_decks(db_session, test_user, deck):
+    empty = Deck(name='Empty', user_id=test_user.id)
+    db_session.session.add(empty)
+    db_session.session.commit()
+    rows = {row['name']: row for row in ReviewService.deck_progress(test_user.id, now=NOW)}
+    assert rows['Empty'] == {'deck_id': empty.id, 'name': 'Empty', 'color': empty.color, 'total': 0,
+                             'new': 0, 'learning': 0, 'mastered': 0, 'due': 0}

@@ -22,6 +22,9 @@ def create_app(config_name=None):
         raise ValueError(f"Unknown FLASK_ENV value: {config_name}")
 
     app.config.from_object(config[config_name])
+    # A review or task tab left open for hours must still be able to save.
+    # The token stays bound to the login session, which is what protects it.
+    app.config.setdefault('WTF_CSRF_TIME_LIMIT', None)
 
     if config_name == 'production':
         db_uri = app.config.get('SQLALCHEMY_DATABASE_URI', '')

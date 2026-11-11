@@ -426,7 +426,9 @@ def rate_card(card_id):
         except CSRFValidationError:
             return {'success': False, 'error': 'Your session has expired. Reload the page and try again.'}, 400
 
-    data = request.get_json(silent=True) or {}
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        data = {}
     rating = data.get('rating')
     if isinstance(rating, bool) or not isinstance(rating, int):
         return {'success': False, 'error': 'A rating from 0 to 3 is required.'}, 400

@@ -68,24 +68,41 @@ def schedule(state, rating, now):
         )
         return new_state, now + RELEARN_DELAY
 
-    first = state.reps == 0
+    hard, good, easy = _success_intervals(state)
     if rating == HARD:
-        interval = 1 if first else max(state.interval_days + 1, round(state.interval_days * 1.2))
+        interval = hard
         ease = max(MIN_EASE, ease - 0.15)
     elif rating == GOOD:
-        if first:
-            interval = 1
-        elif state.reps == 1:
-            interval = 3
-        else:
-            interval = round(max(state.interval_days, 1) * ease)
+        interval = good
     else:  # EASY
-        interval = 4 if first else round(max(state.interval_days, 1) * ease * 1.3)
+        interval = easy
         ease = ease + 0.15
 
     interval = max(1, min(MAX_INTERVAL_DAYS, interval))
     new_state = CardState(interval_days=interval, ease=ease, reps=state.reps + 1, lapses=state.lapses)
     return new_state, now + timedelta(days=interval)
+
+
+def _success_intervals(state):
+    """
+    Next interval in days for Hard, Good and Easy.
+
+    Kept in order (Hard <= Good <= Easy) so a harder answer never earns a
+    longer gap, and a successful review of a card already in progress always
+    moves it further out than its current interval.
+    """
+    if state.reps == 0:
+        hard, good, easy = 1, 1, 4
+    else:
+        current = max(state.interval_days, 1)
+        good = 3 if state.reps == 1 else round(current * state.ease)
+        good = max(good, current + 1)
+        hard = max(current + 1, round(current * 1.2))
+        easy = round(current * state.ease * 1.3)
+    hard = min(hard, good)
+    easy = max(easy, good + 1) if state.reps else easy
+    cap = lambda days: max(1, min(MAX_INTERVAL_DAYS, days))  # noqa: E731
+    return cap(hard), cap(good), cap(easy)
 
 
 def stage_of(last_reviewed_at, interval_days):
@@ -98,6 +115,8 @@ def stage_of(last_reviewed_at, interval_days):
 def describe_interval(delta):
     """Short human text for a timedelta: '10 min', '1 day', '3 days', '2 months'."""
     minutes = int(delta.total_seconds() // 60)
+    if minutes < 1:
+        return 'less than a minute'
     if minutes < 60:
         return f'{minutes} min'
     days = delta.days
@@ -202,18 +221,19 @@ class ReviewService:
         One grouped query, so it stays cheap with many cards.
         """
         now = now or utcnow()
+        no_card = Flashcard.id.is_(None)        # the outer join row of an empty deck
         is_new = Flashcard.last_reviewed_at.is_(None)
         is_mastered = Flashcard.interval_days >= MASTERED_INTERVAL_DAYS
         rows = (
             db.session.query(
                 Deck.id, Deck.name, Deck.color,
                 func.count(Flashcard.id),
-                func.coalesce(func.sum(case((is_new, 1), else_=0)), 0),
-                func.coalesce(func.sum(case((is_new, 0), (is_mastered, 1), else_=0)), 0),
-                func.coalesce(func.sum(case((ReviewService._due_filter(now), 1), else_=0)), 0),
+                func.coalesce(func.sum(case((no_card, 0), (is_new, 1), else_=0)), 0),
+                func.coalesce(func.sum(case((no_card, 0), (is_new, 0), (is_mastered, 1), else_=0)), 0),
+                func.coalesce(func.sum(case((no_card, 0), (ReviewService._due_filter(now), 1), else_=0)), 0),
             )
-            .join(Flashcard, Flashcard.deck_id == Deck.id)
-            .filter(Deck.user_id == user_id, Flashcard.user_id == user_id)
+            .outerjoin(Flashcard, (Flashcard.deck_id == Deck.id) & (Flashcard.user_id == user_id))
+            .filter(Deck.user_id == user_id)
             .group_by(Deck.id, Deck.name, Deck.color)
             .order_by(Deck.name.asc())
             .all()

@@ -150,3 +150,13 @@ def test_dashboard_uses_timezone_cookie_for_today(auth_client, db_session, test_
     # without a clock; instead check a hostile cookie value cannot break the page.
     auth_client.set_cookie('bd_tz', '../../etc/passwd')
     assert auth_client.get('/').status_code == 200
+
+
+# --- Review fixes ---------------------------------------------------------
+
+def test_streak_only_reads_the_last_year(db_session, test_user):
+    _pomodoro(db_session, test_user, datetime(2025, 1, 1, 12))      # long ago
+    _pomodoro(db_session, test_user, datetime(2026, 11, 10, 12))
+    since = TODAY - timedelta(days=365)
+    assert StatsService.activity_dates(test_user.id, UTC, since=since) == {date(2026, 11, 10)}
+    assert StatsService.streak(test_user.id, UTC, TODAY)['longest'] == 1

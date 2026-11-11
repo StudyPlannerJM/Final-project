@@ -12,6 +12,7 @@ from app.models import CardReview, PomodoroSession, StudySession, Task
 from app.utils.timezone import day_bounds_utc, to_local
 
 TODAY_TASK_LIMIT = 5
+STREAK_WINDOW_DAYS = 365
 
 
 def compute_streak(active_dates, today):
@@ -46,13 +47,23 @@ class StatsService:
     """Read-only queries behind the dashboard."""
 
     @staticmethod
-    def activity_dates(user_id, tz):
-        """Local calendar days on which the user completed a Pomodoro or reviewed a card."""
+    def activity_dates(user_id, tz, since=None):
+        """
+        Local calendar days on which the user completed a Pomodoro or reviewed a card.
+
+        Args:
+            since: optional local date; earlier activity is not read (keeps the
+                dashboard query bounded for heavy users)
+        """
         pomodoro_times = db.session.query(PomodoroSession.start_time).filter(
             PomodoroSession.user_id == user_id,
             PomodoroSession.completed.is_(True),
         )
         review_times = db.session.query(CardReview.reviewed_at).filter(CardReview.user_id == user_id)
+        if since is not None:
+            window_start, _ = day_bounds_utc(since, tz)
+            pomodoro_times = pomodoro_times.filter(PomodoroSession.start_time >= window_start)
+            review_times = review_times.filter(CardReview.reviewed_at >= window_start)
         return {
             to_local(stamp, tz).date()
             for (stamp,) in pomodoro_times.union_all(review_times).all()
@@ -61,8 +72,9 @@ class StatsService:
 
     @staticmethod
     def streak(user_id, tz, today):
-        """Current and longest study streak for the user."""
-        return compute_streak(StatsService.activity_dates(user_id, tz), today)
+        """Current streak and the longest streak within the last year."""
+        since = today - timedelta(days=STREAK_WINDOW_DAYS)
+        return compute_streak(StatsService.activity_dates(user_id, tz, since=since), today)
 
     @staticmethod
     def weekly_minutes(user_id, tz, today):

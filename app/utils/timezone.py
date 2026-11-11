@@ -13,7 +13,10 @@ from zoneinfo import ZoneInfo
 from flask import has_request_context, request
 
 TZ_COOKIE = 'bd_tz'
-UTC = ZoneInfo('UTC')
+try:
+    UTC = ZoneInfo('UTC')
+except Exception:  # no tz database on this host (e.g. Windows without tzdata)
+    UTC = timezone.utc
 _ZONE_NAME = re.compile(r'^[A-Za-z][A-Za-z0-9_+\-]*(/[A-Za-z0-9_+\-]+){0,2}$')
 
 

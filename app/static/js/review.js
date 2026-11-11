@@ -128,12 +128,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const isJson = (response.headers.get('content-type') || '').includes('application/json');
             if (response.redirected || !isJson) {
-                throw new Error('Your session may have expired. Reload the page and sign in again.');
+                throw Object.assign(new Error('Your session may have expired. Reload the page and sign in again.'), { userFacing: true });
             }
             body = await response.json();
         } catch (error) {
             setSaving(false);
-            notify(error.message && !/fetch/i.test(error.message)
+            notify(error.userFacing
                 ? error.message
                 : 'Could not save your answer. Check your connection and try again.', 'danger');
             return;
