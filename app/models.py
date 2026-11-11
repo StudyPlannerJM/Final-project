@@ -80,9 +80,22 @@ class Flashcard(db.Model):
     date_created = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     deck_id = db.Column(db.Integer, db.ForeignKey('deck.id'), nullable=True)
-    
+
+    # Spaced repetition state (all timestamps in UTC, stored without tzinfo).
+    # due_at is NULL until the first review: a never-reviewed card is due now.
+    due_at = db.Column(db.DateTime, nullable=True, index=True)
+    interval_days = db.Column(db.Integer, nullable=False, default=0, server_default='0')
+    ease = db.Column(db.Float, nullable=False, default=2.5, server_default='2.5')
+    reps = db.Column(db.Integer, nullable=False, default=0, server_default='0')
+    lapses = db.Column(db.Integer, nullable=False, default=0, server_default='0')
+    last_reviewed_at = db.Column(db.DateTime, nullable=True)
+
     author = db.relationship(
         "User", backref=db.backref("flashcards", lazy=True)
+    )
+    reviews = db.relationship(
+        'CardReview', backref='flashcard', lazy='dynamic',
+        cascade='all, delete-orphan'
     )
 
     def __init__(self, question, answer, user_id, deck_id=None, **kwargs):
@@ -98,6 +111,26 @@ class Flashcard(db.Model):
             f"Flashcard('{self.question}', '{self.answer}', "
             f"'{self.date_created}')"
         )
+
+class CardReview(db.Model):
+    """One rating of one flashcard. The log behind study streaks."""
+    __tablename__ = 'card_review'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    flashcard_id = db.Column(
+        db.Integer, db.ForeignKey('flashcard.id', ondelete='CASCADE'), nullable=False
+    )
+    rating = db.Column(db.Integer, nullable=False)  # 0 again, 1 hard, 2 good, 3 easy
+    reviewed_at = db.Column(db.DateTime, nullable=False)  # UTC
+
+    __table_args__ = (
+        db.Index('idx_card_review_user_time', 'user_id', 'reviewed_at'),
+    )
+
+    def __repr__(self):
+        return f'<CardReview card={self.flashcard_id} rating={self.rating}>'
+
 
 class Deck(db.Model):
     """
