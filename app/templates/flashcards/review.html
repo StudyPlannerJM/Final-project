@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - BrainDump{% endblock %}
+
+{% block head_extra %}
+    <meta name="csrf-token" content="{{ csrf_token_value }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/review.css') }}">
+{% endblock %}
+
+{% block page_title %}Review{% if selected_deck %}: {{ selected_deck.name }}{% endif %}{% endblock %}
+
+{% block content %}
+{% set back_url = url_for('flashcards.index', deck_id=selected_deck.id) if selected_deck else url_for('flashcards.index') %}
+<div class="review" id="review" data-rate-url="{{ url_for('flashcards.rate_card', card_id=0) }}">
+
+    {# ---- Nothing due ---- #}
+    <section class="review-panel review-empty" id="review-empty"{% if review_data.cards %} hidden{% endif %}>
+        <span class="review-panel__icon review-panel__icon--success" aria-hidden="true"><i class="fas fa-circle-check"></i></span>
+        <h2>All caught up</h2>
+        {% if next_due_in %}
+            <p>No cards are due right now. The next one is due in {{ next_due_in }}.</p>
+        {% else %}
+            <p>No cards are due right now. Add some flashcards to start reviewing.</p>
+        {% endif %}
+        <a class="btn btn-primary" href="{{ back_url }}">Back to flashcards</a>
+    </section>
+
+    {# ---- Session ---- #}
+    <section class="review-session" id="review-session"{% if not review_data.cards %} hidden{% endif %}>
+        <div class="review-progress">
+            <div class="review-progress__bar" role="progressbar" aria-label="Session progress"
+                aria-valuemin="0" aria-valuemax="{{ review_data.cards|length }}" aria-valuenow="0" id="review-progressbar">
+                <div class="review-progress__fill" id="review-progress-fill"></div>
+            </div>
+            <span class="review-progress__count" id="review-count" aria-live="polite">0 of {{ review_data.cards|length }}</span>
+            <a class="review-exit" href="{{ back_url }}" aria-label="End session"><i class="fas fa-xmark" aria-hidden="true"></i></a>
+        </div>
+
+        <article class="review-card" id="review-card">
+            <header class="review-card__meta">
+                <span class="review-card__deck" id="review-deck"></span>
+                <span class="review-card__stage" id="review-stage"></span>
+            </header>
+            <div class="review-card__face">
+                <span class="review-card__label">Question</span>
+                <p class="review-card__text" id="review-question"></p>
+            </div>
+            <div class="review-card__face review-card__face--answer" id="review-answer-wrap" hidden>
+                <span class="review-card__label">Answer</span>
+                <p class="review-card__text" id="review-answer" tabindex="-1"></p>
+            </div>
+        </article>
+
+        <div class="review-actions">
+            <button type="button" class="btn btn-primary review-reveal" id="review-reveal">Show answer</button>
+
+            <div class="review-ratings" id="review-ratings" role="group" aria-label="How well did you remember it?" hidden>
+                <button type="button" class="review-rate review-rate--again" data-rating="0">
+                    <span class="review-rate__name">Again</span><span class="review-rate__when" data-when="0"></span>
+                </button>
+                <button type="button" class="review-rate review-rate--hard" data-rating="1">
+                    <span class="review-rate__name">Hard</span><span class="review-rate__when" data-when="1"></span>
+                </button>
+                <button type="button" class="review-rate review-rate--good" data-rating="2">
+                    <span class="review-rate__name">Good</span><span class="review-rate__when" data-when="2"></span>
+                </button>
+                <button type="button" class="review-rate review-rate--easy" data-rating="3">
+                    <span class="review-rate__name">Easy</span><span class="review-rate__when" data-when="3"></span>
+                </button>
+            </div>
+            <p class="review-hint">Space shows the answer. Keys 1 to 4 rate it.</p>
+        </div>
+    </section>
+
+    {# ---- Summary ---- #}
+    <section class="review-panel review-summary" id="review-summary" hidden tabindex="-1">
+        <span class="review-panel__icon" aria-hidden="true"><i class="fas fa-flag-checkered"></i></span>
+        <h2>Session complete</h2>
+        <p id="review-summary-text"></p>
+        <dl class="review-summary__stats">
+            <div><dt>Again</dt><dd data-summary="0">0</dd></div>
+            <div><dt>Hard</dt><dd data-summary="1">0</dd></div>
+            <div><dt>Good</dt><dd data-summary="2">0</dd></div>
+            <div><dt>Easy</dt><dd data-summary="3">0</dd></div>
+        </dl>
+        <div class="review-summary__actions">
+            {% if total_due > review_data.cards|length %}
+            <a class="btn btn-primary" href="{{ request.full_path }}">Review more ({{ total_due - review_data.cards|length }} left)</a>
+            {% endif %}
+            <a class="btn btn-secondary" href="{{ back_url }}">Back to flashcards</a>
+        </div>
+    </section>
+</div>
+
+<script type="application/json" id="review-data">{{ review_data|tojson }}</script>
+{% endblock %}
+
+{% block body_extra %}
+<script src="{{ url_for('static', filename='js/review.js') }}"></script>
+{% endblock %}

@@ -16,6 +16,7 @@
             <i class="fas fa-plus"></i> Create New Deck
         </a>
     </div>
+    {% if decks %}{% include 'flashcards/_review_cta.html' %}{% endif %}
 
     <div class="decks-grid">
         {% if decks %}

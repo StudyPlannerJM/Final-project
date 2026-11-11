@@ -1,12 +1,15 @@
 """
 Flashcards Blueprint - Deck and flashcard management routes
 """
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, abort
+from flask_wtf.csrf import generate_csrf, validate_csrf
+from wtforms.validators import ValidationError as CSRFValidationError
 from flask_login import login_required, current_user
 from app.forms import DeckForm, FlashcardForm
 from app.services.deck_service import DeckService
 from app.services.flashcard_service import FlashcardService
-from app.models import StudyPlan
+from app.services.review_service import ReviewService, describe_interval, stage_of, utcnow
+from app.models import Flashcard, StudyPlan
 from app.exceptions import ValidationError, NotFoundError, AuthorizationError
 
 flashcards_bp = Blueprint('flashcards', __name__, url_prefix='/flashcards')
@@ -25,7 +28,10 @@ def decks():
         # Add flashcard count to each deck
         for deck in user_decks:
             deck.flashcard_count = deck.flashcards.count()
-        return render_template("flashcards/decks.html", title="My Decks", decks=user_decks)
+        return render_template(
+            "flashcards/decks.html", title="My Decks", decks=user_decks,
+            due_count=ReviewService.count_due(current_user.id)
+        )
     except Exception as e:
         current_app.logger.error(f"Error loading decks: {str(e)}")
         flash("Error loading decks", "danger")
@@ -136,7 +142,8 @@ def index():
                 "flashcards/flashcards.html",
                 title="Flashcards",
                 decks=user_decks,
-                show_decks=True
+                show_decks=True,
+                due_count=ReviewService.count_due(current_user.id)
             )
         
         # If deck selected, show flashcards in that deck
@@ -152,7 +159,8 @@ def index():
             flashcards=user_flashcards,
             decks=user_decks,
             selected_deck=selected_deck,
-            show_decks=False
+            show_decks=False,
+            due_count=ReviewService.count_due(current_user.id, deck_id=deck_id)
         )
     except Exception as e:
         current_app.logger.error(f"Error loading flashcards: {str(e)}")
@@ -357,3 +365,92 @@ Make the questions specific and the answers clear and educational."""
         return redirect(url_for('flashcards.index', deck_id=deck.id))
     else:
         return redirect(url_for('ai_planner.view_plan', plan_id=plan_id))
+
+
+# ==============================================================================
+# REVIEW (SPACED REPETITION) ROUTES
+# ==============================================================================
+
+def _card_version(card):
+    """Changes with every review; lets the server spot a replayed rating."""
+    return f"{card.reps or 0}-{card.lapses or 0}"
+
+
+def _review_payload(card):
+    return {
+        'id': card.id,
+        'question': card.question,
+        'answer': card.answer,
+        'deck': card.deck.name if card.deck else '',
+        'stage': stage_of(card.last_reviewed_at, card.interval_days or 0),
+        'preview': {str(rating): text for rating, text in ReviewService.preview(card).items()},
+        'version': _card_version(card),
+    }
+
+
+@flashcards_bp.route("/review")
+@login_required
+def review():
+    """A review session: the cards that are due now, one at a time."""
+    deck_id = request.args.get('deck_id', type=int)
+    selected_deck = None
+    if deck_id is not None:
+        try:
+            selected_deck = DeckService.get_deck_by_id(deck_id, current_user.id)
+        except (NotFoundError, AuthorizationError):
+            abort(404)
+
+    now = utcnow()
+    cards = ReviewService.get_due_cards(current_user.id, deck_id=deck_id, now=now)
+    total_due = ReviewService.count_due(current_user.id, deck_id=deck_id, now=now)
+    next_due = ReviewService.next_due_at(current_user.id, deck_id=deck_id, now=now)
+
+    return render_template(
+        "flashcards/review.html",
+        title="Review",
+        selected_deck=selected_deck,
+        review_data={'cards': [_review_payload(card) for card in cards]},
+        total_due=total_due,
+        next_due_in=describe_interval(next_due - now) if next_due else None,
+        csrf_token_value=generate_csrf(),
+    )
+
+
+@flashcards_bp.route("/review/<int:card_id>", methods=["POST"])
+@login_required
+def rate_card(card_id):
+    """Record one rating for one card (JSON)."""
+    if current_app.config.get('WTF_CSRF_ENABLED', True):
+        try:
+            validate_csrf(request.headers.get('X-CSRFToken', ''))
+        except CSRFValidationError:
+            return {'success': False, 'error': 'Your session has expired. Reload the page and try again.'}, 400
+
+    data = request.get_json(silent=True) or {}
+    rating = data.get('rating')
+    if isinstance(rating, bool) or not isinstance(rating, int):
+        return {'success': False, 'error': 'A rating from 0 to 3 is required.'}, 400
+
+    card = Flashcard.query.filter_by(id=card_id, user_id=current_user.id).first()
+    if card is None:
+        return {'success': False, 'error': 'This card no longer exists.'}, 404
+    if data.get('version') != _card_version(card):
+        # Double tap or a replayed request: the review was already recorded
+        return {'success': False, 'error': 'This card was already reviewed.', 'version': _card_version(card)}, 409
+
+    try:
+        now = utcnow()
+        card = ReviewService.record_review(card_id, current_user.id, rating, now=now)
+    except ValidationError as e:
+        return {'success': False, 'error': str(e)}, 400
+    except NotFoundError:
+        return {'success': False, 'error': 'This card no longer exists.'}, 404
+
+    return {
+        'success': True,
+        'due_in': describe_interval(card.due_at - now),
+        'version': _card_version(card),
+        'preview': {str(r): text for r, text in ReviewService.preview(card).items()},
+        'stage': stage_of(card.last_reviewed_at, card.interval_days),
+    }
+

@@ -21,6 +21,7 @@
                 </a>
             </div>
         </div>
+        {% if decks %}{% include 'flashcards/_review_cta.html' %}{% endif %}
 
         <div class="decks-grid">
             {% if decks %}
@@ -101,6 +102,11 @@
                 </a>
             </div>
         </div>
+
+        {% if flashcards %}
+            {% set review_deck_id = selected_deck.id if selected_deck else none %}
+            {% include 'flashcards/_review_cta.html' %}
+        {% endif %}
 
         {% if selected_deck %}
             <div class="flashcards-back-link">

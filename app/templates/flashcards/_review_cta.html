@@ -1,0 +1,17 @@
+{# Review call-to-action. Expects due_count; optional review_deck_id. #}
+<div class="review-cta{% if not due_count %} review-cta--done{% endif %}">
+    <div class="review-cta__text">
+        {% if due_count %}
+            <strong>{{ due_count }} card{{ '' if due_count == 1 else 's' }} due for review</strong>
+            <span>Reviewing now is the fastest way to remember them.</span>
+        {% else %}
+            <strong>All caught up</strong>
+            <span>No cards are due right now.</span>
+        {% endif %}
+    </div>
+    {% if due_count %}
+    <a class="btn btn-primary review-cta__btn" href="{{ url_for('flashcards.review', deck_id=review_deck_id) if review_deck_id else url_for('flashcards.review') }}">
+        <i class="fas fa-bolt" aria-hidden="true"></i> Review due cards <span class="review-cta__count">{{ due_count }}</span>
+    </a>
+    {% endif %}
+</div>

@@ -391,3 +391,61 @@
     min-height: 44px;
     border-radius: var(--radius-md);
 }
+
+/* ---------- Review call-to-action (decks and flashcards pages) ---------- */
+
+.review-cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-5);
+    padding: var(--space-4);
+    background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+    border: 1px solid color-mix(in srgb, var(--color-primary) 30%, var(--color-surface));
+    border-radius: var(--radius-lg);
+}
+
+.review-cta--done {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+.review-cta__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    color: var(--color-text);
+}
+
+.review-cta__text span {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+}
+
+.review-cta__btn {
+    margin: 0;
+    white-space: nowrap;
+}
+
+.review-cta__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: var(--radius-full);
+    background: var(--color-on-primary);
+    color: var(--color-primary);
+    font-size: var(--text-xs);
+    font-weight: 700;
+}
+
+@media (max-width: 767.98px) {
+    .review-cta__btn {
+        width: 100%;
+    }
+}
