@@ -370,14 +370,14 @@ function updateTaskStatus(taskId, newStatus, taskCard) {
         // An expired session redirects to the login page instead of returning JSON
         const isJson = (response.headers.get('content-type') || '').includes('application/json');
         if (response.redirected) {
-            throw new Error('Your session may have expired. Reload the page and sign in again.');
+            throw Object.assign(new Error('Your session may have expired. Reload the page and sign in again.'), { userFacing: true });
         }
         if (!isJson) {
-            throw new Error('The task could not be updated. Reload the page and try again.');
+            throw Object.assign(new Error('The task could not be updated. Reload the page and try again.'), { userFacing: true });
         }
         return response.json().then((data) => {
             if (!response.ok || !data.success) {
-                throw new Error(data.error || 'The task could not be updated.');
+                throw Object.assign(new Error(data.error || 'The task could not be updated.'), { userFacing: true });
             }
             return data;
         });
@@ -394,7 +394,7 @@ function updateTaskStatus(taskId, newStatus, taskCard) {
     .catch((error) => {
         console.error('Error updating task:', error);
         resetMoveSelect(taskCard);
-        notify(error.message || 'The task could not be updated.', 'danger');
+        notify(error.userFacing ? error.message : 'Could not reach the server. Check your connection and try again.', 'danger');
     })
     .finally(() => {
         taskCard.classList.remove('is-saving');

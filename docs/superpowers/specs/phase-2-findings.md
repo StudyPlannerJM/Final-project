@@ -131,3 +131,19 @@ summarizer (4 files) 11, settings 3, schedule week/day 2.
 - Not reworked in Phase 2: summarizer, AI planner, admin, settings, date
   picker and calendar sync prompt pages still carry hardcoded colours.
 - Nothing has been tested on a physical phone.
+
+## Left open after Phase 3 (from its code review)
+
+- The Pomodoro completion response (`total_minutes_today` in
+  `pomodoro_service.py`) still counts the UTC day, while the dashboard now
+  counts the user's local day, so the two can differ in the evening.
+- Study-plan tasks are created with UTC due dates (`study_plan_service.py`)
+  but the dashboard treats task due dates as local wall-clock time, so those
+  tasks can show as overdue or "today" a few hours early or late.
+- The manifest has no `maskable` icons; Android shows the icon on a plain
+  disc. Needs a padded icon asset.
+- The service worker cache name is fixed (`braindump-offline-v1`); a change to
+  the offline page's CSS alone is only picked up when `sw.js` changes.
+- The rating replay check is not atomic: two tabs rating the same card at the
+  same instant could both be recorded.
+- PWA tests read source text; nothing loads every pre-cached URL in a test.
