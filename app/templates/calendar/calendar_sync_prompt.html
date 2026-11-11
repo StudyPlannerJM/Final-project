@@ -30,12 +30,14 @@
 
             <div class="sync-actions">
                 <form class="sync-action-form" method="POST" action="{{ url_for('calendar.sync_existing_tasks') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="btn sync-btn sync-btn-primary">
                         <span>Yes, Sync All Tasks</span>
                     </button>
                 </form>
 
                 <form class="sync-action-form" method="POST" action="{{ url_for('calendar.skip_sync_existing_tasks') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="btn sync-btn sync-btn-secondary">
                         <span>No, Only Sync New Tasks</span>
                     </button>

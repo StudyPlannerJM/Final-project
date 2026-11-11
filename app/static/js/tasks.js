@@ -16,6 +16,7 @@ function confirmDelete() {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/tasks/delete/${taskIdToDelete}`;
+        addCsrfField(form); // csrf_token
         document.body.appendChild(form);
         form.submit();
     }

@@ -65,6 +65,7 @@
             <form method="POST" action="{{ url_for('flashcards.generate_from_study_plan', plan_id=plan.id) }}" 
                 class="flashcard-generation-form planner-action-card"
                   id="flashcard-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="flashcard-options">
                     <label for="num_cards">Number of flashcards:</label>
                     <select name="num_cards" id="num_cards" class="flashcard-select">
@@ -81,6 +82,7 @@
 
             <form method="POST" action="{{ url_for('ai_planner.generate_tasks_from_plan', plan_id=plan.id) }}"
                   class="flashcard-generation-form planner-action-card">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="flashcard-options">
                     <label for="num_tasks">Number of tasks:</label>
                     <select name="num_tasks" id="num_tasks" class="flashcard-select">
@@ -118,6 +120,7 @@
 
     <div class="plan-actions">
         <form method="POST" action="{{ url_for('ai_planner.delete_plan', plan_id=plan.id) }}" class="delete-plan-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="button" class="btn btn-danger open-delete-modal" data-delete-entity="study plan" data-delete-label="{{ plan.subject }}">
                 <i class="fas fa-trash"></i> Delete Plan
             </button>

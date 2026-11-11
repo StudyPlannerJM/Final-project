@@ -98,10 +98,12 @@ def skip_sync_existing_tasks():
     return redirect(url_for('calendar.schedule'))
 
 
-@calendar_bp.route('/disconnect')
+@calendar_bp.route('/disconnect', methods=['GET', 'POST'])
 @login_required
 def disconnect_google():
-    """Remove Google Calendar connection - clear stored token"""
+    """Remove Google Calendar connection - clear stored token (POST only)"""
+    if request.method == 'GET':
+        return redirect(url_for('calendar.schedule'))
     try:
         CalendarService.disconnect_google_calendar(current_user.id)
         flash('Google Calendar disconnected.', 'info')

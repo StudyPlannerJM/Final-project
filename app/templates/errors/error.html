@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    {% include 'components/theme_init.html' %}
+    <title>{{ title }} - BrainDump</title>
+    {% include 'components/favicons.html' %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/core/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/core/fonts.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/core/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/offline.css') }}">
+</head>
+<body class="offline-page">
+    <main class="offline-card">
+        <img src="{{ url_for('static', filename='favicon/android-chrome-192x192.png') }}" alt="" width="72" height="72">
+        <p class="error-code">{{ code }}</p>
+        <h1>{{ title }}</h1>
+        <p>{{ message }}</p>
+        <div class="offline-actions">
+            {% if show_back %}
+            <button type="button" class="offline-btn offline-btn--primary" id="error-back">Go back</button>
+            {% endif %}
+            <a class="offline-btn{% if not show_back %} offline-btn--primary{% endif %}" href="{{ url_for('main.dashboard') }}">Go to dashboard</a>
+        </div>
+    </main>
+    {% if show_back %}
+    <script>
+        document.getElementById('error-back').addEventListener('click', function () {
+            if (window.history.length > 1) { window.history.back(); } else { window.location.href = '/'; }
+        });
+    </script>
+    {% endif %}
+</body>
+</html>

@@ -116,6 +116,7 @@
                             <i class="fas fa-eye"></i> View Plan
                         </a>
                         <form method="POST" action="{{ url_for('ai_planner.delete_plan', plan_id=plan.id) }}" class="delete-plan-form inline-form">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="button" class="btn btn-delete open-delete-modal" data-delete-entity="study plan" data-delete-label="{{ plan.subject }}">
                                 <i class="fas fa-trash"></i>
                             </button>

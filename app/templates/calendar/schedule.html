@@ -42,13 +42,17 @@
             <div class="connection-actions">
                 {% if calendar_connected %}
                     <form method="POST" action="{{ url_for('calendar.sync_existing_tasks') }}" class="sync-existing-tasks-form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="btn-sync-mini" title="Sync all unsynced tasks">
                             <i class="fas fa-sync-alt"></i> Sync All Tasks
                         </button>
                     </form>
-                    <a href="{{ url_for('calendar.disconnect_google') }}" class="btn-disconnect-mini">
-                        <i class="fas fa-unlink"></i> Disconnect
-                    </a>
+                    <form method="POST" action="{{ url_for('calendar.disconnect_google') }}" class="disconnect-form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn-disconnect-mini">
+                            <i class="fas fa-unlink" aria-hidden="true"></i> Disconnect
+                        </button>
+                    </form>
                 {% else %}
                     <a href="{{ url_for('calendar.authorize_google') }}" class="btn-connect-mini">
                         <i class="fas fa-link"></i> Connect Now

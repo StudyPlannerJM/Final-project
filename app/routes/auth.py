@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, current_app, request
 from app import db
 from app.forms import LoginForm, RegistrationForm
 from app.models import User
@@ -38,9 +38,13 @@ def register():
         return redirect(url_for('auth.login'))
     return render_template('auth/register.html', title='Register', form=form)
 
-@auth_bp.route('/logout')
-def logout():    
-    logout_user() 
+@auth_bp.route('/logout', methods=['GET', 'POST'])
+def logout():
+    # Signing out changes state, so it needs a POST (with its CSRF token).
+    # A plain link or another site's <img src> must not sign anyone out.
+    if request.method == 'GET':
+        return redirect(url_for('main.dashboard') if current_user.is_authenticated else url_for('auth.login'))
+    logout_user()
     flash('You have been logged out.', 'info')   
     return redirect(url_for('auth.login'))
     

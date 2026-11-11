@@ -96,7 +96,7 @@ class TestAuthRoutes:
     
     def test_logout(self, auth_client):
         """Test logout functionality"""
-        response = auth_client.get('/auth/logout', follow_redirects=True)
+        response = auth_client.post('/auth/logout', follow_redirects=True)
         
         assert response.status_code == 200
         assert b'logged out' in response.data or b'Sign In' in response.data

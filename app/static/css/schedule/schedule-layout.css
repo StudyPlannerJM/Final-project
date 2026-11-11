@@ -122,14 +122,17 @@
 }
 
 .btn-disconnect-mini {
+    width: 100%;
+    font-family: inherit;
+    cursor: pointer;
     background-color: var(--bg-color-tertiary);
     color: var(--text-color-primary);
     border: 1px solid var(--border-color);
 }
 
 .btn-disconnect-mini:hover {
-    background-color: #dc3545;
-    color: white;
+    background-color: var(--color-danger);
+    color: var(--color-surface);
 }
 
 /* =============================================================================
