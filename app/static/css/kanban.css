@@ -382,7 +382,7 @@
 
     .board-tabs {
         position: sticky;
-        top: var(--header-height);
+        top: calc(var(--header-height) + env(safe-area-inset-top));
         z-index: 800;
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -442,6 +442,8 @@
 
     .kanban-column {
         flex: 0 0 100%;
+        /* each column is only as tall as its own tasks */
+        align-self: flex-start;
         scroll-snap-align: start;
         scroll-snap-stop: always;
     }

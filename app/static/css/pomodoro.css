@@ -440,17 +440,17 @@
 }
 
 .stat-card-total .stat-icon {
-    background: rgba(52, 152, 219, 0.1);
+    background: color-mix(in srgb, var(--color-primary) 12%, transparent);
     color: var(--color-primary);
 }
 
 .stat-card-completed .stat-icon {
-    background: rgba(76, 175, 80, 0.1);
+    background: color-mix(in srgb, var(--color-success) 12%, transparent);
     color: var(--color-success);
 }
 
 .stat-card-time .stat-icon {
-    background: rgba(255, 152, 0, 0.1);
+    background: color-mix(in srgb, var(--color-warning) 12%, transparent);
     color: var(--color-warning);
 }
 
@@ -713,7 +713,7 @@
     background: var(--primary-color);
     color: var(--color-on-primary);
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 102, 204, 0.2);
+    box-shadow: var(--shadow-1);
 }
 
 .pagination-btn.disabled {

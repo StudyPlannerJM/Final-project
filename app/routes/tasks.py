@@ -1,8 +1,6 @@
 """
 Tasks Blueprint - Task management routes
 """
-from datetime import datetime
-
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from app.models import Task, Category
@@ -34,14 +32,7 @@ def index():
         Task.date_created.asc()
     ).all()
     
-    # STEP 4: Flag open tasks whose due date has passed (stored without timezone)
-    now = datetime.now()
-    overdue_ids = {
-        task.id for task in todo_tasks + doing_tasks
-        if task.due_date and task.due_date.replace(tzinfo=None) < now
-    }
-
-    # STEP 5: Pass the columns to the template for display
+    # STEP 4: Pass the columns to the template for display
     columns = [
         ('todo', 'To-Do', todo_tasks),
         ('doing', 'Doing', doing_tasks),
@@ -50,11 +41,7 @@ def index():
     return render_template(
         'tasks/tasks.html',
         title='Tasks',
-        columns=columns,
-        overdue_ids=overdue_ids,
-        todo_tasks=todo_tasks,
-        doing_tasks=doing_tasks,
-        done_tasks=done_tasks
+        columns=columns
     )
 
 

@@ -142,10 +142,15 @@
 }
 
 @media (max-width: 767.98px) {
+    /* Bottom of the screen on phones: clear of the header and any sticky tabs */
     .toasts {
+        top: auto;
+        bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + var(--space-3));
         left: var(--space-3);
         right: var(--space-3);
         align-items: center;
+        flex-direction: column-reverse;
+        max-height: 50dvh;
     }
 
     .toast {
@@ -158,7 +163,8 @@
 #floating-pomodoro {
     position: fixed;
     bottom: 20px;
-    right: 20px;
+    /* bottom-left: page actions such as the schedule's add button sit bottom-right */
+    left: calc(var(--sidebar-width) + 20px);
     z-index: 950;
     min-width: 180px;
     padding: var(--space-4) var(--space-5);
@@ -221,7 +227,7 @@
 @media (max-width: 768px) {
     #floating-pomodoro {
         bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + var(--space-3));
-        right: 10px;
+        left: 10px;
         z-index: 950;
         min-width: 150px;
         padding: 12px 15px;
@@ -393,5 +399,25 @@
     .delete-modal .modal-footer button {
         width: 100%;
         margin-right: 0;
+    }
+}
+
+/* Floating timer follows the sidebar's width */
+@media (min-width: 1024px) {
+    body:has(.sidebar.collapsed) #floating-pomodoro {
+        left: calc(var(--sidebar-width-collapsed) + 20px);
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023.98px) {
+    #floating-pomodoro {
+        left: calc(var(--sidebar-width-collapsed) + 20px);
+    }
+}
+
+@media (pointer: coarse) {
+    .floating-btn {
+        min-width: 44px;
+        min-height: 44px;
     }
 }

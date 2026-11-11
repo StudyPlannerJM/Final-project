@@ -3,18 +3,13 @@
 // The next few days as a simple list grouped by day. Default view on phones.
 // =============================================================================
 
-import { escapeHtml, getCategoryColor } from './utils.js';
+import { escapeHtml, getCategoryColor, localDateString, parseEventDate } from './utils.js';
 import { showCalendarEventDetails, showTaskDetails } from './event-modals.js';
 import { UPCOMING_EVENTS_DAYS_AHEAD } from './constants.js';
 
 const STATUS_LABELS = { todo: 'To-Do', doing: 'Doing', done: 'Done' };
 
-/** Local calendar-day key (YYYY-MM-DD) so items group by the user's own day. */
-function dayKey(date) {
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${date.getFullYear()}-${month}-${day}`;
-}
+const dayKey = localDateString;
 
 function dayHeading(date, today) {
     const diffDays = Math.round((new Date(date).setHours(0, 0, 0, 0) - today.getTime()) / 86400000);
@@ -31,12 +26,19 @@ function collectItems(calendarEvents, tasks, rangeStart, rangeEnd) {
 
     (Array.isArray(calendarEvents) ? calendarEvents : []).forEach((event) => {
         if (!event.start) return;
-        const date = new Date(event.start);
-        if (Number.isNaN(date.getTime()) || date < rangeStart || date > rangeEnd) return;
+        const allDay = !String(event.start).includes('T');
+        let date = parseEventDate(event.start);
+        if (Number.isNaN(date.getTime())) return;
+        // An event already under way (started before today, still running) shows under today
+        const end = event.end ? parseEventDate(event.end) : null;
+        if (date < rangeStart && end && !Number.isNaN(end.getTime()) && end > rangeStart) {
+            date = new Date(rangeStart);
+        }
+        if (date < rangeStart || date > rangeEnd) return;
         items.push({
             type: 'calendar',
             date,
-            allDay: !String(event.start).includes('T'),
+            allDay,
             title: event.title || 'Untitled event',
             source: event
         });
@@ -69,14 +71,13 @@ function itemHtml(item, index) {
         ? 'All day'
         : item.date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     const isTask = item.type === 'task';
-    const color = isTask && item.source.category ? getCategoryColor(item.source.category) : null;
     const status = isTask && item.source.status ? item.source.status : null;
     const location = !isTask && item.source.location ? item.source.location : '';
 
     return `
         <li>
             <button type="button" class="agenda-item agenda-item--${item.type}${status === 'done' ? ' is-done' : ''}"
-                data-agenda-index="${index}"${color ? ` style="--agenda-color: ${escapeHtml(color)}"` : ''}>
+                data-agenda-index="${index}">
                 <span class="agenda-item__time">${escapeHtml(time)}</span>
                 <span class="agenda-item__body">
                     <span class="agenda-item__title">${escapeHtml(item.title)}</span>
@@ -112,7 +113,7 @@ export function renderAgendaView(calendarEvents, tasks) {
             <div class="agenda-empty">
                 <i class="fas fa-calendar-check" aria-hidden="true"></i>
                 <p class="agenda-empty__title">Nothing scheduled</p>
-                <p>No events or task deadlines in the next ${UPCOMING_EVENTS_DAYS_AHEAD} days.</p>
+                <p>No events or task deadlines in the coming week.</p>
             </div>`;
         return;
     }
@@ -137,9 +138,13 @@ export function renderAgendaView(calendarEvents, tasks) {
     }).join('');
 
     container.querySelectorAll('.agenda-item').forEach((button) => {
+        const item = items[Number(button.dataset.agendaIndex)];
+        if (!item) return;
+        // Category colour is user data: set it as a property, never as markup
+        if (item.type === 'task' && item.source.category) {
+            button.style.setProperty('--agenda-color', getCategoryColor(item.source.category));
+        }
         button.addEventListener('click', () => {
-            const item = items[Number(button.dataset.agendaIndex)];
-            if (!item) return;
             if (item.type === 'task') {
                 showTaskDetails(item.source);
             } else {

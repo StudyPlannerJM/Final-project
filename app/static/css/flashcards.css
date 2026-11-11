@@ -9,7 +9,7 @@
     color: var(--color-text);
     background: var(--primary-color);
     margin-bottom: 0.5rem;
-    box-shadow: 0 1px 4px rgba(44,62,80,0.08);
+    box-shadow: var(--shadow-1);
     position: relative;
     z-index: 1;
     transition: background 0.2s, color 0.2s;
@@ -141,19 +141,19 @@
 
 .flashcard-question::-webkit-scrollbar-track,
 .flashcard-answer::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--color-surface-2);
     border-radius: 3px;
 }
 
 .flashcard-question::-webkit-scrollbar-thumb,
 .flashcard-answer::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
+    background: var(--color-text-subtle);
     border-radius: 3px;
 }
 
 .flashcard-question::-webkit-scrollbar-thumb:hover,
 .flashcard-answer::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.5);
+    background: var(--color-text-muted);
 }
 
 .flashcard-question h3,
@@ -176,8 +176,8 @@
 }
 
 .btn-flip {
-    background: rgba(255, 255, 255, 0.25);
-    border: 2px solid rgba(255, 255, 255, 0.5);
+    background: var(--color-surface);
+    border: 1px solid var(--color-primary);
     color: var(--color-text);
     padding: 12px 24px;
     border-radius: 8px;
@@ -191,9 +191,9 @@
 }
 
 .btn-flip:hover {
-    background: rgba(255, 255, 255, 0.35);
+    background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
     transform: scale(1.05);
-    border-color: rgba(255, 255, 255, 0.7);
+    border-color: var(--color-primary);
 }
 
 .btn-flip i {
@@ -318,8 +318,8 @@
 
 @media (max-width: 768px) {
     .flashcards-header {
-        background: linear-gradient(180deg, rgba(52, 152, 219, 0.09) 0%, rgba(52, 152, 219, 0.03) 100%);
-        border: 1px solid rgba(52, 152, 219, 0.18);
+        background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
+        border: 1px solid color-mix(in srgb, var(--color-primary) 20%, var(--color-surface));
         border-radius: 12px;
         padding: 12px;
         margin-bottom: 16px;
@@ -560,7 +560,7 @@
 .filter-group select:focus {
     outline: none;
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 25%, transparent);
 }
 
 .btn-clear-filter {

@@ -22,6 +22,7 @@ taskCards.forEach((card) => {
 });
 
 initBoardTabs();
+taskCards.forEach(refreshOverdue);
 
 columns.forEach((column) => {
     column.addEventListener('dragover', (e) => {
@@ -266,17 +267,41 @@ function resetMoveSelect(card) {
     if (select) select.selectedIndex = 0;
 }
 
+// ===== OVERDUE MARKER =====
+// data-due is the due date as the user entered it (wall-clock, no timezone),
+// so comparing it with the browser's clock is correct wherever the server runs.
+function refreshOverdue(card) {
+    const due = card.dataset.due ? new Date(card.dataset.due) : null;
+    const status = card.closest('.column-content')?.dataset.status;
+    const overdue = Boolean(due) && !Number.isNaN(due.getTime()) && due < new Date() && status !== 'done';
+    card.classList.toggle('is-overdue', overdue);
+    let label = card.querySelector('.task-overdue-label');
+    if (overdue && !label) {
+        const dueLine = card.querySelector('.task-due-date');
+        if (dueLine) {
+            label = document.createElement('span');
+            label.className = 'task-overdue-label';
+            label.textContent = 'Overdue';
+            dueLine.appendChild(label);
+        }
+    } else if (!overdue && label) {
+        label.remove();
+    }
+}
+
 // ===== COLUMN TABS (phones) =====
 function initBoardTabs() {
     const board = document.querySelector('.kanban-board');
     const tabs = Array.from(document.querySelectorAll('.board-tab'));
     if (!board || !tabs.length) return;
 
+    let programmaticUntil = 0;
+
     const setActive = (status) => {
         tabs.forEach((tab) => {
             const active = tab.dataset.status === status;
             tab.classList.toggle('is-active', active);
-            tab.setAttribute('aria-selected', active ? 'true' : 'false');
+            tab.setAttribute('aria-pressed', active ? 'true' : 'false');
         });
     };
 
@@ -284,27 +309,39 @@ function initBoardTabs() {
         tab.addEventListener('click', () => {
             const column = document.getElementById('column-' + tab.dataset.status);
             if (!column) return;
+            programmaticUntil = Date.now() + 600;
             board.scrollTo({ left: column.offsetLeft - board.offsetLeft, behavior: 'smooth' });
             setActive(tab.dataset.status);
         });
     });
 
-    // Keep the tabs in step with swiping
+    const syncFromScroll = () => {
+        const columns = Array.from(board.querySelectorAll('.kanban-column'));
+        const centre = board.scrollLeft + board.clientWidth / 2;
+        const current = columns.find((column) => {
+            const left = column.offsetLeft - board.offsetLeft;
+            return centre >= left && centre < left + column.offsetWidth;
+        });
+        if (current) setActive(current.dataset.column);
+    };
+
+    // Keep the tabs in step with swiping (ignored while a tab tap is scrolling the board)
     let ticking = false;
     board.addEventListener('scroll', () => {
-        if (ticking) return;
+        if (ticking || Date.now() < programmaticUntil) return;
         ticking = true;
         requestAnimationFrame(() => {
             ticking = false;
-            const columns = Array.from(board.querySelectorAll('.kanban-column'));
-            const centre = board.scrollLeft + board.clientWidth / 2;
-            const current = columns.find((column) => {
-                const left = column.offsetLeft - board.offsetLeft;
-                return centre >= left && centre < left + column.offsetWidth;
-            });
-            if (current) setActive(current.dataset.column);
+            syncFromScroll();
         });
     }, { passive: true });
+
+    const onLayoutChange = () => syncFromScroll();
+    if (phoneQuery.addEventListener) {
+        phoneQuery.addEventListener('change', onLayoutChange);
+    } else {
+        phoneQuery.addListener(onLayoutChange);
+    }
 }
 
 // ===== BACKEND COMMUNICATION =====
@@ -350,10 +387,7 @@ function updateTaskStatus(taskId, newStatus, taskCard) {
         const emptyNote = targetColumn.querySelector('.column-empty');
         targetColumn.insertBefore(taskCard, emptyNote);
         refreshMoveSelect(taskCard, newStatus);
-        if (newStatus === 'done') {
-            taskCard.classList.remove('is-overdue');
-            taskCard.querySelector('.task-overdue-label')?.remove();
-        }
+        refreshOverdue(taskCard);
         updateTaskCounts();
         notify(`Moved to ${STATUS_LABELS[newStatus]}`, 'success');
     })

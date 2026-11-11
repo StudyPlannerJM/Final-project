@@ -11,7 +11,7 @@ import { renderMiniCalendar, updateMiniCalendarHeader } from './calendar/mini-ca
 import { renderUpcomingEvents } from './calendar/upcoming-events.js';
 import { renderAgendaView } from './calendar/agenda-view.js';
 import { showCalendarEventDetails, showTaskDetails, closeTaskDetailsModal } from './calendar/event-modals.js';
-import { getMonthNames } from './calendar/utils.js';
+import { getMonthNames, localDateString } from './calendar/utils.js';
 import { MONTHS_PER_YEAR, DAYS_PER_WEEK } from './calendar/constants.js';
 
 // =============================================================================
@@ -86,7 +86,7 @@ async function fetchCalendarData(date, view) {
     // The agenda always shows the days ahead of today, using the "upcoming" range
     const isAgenda = view === 'agenda';
     const apiView = isAgenda ? 'upcoming' : view;
-    const dateStr = (isAgenda ? new Date() : date).toISOString().split('T')[0];
+    const dateStr = localDateString(isAgenda ? new Date() : date);
 
     try {
         const response = await fetch(`/calendar/api/events?date=${dateStr}&view=${apiView}`);
@@ -121,7 +121,7 @@ async function fetchCalendarData(date, view) {
 
 async function fetchUpcomingEvents() {
     const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
+    const todayStr = localDateString(today);
 
     try {
         const response = await fetch(`/calendar/api/events?date=${todayStr}&view=upcoming`);
@@ -293,7 +293,7 @@ async function navigateToDate(date, view = null) {
     ]);
 
     if (data) {
-        const dateStr = currentDate.toISOString().split('T')[0];
+        const dateStr = localDateString(currentDate);
         const newUrl = `${window.location.pathname}?date=${dateStr}&view=${viewParam}`;
         window.history.pushState({ date: dateStr, view: viewParam }, '', newUrl);
 
@@ -367,7 +367,7 @@ function renderCurrentView() {
 function updateMainCalendarHeader() {
     const monthNames = getMonthNames();
     if (domCache.mainCalendarHeader && activeView === 'agenda') {
-        domCache.mainCalendarHeader.textContent = 'Next 7 days';
+        domCache.mainCalendarHeader.textContent = 'Coming week';
         return;
     }
     if (domCache.mainCalendarHeader) {
@@ -471,7 +471,7 @@ function initializeEventHandlers() {
     // Event modal handlers
     domCache.addEventBtn?.addEventListener('click', function () {
         domCache.eventModal.classList.add('active');
-        const today = new Date().toISOString().split('T')[0];
+        const today = localDateString(new Date());
         domCache.eventDate.value = today;
     });
 
@@ -645,7 +645,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     const urlParams = new URLSearchParams(window.location.search);
-    const dateParam = initialDate || urlParams.get('date') || new Date().toISOString().split('T')[0];
+    const dateParam = initialDate || urlParams.get('date') || localDateString(new Date());
     // Phones open on the agenda unless the link asked for a specific view
     const isPhone = window.matchMedia('(max-width: 767.98px)').matches;
     const viewParam = (!viewRequested && isPhone)

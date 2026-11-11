@@ -14,8 +14,8 @@
     {% set status_labels = {'todo': 'To-Do', 'doing': 'Doing', 'done': 'Done'} %}
 
     {% macro task_card(task, status) %}
-    {% set overdue = task.id in overdue_ids %}
-    <article class="task-card{% if overdue %} is-overdue{% endif %}" draggable="true" data-task-id="{{ task.id }}">
+    {# Overdue is decided in the browser (kanban.js) so it uses the user's own clock #}
+    <article class="task-card" draggable="true" data-task-id="{{ task.id }}"{% if task.due_date %} data-due="{{ task.due_date.replace(tzinfo=None).isoformat(timespec='seconds') }}"{% endif %}>
         <h4 class="task-card-title">{{ task.title }}</h4>
         {% if task.description %}
             <p class="task-description">{{ task.description }}</p>
@@ -25,7 +25,6 @@
                 <span class="task-due-date">
                     <i class="far fa-calendar" aria-hidden="true"></i>
                     {{ task.due_date.strftime('%d %b %Y, %H:%M') }}
-                    {% if overdue %}<span class="task-overdue-label">Overdue</span>{% endif %}
                 </span>
             {% endif %}
             {% if task.task_category %}
@@ -60,10 +59,10 @@
             <a href="{{ url_for('tasks.add') }}" class="btn btn-primary board-add"><i class="fas fa-plus" aria-hidden="true"></i> Add task</a>
         </div>
 
-        <div class="board-tabs" role="tablist" aria-label="Task columns">
+        <div class="board-tabs" role="group" aria-label="Show column">
             {% for status, label, tasks in columns %}
-            <button type="button" class="board-tab{% if loop.first %} is-active{% endif %}" role="tab"
-                data-status="{{ status }}" aria-selected="{{ 'true' if loop.first else 'false' }}" aria-controls="column-{{ status }}">
+            <button type="button" class="board-tab{% if loop.first %} is-active{% endif %}"
+                data-status="{{ status }}" aria-pressed="{{ 'true' if loop.first else 'false' }}">
                 {{ label }} <span class="task-count" data-count-for="{{ status }}">{{ tasks|length }}</span>
             </button>
             {% endfor %}

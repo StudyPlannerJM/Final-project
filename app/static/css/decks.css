@@ -68,7 +68,8 @@
     align-items: center;
     justify-content: center;
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
 }
 
 .deck-info h3 {
@@ -82,7 +83,7 @@
     color: var(--color-text);
     padding: 0.25em 0.75em;
     border-radius: 8px;
-    box-shadow: 0 1px 4px rgba(44,62,80,0.08);
+    box-shadow: var(--shadow-1);
     font-weight: 700;
     position: relative;
     z-index: 1;
@@ -204,7 +205,7 @@
 .form-card .form-control:focus {
     outline: none;
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 25%, transparent);
     background-color: var(--color-surface);
 }
 
@@ -344,7 +345,7 @@
     color: var(--color-on-primary);
     border-color: var(--color-primary);
     transform: translateY(-2px);
-    box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
+    box-shadow: var(--shadow-1);
 }
 
 .icon-btn i {

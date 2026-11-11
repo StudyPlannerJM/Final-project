@@ -1,7 +1,7 @@
 """Phase 2: server-rendered behaviour of the reworked pages."""
 
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -51,22 +51,22 @@ def test_empty_column_shows_empty_state(auth_client):
     assert html.count('class="column-empty"') == 3
 
 
-def test_overdue_open_task_is_marked(auth_client, db_session, test_user):
-    late = _add_task(db_session, test_user, title='Late', status='todo',
-                     due_date=datetime.now() - timedelta(days=1))
+def test_card_carries_due_date_for_client_side_overdue_check(auth_client, db_session, test_user):
+    """Overdue is decided in the browser, in the user's own timezone."""
+    due = datetime(2026, 3, 14, 9, 30)
+    task = _add_task(db_session, test_user, title='Timed', status='todo', due_date=due)
+    plain = _add_task(db_session, test_user, title='Untimed', status='todo')
     html = auth_client.get('/tasks/').get_data(as_text=True)
-    assert 'is-overdue' in _card(html, late.id)
-    assert 'Overdue' in _card(html, late.id)
+    assert 'data-due="2026-03-14T09:30:00"' in _card(html, task.id)
+    assert 'data-due' not in _card(html, plain.id)
+    assert 'is-overdue' not in html.split('id="main-content"')[1].split('<script')[0]
 
 
-def test_done_or_future_task_is_not_marked_overdue(auth_client, db_session, test_user):
-    finished = _add_task(db_session, test_user, title='Finished', status='done',
-                         due_date=datetime.now() - timedelta(days=1))
-    upcoming = _add_task(db_session, test_user, title='Upcoming', status='todo',
-                         due_date=datetime.now() + timedelta(days=1))
+def test_empty_note_is_hidden_only_in_columns_with_tasks(auth_client, db_session, test_user):
+    _add_task(db_session, test_user, title='Only one', status='doing')
     html = auth_client.get('/tasks/').get_data(as_text=True)
-    assert 'is-overdue' not in _card(html, finished.id)
-    assert 'is-overdue' not in _card(html, upcoming.id)
+    notes = dict(re.findall(r'id="(\w+)-column">.*?<p class="column-empty"( hidden)?>', html, re.S))
+    assert notes == {'todo': '', 'doing': ' hidden', 'done': ''}
 
 
 def test_task_title_is_escaped_in_card(auth_client, db_session, test_user):
@@ -138,3 +138,25 @@ def test_pomodoro_timer_comes_before_duration_options(auth_client):
 def test_reworked_stylesheet_has_no_hardcoded_hex(name):
     css = (STATIC / 'css' / name).read_text()
     assert HEX.findall(css) == []
+
+
+@pytest.mark.parametrize('name', ['kanban.css', 'pomodoro.css', 'decks.css', 'flashcards.css', 'dashboard.css'])
+def test_reworked_stylesheet_has_no_rgb_literals_except_neutral_shadows(name):
+    css = (STATIC / 'css' / name).read_text()
+    literals = re.findall(r'rgba?\([^)]*\)', css)
+    assert [c for c in literals if not re.match(r'rgba\(0,\s*0,\s*0,', c)] == []
+
+
+# --- Timezone safety (review findings) ------------------------------------
+
+@pytest.mark.parametrize('name', ['schedule.js', 'calendar/day-view.js', 'calendar/week-view.js',
+                                  'calendar/agenda-view.js'])
+def test_calendar_scripts_do_not_format_dates_in_utc(name):
+    """toISOString() gives the UTC date, which is the wrong day near midnight."""
+    js = (STATIC / 'js' / name).read_text()
+    assert 'toISOString().split' not in js
+
+
+def test_agenda_does_not_put_user_data_in_a_style_attribute():
+    js = (STATIC / 'js/calendar/agenda-view.js').read_text()
+    assert 'style="' not in js
