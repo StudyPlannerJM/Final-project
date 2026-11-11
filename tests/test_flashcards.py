@@ -1,6 +1,5 @@
-import sys
 import datetime
-from types import SimpleNamespace, ModuleType
+from types import SimpleNamespace
 
 def make_deck(name='Deck', flashcard_count=0):
     class FC:
@@ -150,18 +149,17 @@ def test_generate_from_study_plan_unauthorized(db_session, auth_client, test_use
     assert b'not authorized' in resp.data.lower()
 
 
-def test_generate_from_study_plan_no_genai(monkeypatch, db_session, auth_client, test_user):
+def test_generate_from_study_plan_without_ai_configured(monkeypatch, db_session, auth_client, test_user):
     from app.models import StudyPlan
+    from app.utils.ai_generator import NOT_CONFIGURED_MESSAGE
     p = StudyPlan(user_id=test_user.id, subject='S', time_value=1, time_unit='days', knowledge_level='beginner', plan_content='C')
     db_session.session.add(p)
     db_session.session.commit()
 
-    # Ensure google.genai import will fail by removing 'google' if present
-    if 'google' in sys.modules:
-        del sys.modules['google']
-
+    # The test app has no Gemini key, so the real helper reports it is not set up
     resp = auth_client.post(f'/flashcards/generate_from_study_plan/{p.id}', data={'num_cards': '5'}, follow_redirects=True)
     assert resp.status_code == 200
+    assert NOT_CONFIGURED_MESSAGE in resp.get_data(as_text=True)
 
 
 def test_generate_from_study_plan_success(monkeypatch, db_session, auth_client, test_user):
@@ -170,27 +168,11 @@ def test_generate_from_study_plan_success(monkeypatch, db_session, auth_client, 
     db_session.session.add(p)
     db_session.session.commit()
 
-    # inject fake google.genai module
-    genai_mod = ModuleType('google')
-    genai = ModuleType('google.genai')
-
-    class FakeModels:
-        @staticmethod
-        def generate_content(model, contents):
-            return SimpleNamespace(text='Q: What?\nA: That.')
-
-    class FakeClient:
-        def __init__(self, api_key=None):
-            self.models = FakeModels()
-
-    genai.Client = FakeClient
-    genai_mod.genai = genai
-    sys.modules['google'] = genai_mod
-    sys.modules['google.genai'] = genai
-
+    monkeypatch.setattr('app.routes.flashcards.generate_text', lambda prompt: 'Q: What?\nA: That.')
     deck = SimpleNamespace(id=99, name='S')
     monkeypatch.setattr('app.routes.flashcards.DeckService.get_or_create_deck', lambda **kw: deck)
     monkeypatch.setattr('app.routes.flashcards.FlashcardService.bulk_create_flashcards', lambda **kw: [{'id':1}])
 
     resp = auth_client.post(f'/flashcards/generate_from_study_plan/{p.id}', data={'num_cards': '1'}, follow_redirects=False)
     assert resp.status_code in (302, 303)
+    assert resp.headers['Location'].endswith('/flashcards/?deck_id=99')

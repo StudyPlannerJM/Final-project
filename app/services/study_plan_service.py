@@ -10,7 +10,7 @@ from app.models import StudyPlan, User, Category
 from app.exceptions import (
     ValidationError, AuthorizationError, NotFoundError
 )
-from app.utils.ai_generator import generate_study_plan
+from app.utils.ai_generator import generate_study_plan, AIServiceError
 from app.services.task_service import TaskService
 
 
@@ -73,6 +73,9 @@ class StudyPlanService:
                 time_unit=time_unit,
                 knowledge_level=knowledge_level
             )
+        except AIServiceError as e:
+            # Already a message meant for the user (e.g. "the AI service is busy")
+            raise ValidationError(str(e))
         except Exception as e:
             raise ValidationError(f"Error generating study plan: {str(e)}")
         

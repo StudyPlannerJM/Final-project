@@ -9,6 +9,9 @@ from app.models import User, Category
 def app():
     """Create application for testing"""
     app = create_app('testing')
+    # Never let tests reach real third-party APIs with keys from a developer's .env
+    app.config['GEMINI_API_KEY'] = None
+    app.config['APYHUB_API_KEY'] = None
     return app
 
 

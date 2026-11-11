@@ -7,8 +7,63 @@ try:
     from google import genai
 except ImportError:
     genai = None  # Will handle this in the functions
+import time
+
 from flask import current_app
 from markupsafe import escape, Markup  # For XSS protection
+
+MODEL = 'gemini-flash-latest'
+BUSY_MESSAGE = 'The AI service is busy right now. Please try again in a minute.'
+FAILED_MESSAGE = "The AI service couldn't complete that request. Please try again later."
+NOT_CONFIGURED_MESSAGE = 'AI features are not set up on this server yet.'
+# Retry a busy model once, but only when it refused quickly, so two attempts
+# stay well inside the web server's 30-second request limit.
+RETRY_DELAY_SECONDS = 2
+RETRY_ONLY_IF_FAILED_WITHIN_SECONDS = 5
+_BUSY_MARKERS = ('503', 'UNAVAILABLE', '429', 'RESOURCE_EXHAUSTED', 'overloaded', 'high demand')
+
+
+class AIServiceError(Exception):
+    """The AI call failed. The message is safe to show to the user."""
+
+
+def _is_busy(error):
+    text = str(error)
+    return any(marker.lower() in text.lower() for marker in _BUSY_MARKERS)
+
+
+def generate_text(prompt):
+    """
+    Ask Gemini for text.
+
+    Retries once when the model is busy (503 / rate limit). Never returns an
+    error message as if it were content: failures raise AIServiceError with a
+    message meant for the user, and the technical detail goes to the log.
+    """
+    try:
+        client = configure_gemini_api()
+    except (ImportError, ValueError) as e:
+        current_app.logger.error(f"Gemini is not configured: {e}")
+        raise AIServiceError(NOT_CONFIGURED_MESSAGE) from e
+
+    for attempt in (1, 2):
+        started = time.monotonic()
+        try:
+            response = client.models.generate_content(model=MODEL, contents=prompt)
+        except Exception as e:
+            busy = _is_busy(e)
+            quick = time.monotonic() - started < RETRY_ONLY_IF_FAILED_WITHIN_SECONDS
+            current_app.logger.error(f"Gemini request failed (attempt {attempt}): {e}")
+            if busy and quick and attempt == 1:
+                time.sleep(RETRY_DELAY_SECONDS)
+                continue
+            raise AIServiceError(BUSY_MESSAGE if busy else FAILED_MESSAGE) from e
+
+        text = (getattr(response, 'text', None) or '').strip()
+        if not text:
+            current_app.logger.error('Gemini returned an empty response')
+            raise AIServiceError(FAILED_MESSAGE)
+        return text
 
 
 def configure_gemini_api():
@@ -34,27 +89,27 @@ def generate_study_plan(subject, time_value, time_unit, knowledge_level):
     
     Returns:
         str: Generated study plan in formatted text
+
+    Raises:
+        AIServiceError: the AI service failed; the message is safe to show
     """
-    try:
-        # Configure the API
-        client = configure_gemini_api()
-        
-        # Convert time to days for calculations
-        if time_unit == 'days':
-            total_days = time_value
-            time_display = f"{time_value} {'day' if time_value == 1 else 'days'}"
-        elif time_unit == 'weeks':
-            total_days = time_value * 7
-            time_display = f"{time_value} {'week' if time_value == 1 else 'weeks'}"
-        elif time_unit == 'months':
-            total_days = time_value * 30  # Approximate
-            time_display = f"{time_value} {'month' if time_value == 1 else 'months'}"
-        else:
-            total_days = time_value
-            time_display = f"{time_value} days"
-        
-        # Create the prompt for the AI
-        prompt = f"""
+    
+    # Convert time to days for calculations
+    if time_unit == 'days':
+        total_days = time_value
+        time_display = f"{time_value} {'day' if time_value == 1 else 'days'}"
+    elif time_unit == 'weeks':
+        total_days = time_value * 7
+        time_display = f"{time_value} {'week' if time_value == 1 else 'weeks'}"
+    elif time_unit == 'months':
+        total_days = time_value * 30  # Approximate
+        time_display = f"{time_value} {'month' if time_value == 1 else 'months'}"
+    else:
+        total_days = time_value
+        time_display = f"{time_value} days"
+    
+    # Create the prompt for the AI
+    prompt = f"""
 You are an expert educational advisor. Create a personalized study plan.
 
 **Subject:** {subject}
@@ -114,20 +169,8 @@ FORMATTING RULES:
 - Keep content concise and actionable
 - Maintain consistent spacing
 """
-        
-        # Generate the study plan using the new API
-        # Using gemini-flash-latest for better availability
-        response = client.models.generate_content(
-            model='gemini-flash-latest',
-            contents=prompt
-        )
-        
-        # Return the generated text
-        return response.text
-        
-    except Exception as e:
-        current_app.logger.error(f"Error generating study plan: {str(e)}")
-        return f"Error generating study plan: {str(e)}"
+    
+    return generate_text(prompt)
 
 
 def format_plan_for_display(plan_content):

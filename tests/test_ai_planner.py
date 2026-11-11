@@ -175,3 +175,54 @@ def test_generate_tasks_from_plan_handles_authorization(monkeypatch, auth_client
     resp = auth_client.post('/ai-planner/generate_tasks/99', data={'num_tasks': '5'}, follow_redirects=True)
     assert resp.status_code == 200
     assert b'Denied' in resp.data
+
+
+# --- AI service failures (review of a live 503) ----------------------------
+
+def test_failed_generation_saves_nothing_and_says_why(monkeypatch, auth_client, test_user):
+    from app.models import StudyPlan
+    from app.utils.ai_generator import AIServiceError
+
+    def busy(*args, **kwargs):
+        raise AIServiceError('The AI service is busy right now. Please try again in a minute.')
+
+    monkeypatch.setattr('app.services.study_plan_service.generate_study_plan', busy)
+    response = auth_client.post('/ai-planner/generator', data={
+        'subject': 'Chemistry', 'time_value': 3, 'time_unit': 'days', 'knowledge_level': 'beginner'},
+        follow_redirects=True)
+    html = response.get_data(as_text=True)
+    assert 'The AI service is busy right now' in html
+    assert 'generated successfully' not in html
+    assert StudyPlan.query.filter_by(user_id=test_user.id).count() == 0
+
+
+def test_failed_flashcard_generation_leaves_no_empty_deck(monkeypatch, auth_client, db_session, test_user):
+    from app.models import Deck, StudyPlan
+    from app.utils.ai_generator import AIServiceError
+
+    plan = StudyPlan(user_id=test_user.id, subject='Physics', time_value=3, time_unit='days',
+                     knowledge_level='beginner', plan_content='# Overview\n- Forces and motion basics')
+    db_session.session.add(plan)
+    db_session.session.commit()
+
+    def busy(*args, **kwargs):
+        raise AIServiceError('The AI service is busy right now. Please try again in a minute.')
+
+    monkeypatch.setattr('app.routes.flashcards.generate_text', busy)
+    response = auth_client.post(f'/flashcards/generate_from_study_plan/{plan.id}',
+                                data={'num_cards': 5}, follow_redirects=True)
+    assert 'The AI service is busy right now' in response.get_data(as_text=True)
+    assert Deck.query.filter_by(user_id=test_user.id, name='Physics').count() == 0
+
+
+def test_flashcard_generation_uses_the_shared_ai_call(monkeypatch, auth_client, db_session, test_user):
+    from app.models import Flashcard, StudyPlan
+
+    plan = StudyPlan(user_id=test_user.id, subject='Biology', time_value=3, time_unit='days',
+                     knowledge_level='beginner', plan_content='# Overview\n- Cells')
+    db_session.session.add(plan)
+    db_session.session.commit()
+    monkeypatch.setattr('app.routes.flashcards.generate_text',
+                        lambda prompt: 'Q: What is a cell?\nA: The basic unit of life.')
+    auth_client.post(f'/flashcards/generate_from_study_plan/{plan.id}', data={'num_cards': 1})
+    assert Flashcard.query.filter_by(user_id=test_user.id).count() == 1
