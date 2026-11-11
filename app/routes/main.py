@@ -1,11 +1,13 @@
 """
 Main Blueprint - Dashboard and general routes
 """
-from datetime import datetime, timedelta, timezone
 from flask import Blueprint, render_template
 from flask_login import login_required, current_user
-from app.models import Task, StudySession, PomodoroSession, Deck, Flashcard
 from app import db
+from app.models import Task, Deck, Flashcard
+from app.services.review_service import ReviewService
+from app.services.stats_service import StatsService
+from app.utils.timezone import get_user_timezone, local_now
 
 main_bp = Blueprint('main', __name__)
 
@@ -14,63 +16,49 @@ main_bp = Blueprint('main', __name__)
 @main_bp.route('/dashboard')
 @login_required
 def dashboard():
-    """Dashboard - overview of tasks and stats"""
+    """Dashboard - what to do today, study progress and overview counts"""
+    user_id = current_user.id
 
-    # Existing code for tasks
-    tasks = Task.query.filter_by(user_id=current_user.id).all()
+    # "Today" is the user's own calendar day (timezone comes from a cookie)
+    tz = get_user_timezone()
+    now_local = local_now(tz)
+    today = now_local.date()
 
-    # Count tasks by status
-    todo_count = sum(1 for task in tasks if task.status == 'todo')
-    doing_count = sum(1 for task in tasks if task.status == 'doing')
-    done_count = sum(1 for task in tasks if task.status == 'done')
+    # Task counts by status (one grouped query)
+    status_counts = dict(
+        db.session.query(Task.status, db.func.count(Task.id))
+        .filter(Task.user_id == user_id)
+        .group_by(Task.status)
+        .all()
+    )
 
-    # Get recent tasks
-    recent_tasks = Task.query.filter_by(user_id=current_user.id).order_by(
+    recent_tasks = Task.query.filter_by(user_id=user_id).order_by(
         Task.date_created.desc()
     ).limit(5).all()
 
-    # NEW: Get study statistics
-    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
-    week_start = today_start - timedelta(days=7)
-
-    # Today's study time
-    today_minutes = db.session.query(db.func.sum(StudySession.duration_minutes)).filter(
-        StudySession.user_id == current_user.id,
-        StudySession.start_time >= today_start
-    ).scalar() or 0
-
-    # This week's study time
-    week_minutes = db.session.query(db.func.sum(StudySession.duration_minutes)).filter(
-        StudySession.user_id == current_user.id,
-        StudySession.start_time >= week_start
-    ).scalar() or 0
-
-    # Pomodoros completed today
-    pomodoros_today = PomodoroSession.query.filter(
-        PomodoroSession.user_id == current_user.id,
-        PomodoroSession.start_time >= today_start,
-        PomodoroSession.completed.is_(True)
-    ).count()
-
-    # Deck and Flashcard statistics
-    total_decks = Deck.query.filter_by(user_id=current_user.id).count()
-    total_flashcards = Flashcard.query.filter_by(user_id=current_user.id).count()
+    # Study time
+    week = StatsService.weekly_minutes(user_id, tz, today)
+    today_minutes = week[-1]['minutes']
+    week_minutes = sum(day['minutes'] for day in week)
 
     return render_template(
         'dashboard.html',
         title='Dashboard',
-        tasks=tasks,
-        todo_count=todo_count,
-        doing_count=doing_count,
-        done_count=done_count,
+        todo_count=status_counts.get('todo', 0),
+        doing_count=status_counts.get('doing', 0),
+        done_count=status_counts.get('done', 0),
         recent_tasks=recent_tasks,
-        # NEW: Pass study stats
         today_minutes=today_minutes,
         week_minutes=week_minutes,
-        pomodoros_today=pomodoros_today,
-        # Flashcard stats
-        total_decks=total_decks,
-        total_flashcards=total_flashcards
+        pomodoros_today=StatsService.pomodoros_on(user_id, tz, today),
+        total_decks=Deck.query.filter_by(user_id=user_id).count(),
+        total_flashcards=Flashcard.query.filter_by(user_id=user_id).count(),
+        # Phase 3 panels
+        today_tasks=StatsService.today_tasks(user_id, now_local),
+        cards_due=ReviewService.count_due(user_id),
+        streak=StatsService.streak(user_id, tz, today),
+        week=week,
+        deck_progress=ReviewService.deck_progress(user_id),
     )
 
 

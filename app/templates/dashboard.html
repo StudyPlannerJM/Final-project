@@ -33,6 +33,56 @@
         <p class="welcome-subtitle">Here is where your studying stands today.</p>
     </div>
 
+    <section class="section" aria-labelledby="dash-today">
+        <h2 class="section-title" id="dash-today">Today</h2>
+        <div class="today-grid">
+            <div class="today-card">
+                <div class="today-card__head">
+                    <span class="today-card__icon" aria-hidden="true"><i class="fas fa-list-check"></i></span>
+                    <h3>Tasks due</h3>
+                    {% if today_tasks.total %}<span class="today-card__count">{{ today_tasks.total }}</span>{% endif %}
+                </div>
+                {% if today_tasks['items'] %}
+                <ul class="today-list">
+                    {% for task, kind in today_tasks['items'] %}
+                    <li>
+                        <a class="today-task{% if kind == 'overdue' %} is-overdue{% endif %}" href="{{ url_for('tasks.edit', task_id=task.id) }}">
+                            <span class="today-task__title">{{ task.title }}</span>
+                            <span class="today-task__when">
+                                {% if kind == 'overdue' %}Overdue · {{ task.due_date.strftime('%d %b, %H:%M') }}{% else %}{{ task.due_date.strftime('%H:%M') }}{% endif %}
+                            </span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <a class="today-card__link" href="{{ url_for('tasks.index') }}">
+                    {% if today_tasks.more %}{{ today_tasks.more }} more on the board{% else %}Open the board{% endif %}
+                    <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </a>
+                {% else %}
+                <p class="today-card__empty">Nothing due today.</p>
+                <a class="today-card__link" href="{{ url_for('tasks.add') }}">Add a task <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                {% endif %}
+            </div>
+
+            <div class="today-card{% if cards_due %} today-card--highlight{% endif %}">
+                <div class="today-card__head">
+                    <span class="today-card__icon" aria-hidden="true"><i class="fas fa-layer-group"></i></span>
+                    <h3>Flashcards</h3>
+                </div>
+                {% if cards_due %}
+                <p class="today-card__big">{{ cards_due }} card{{ '' if cards_due == 1 else 's' }} due</p>
+                <a class="btn btn-primary today-card__btn" href="{{ url_for('flashcards.review') }}">
+                    <i class="fas fa-bolt" aria-hidden="true"></i> Review now
+                </a>
+                {% else %}
+                <p class="today-card__empty">No cards to review right now.</p>
+                <a class="today-card__link" href="{{ url_for('flashcards.index') }}">Open flashcards <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
     <section class="section" aria-labelledby="dash-actions">
         <h2 class="section-title" id="dash-actions">Quick actions</h2>
         <div class="quick-actions">
@@ -43,6 +93,76 @@
             {{ action('ai_planner.generator', 'fa-brain', 'AI study plan') }}
             {{ action('flashcards.add', 'fa-square-plus', 'Add flashcard') }}
         </div>
+    </section>
+
+    <section class="section" aria-label="Study habit">
+        <div class="habit-grid">
+            <div class="habit-card" id="dash-streak">
+                <h2 class="section-title">Study streak</h2>
+                <p class="streak-number">
+                    <i class="fas fa-fire{% if not streak.current %} is-cold{% endif %}" aria-hidden="true"></i>
+                    <span>{{ streak.current }}</span> day{{ '' if streak.current == 1 else 's' }}
+                </p>
+                <p class="streak-note">
+                    {% if streak.active_today %}
+                        You have studied today. Keep it going tomorrow.
+                    {% elif streak.current %}
+                        Study today to keep your streak.
+                    {% else %}
+                        Finish a Pomodoro or review a card to start a streak.
+                    {% endif %}
+                </p>
+                <p class="streak-best">Longest: {{ streak.longest }} day{{ '' if streak.longest == 1 else 's' }}</p>
+            </div>
+
+            <div class="habit-card" id="dash-week">
+                <h2 class="section-title">Study time, last 7 days</h2>
+                <ol class="week-chart" aria-label="Study minutes per day">
+                    {% for day in week %}
+                    <li class="week-chart__day{% if day.is_today %} is-today{% endif %}">
+                        <span class="week-chart__value">{{ day.minutes }}<span class="sr-only"> minutes on {{ day.date.strftime('%A') }}</span></span>
+                        <span class="week-chart__track" aria-hidden="true"><span class="week-chart__bar" data-percent="{{ day.percent }}"></span></span>
+                        <span class="week-chart__label" aria-hidden="true">{{ day.label }}</span>
+                    </li>
+                    {% endfor %}
+                </ol>
+                <p class="week-total">{{ week_minutes }} minutes this week</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" aria-labelledby="dash-decks-title" id="dash-decks">
+        <h2 class="section-title" id="dash-decks-title">Deck progress</h2>
+        {% if deck_progress %}
+        <ul class="deck-progress">
+            {% for deck in deck_progress %}
+            <li>
+                <a class="deck-progress__row" href="{{ url_for('flashcards.index', deck_id=deck.deck_id) }}">
+                    <span class="deck-progress__head">
+                        <span class="deck-progress__name">{{ deck.name }}</span>
+                        <span class="deck-progress__meta">
+                            {% if deck.due %}<span class="deck-progress__due">{{ deck.due }} due</span>{% endif %}
+                            {{ deck.total }} card{{ '' if deck.total == 1 else 's' }}
+                        </span>
+                    </span>
+                    <span class="deck-progress__bar" role="img"
+                        aria-label="{{ deck.mastered }} mastered, {{ deck.learning }} learning, {{ deck.new }} new">
+                        <span class="deck-progress__seg deck-progress__seg--mastered" data-flex="{{ deck.mastered }}"></span>
+                        <span class="deck-progress__seg deck-progress__seg--learning" data-flex="{{ deck.learning }}"></span>
+                        <span class="deck-progress__seg deck-progress__seg--new" data-flex="{{ deck.new }}"></span>
+                    </span>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        <p class="deck-progress__legend" aria-hidden="true">
+            <span class="legend-dot legend-dot--mastered"></span> Mastered
+            <span class="legend-dot legend-dot--learning"></span> Learning
+            <span class="legend-dot legend-dot--new"></span> New
+        </p>
+        {% else %}
+        <p class="today-card__empty">No flashcards yet. <a href="{{ url_for('flashcards.add_deck') }}">Create a deck</a> to start.</p>
+        {% endif %}
     </section>
 
     <section class="section" aria-labelledby="dash-tasks">
@@ -100,4 +220,17 @@
     </section>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block body_extra %}
+<script>
+    // Bar sizes come from data attributes (no inline styles in the markup)
+    document.querySelectorAll('.week-chart__bar[data-percent]').forEach(function (bar) {
+        bar.style.height = Math.max(Number(bar.dataset.percent), bar.dataset.percent === '0' ? 0 : 4) + '%';
+    });
+    document.querySelectorAll('.deck-progress__seg[data-flex]').forEach(function (seg) {
+        seg.style.flexGrow = seg.dataset.flex;
+        if (seg.dataset.flex === '0') { seg.hidden = true; }
+    });
+</script>
 {% endblock %}
