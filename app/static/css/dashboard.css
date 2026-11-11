@@ -683,3 +683,9 @@
         align-self: stretch;
     }
 }
+
+@media (pointer: coarse) {
+    .today-card__link {
+        min-height: 44px;
+    }
+}
